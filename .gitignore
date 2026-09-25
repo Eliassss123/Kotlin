@@ -1,0 +1,12 @@
+.gradle/
+.idea/
+.kotlin/
+local.properties
+*.iml
+*.log
+**/build/
+**/captures/
+**/release/
+**/debug/
+.DS_Store
+Thumbs.db

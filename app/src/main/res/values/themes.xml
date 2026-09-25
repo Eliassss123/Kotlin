@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    themes.xml — tema XML base requerido por el sistema Android.
+
+    IMPORTANTE: La app usa Jetpack Compose con InduztekTheme (Material Design 3).
+    Este archivo XML solo define el tema de la ventana (splash, barra de estado)
+    antes de que Compose tome el control.
+
+    Theme.Induztek hereda de Theme.Material3 para compatibilidad con componentes
+    de View que puedan existir (ej. el sistema de cámara nativa que usa Views).
+-->
+<resources>
+    <style name="Theme.Induztek" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- Compose maneja todo el tema — esto es solo el contenedor de la ventana -->
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+</resources>

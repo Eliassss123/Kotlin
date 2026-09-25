@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    file_provider_paths.xml
+    Define qué directorios del almacenamiento interno pueden compartirse
+    con otras apps (ej. la cámara del sistema) mediante FileProvider.
+
+    files-path → Context.getFilesDir()  → /data/data/<pkg>/files/
+    El subdirectorio "images/" es donde guardamos las fotos de pruebas.
+-->
+<paths>
+    <files-path
+        name="internal_images"
+        path="images/" />
+</paths>
