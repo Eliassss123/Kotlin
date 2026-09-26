@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Induztek</string>
+    <string name="fileprovider_authority">com.induztek.app.fileprovider</string>
+
+    <!-- Etiquetas de pantallas -->
+    <string name="label_lista_equipos">Equipos</string>
+    <string name="label_nueva_prueba">Nueva Prueba</string>
+    <string name="label_detalle_prueba">Detalle de Prueba</string>
+
+    <!-- Formulario Nueva Prueba -->
+    <string name="hint_tecnico">Técnico responsable</string>
+    <string name="hint_observaciones">Observaciones adicionales…</string>
+    <string name="btn_guardar_offline">Guardar offline</string>
+    <string name="btn_tomar_foto">Tomar foto de evidencia</string>
+
+    <!-- Mensajes de estado -->
+    <string name="msg_guardado_offline">Prueba guardada. Se sincronizará cuando haya red.</string>
+    <string name="msg_permiso_camara_denegado">Permiso de cámara denegado. Habilitarlo en Ajustes.</string>
+    <string name="msg_sin_equipos">No hay equipos registrados</string>
+    <string name="msg_sin_resultados">Sin resultados para la búsqueda</string>
+    <string name="hint_buscar">Buscar por código, tipo o instalación…</string>
+
+    <!-- Accesibilidad -->
+    <string name="cd_foto_evidencia">Foto de evidencia de la prueba</string>
+    <string name="cd_eliminar_foto">Eliminar foto capturada</string>
+    <string name="cd_volver">Volver atrás</string>
+    <string name="cd_icono_equipo">Ícono del tipo de equipo</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    colors.xml — colores de recursos XML (para el tema de ventana).
+    Los colores de la UI de Compose están definidos en Theme.kt (Kotlin).
+-->
+<resources>
+    <color name="induztek_blue">#1A5276</color>
+    <color name="induztek_blue_light">#D6EAF8</color>
+    <color name="induztek_orange">#E67E22</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+</resources>
