@@ -12,26 +12,26 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 // ── Paleta de colores Induztek ─────────────────────────────────────────────
-// Azul industrial como color primario (apropiado para empresa de ingeniería eléctrica)
-private val InduztekBlue   = Color(0xFF1A5276)
+// Azul petróleo como color primario (elegante y corporativo)
+private val InduztekBlue   = Color(0xFF114B5F)
 private val InduztekOrange = Color(0xFFE67E22)   // acento para estados de alerta
-private val InduztekGray   = Color(0xFF566573)
+private val InduztekGray   = Color(0xFF455A64)
 
 private val LightColorScheme = lightColorScheme(
     primary          = InduztekBlue,
     onPrimary        = Color.White,
-    primaryContainer = Color(0xFFD6EAF8),
+    primaryContainer = Color(0xFFC3E7F4),
     secondary        = InduztekOrange,
     onSecondary      = Color.White,
     tertiary         = InduztekGray
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary          = Color(0xFF85C1E9),
-    onPrimary        = Color(0xFF0D2137),
-    primaryContainer = Color(0xFF1A4A6E),
+    primary          = Color(0xFF7BCAE5),
+    onPrimary        = Color(0xFF003547),
+    primaryContainer = Color(0xFF004D65),
     secondary        = InduztekOrange,
-    tertiary         = Color(0xFF99A3A4)
+    tertiary         = Color(0xFF90A4AE)
 )
 
 /**
@@ -45,7 +45,7 @@ private val DarkColorScheme = darkColorScheme(
 @Composable
 fun InduztekTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,   // desactivar en producción si queremos branding fijo
+    dynamicColor: Boolean = false,   // desactivar en producción para forzar el color Azul Petróleo
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
