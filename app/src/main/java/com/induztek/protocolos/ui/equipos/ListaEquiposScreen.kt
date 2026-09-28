@@ -1,3 +1,10 @@
+// ============================================================================
+// ARCHIVO : ui/equipos/ListaEquiposScreen.kt
+// CAPA    : View (pantalla)
+// RESUMEN : pantalla principal tras el login: buscador + lista de equipos + 2 botones flotantes (ver protocolos /
+//           nueva prueba).
+// ============================================================================
+
 package com.induztek.protocolos.ui.equipos
 
 import androidx.compose.foundation.clickable
@@ -41,6 +48,7 @@ import com.induztek.protocolos.ui.theme.NaranjaSeguridad
 import com.induztek.protocolos.ui.theme.TextoSecundario
 import com.induztek.protocolos.viewmodel.EquipoViewModel
 
+// Pantalla principal. Las lambdas del final avisan a NavGraph (ver equipo, nueva prueba, ver protocolos).
 @Composable
 fun ListaEquiposScreen(
     viewModel: EquipoViewModel,
@@ -48,15 +56,22 @@ fun ListaEquiposScreen(
     onNuevaPruebaClick: () -> Unit,
     onVerProtocolosClick: () -> Unit
 ) {
+    // La lista ya viene FILTRADA por el ViewModel (según lo escrito en el buscador). La pantalla solo la dibuja.
     val equipos by viewModel.equipos.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
 
+    // Scaffold = 'esqueleto' de pantalla de Material: define zonas estándar (barra superior, botón flotante,
+    //   contenido).
+    // El contenido va en la lambda final; 'innerPadding' es el espacio que ocupan las barras, para que nada quede
+    //   tapado.
     Scaffold(
         topBar = {
             InduztekTopBar(titulo = "Equipos Eléctricos")
         },
+        // Botones flotantes (FAB) redondos en la esquina inferior derecha.
         floatingActionButton = {
             Column(horizontalAlignment = Alignment.End) {
+                // Botón redondo flotante. Este abre la lista de protocolos guardados.
                 FloatingActionButton(
                     onClick = onVerProtocolosClick,
                     containerColor = AzulPetroleo,
@@ -82,6 +97,7 @@ fun ListaEquiposScreen(
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
+            // Buscador: cada letra llama a viewModel.onSearchQueryChanged y la lista se filtra sola.
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { viewModel.onSearchQueryChanged(it) },
@@ -94,6 +110,7 @@ fun ListaEquiposScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Si no hay resultados muestra un mensaje; si hay, muestra la lista.
             if (equipos.isEmpty()) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
@@ -107,9 +124,12 @@ fun ListaEquiposScreen(
                     )
                 }
             } else {
+                // LazyColumn = lista con scroll que solo dibuja los elementos visibles (como RecyclerView / lista
+                //   virtualizada).
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    // Repite EquipoCard por cada equipo de la lista (como un v-for / .map()).
                     items(equipos) { equipo ->
                         EquipoCard(
                             equipo = equipo,
@@ -123,6 +143,7 @@ fun ListaEquiposScreen(
 }
 
 @Composable
+// Componente de UNA tarjeta de equipo. Recibe el equipo y qué hacer al tocarla.
 fun EquipoCard(
     equipo: Equipo,
     onClick: () -> Unit
@@ -130,6 +151,7 @@ fun EquipoCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            // Hace tocable toda la tarjeta.
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -149,6 +171,7 @@ fun EquipoCard(
                     fontWeight = FontWeight.Bold,
                     color = AzulPetroleo
                 )
+                // Reutiliza el componente de la 'píldora' de estado (ui/components/EstadoChip.kt).
                 EstadoChip(estado = equipo.ultimoEstado)
             }
 
@@ -164,6 +187,7 @@ fun EquipoCard(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
+                // '${...}' inserta el valor de una variable dentro del texto (string template).
                 text = "📍 ${equipo.ubicacion}",
                 fontSize = 13.sp,
                 color = TextoSecundario

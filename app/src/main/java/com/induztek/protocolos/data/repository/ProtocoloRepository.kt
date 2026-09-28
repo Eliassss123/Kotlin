@@ -1,3 +1,9 @@
+// ============================================================================
+// ARCHIVO : data/repository/ProtocoloRepository.kt
+// CAPA    : Repositorio (MVVM)
+// RESUMEN : acceso a los protocolos guardados. Ver EquipoRepository.kt para la explicación general.
+// ============================================================================
+
 package com.induztek.protocolos.data.repository
 
 import com.induztek.protocolos.data.local.ProtocoloDao
@@ -11,18 +17,22 @@ import kotlinx.coroutines.flow.map
 class ProtocoloRepository(
     private val protocoloDao: ProtocoloDao
 ) {
+    // Flow con todos los protocolos (ordenados por fecha desde el DAO). Se actualiza solo.
     val allProtocolos: Flow<List<Protocolo>> = protocoloDao.getAllProtocolos().map { entities ->
         entities.map { it.toDomain() }
     }
 
+    // Busca un protocolo por id (null si no existe).
     suspend fun getProtocoloById(id: String): Protocolo? {
         return protocoloDao.getProtocoloById(id)?.toDomain()
     }
 
+    // Guarda un protocolo nuevo.
     suspend fun insertProtocolo(protocolo: Protocolo) {
         protocoloDao.insertProtocolo(ProtocoloEntity.fromDomain(protocolo))
     }
 
+    // Siembra 3 protocolos de ejemplo si la tabla está vacía.
     suspend fun seedInitialDataIfEmpty() {
         if (protocoloDao.getCount() == 0) {
             val initialProtocolos = listOf(
@@ -36,8 +46,8 @@ class ProtocoloRepository(
                     tecnico = "Elias Farías (el.farr@duocuc.cl)",
                     observaciones = "Prueba de aislamiento inicial completada y formalizada en sistema.",
                     mediciones = listOf(
-                        Medicion("Resistencia Alta-Tierra", "4.5 GΩ"),
-                        Medicion("Índice de Polarización", "1.85")
+                        Medicion("Resistencia Alta-Tierra", "4.5 GOhm"),
+                        Medicion("Indice de Polarizacion", "1.85")
                     )
                 ),
                 Protocolo(
@@ -64,10 +74,11 @@ class ProtocoloRepository(
                     tecnico = "Elias Farías (el.farr@duocuc.cl)",
                     observaciones = "Resistencia de contacto excedida en Fase S.",
                     mediciones = listOf(
-                        Medicion("Resistencia Fase S", "120 µΩ")
+                        Medicion("Resistencia Fase S", "120 uOhm")
                     )
                 )
             )
+            // Convierte y guarda todos los protocolos de ejemplo.
             protocoloDao.insertAll(initialProtocolos.map { ProtocoloEntity.fromDomain(it) })
         }
     }

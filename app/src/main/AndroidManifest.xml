@@ -7,13 +7,13 @@
     <application
         android:name=".InduztekApp"
         android:allowBackup="true"
-        android:label="Induztek Protocolos"
+        android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@android:style/Theme.Material.NoActionBar">
+        android:theme="@style/Theme.InduztekProtocolos">
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@android:style/Theme.Material.NoActionBar">
+            android:theme="@style/Theme.InduztekProtocolos">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

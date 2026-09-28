@@ -1,3 +1,9 @@
+// ============================================================================
+// ARCHIVO : data/repository/PruebaRepository.kt
+// CAPA    : Repositorio (MVVM)
+// RESUMEN : acceso a las pruebas. Ver EquipoRepository.kt para la explicación general de qué es un repositorio.
+// ============================================================================
+
 package com.induztek.protocolos.data.repository
 
 import com.induztek.protocolos.data.local.PruebaDao
@@ -11,23 +17,28 @@ import kotlinx.coroutines.flow.map
 class PruebaRepository(
     private val pruebaDao: PruebaDao
 ) {
+    // Historial de pruebas de un equipo. Devuelve Flow: la pantalla se actualiza sola si se agrega una prueba.
     fun getPruebasByEquipo(equipoCodigo: String): Flow<List<Prueba>> {
         return pruebaDao.getPruebasByEquipo(equipoCodigo).map { entities ->
             entities.map { it.toDomain() }
         }
     }
 
+    // Todas las pruebas (Flow). Hoy ninguna pantalla lo usa.
     val allPruebas: Flow<List<Prueba>> = pruebaDao.getAllPruebas().map { entities ->
         entities.map { it.toDomain() }
     }
 
+    // Guarda una prueba nueva.
     suspend fun insertPrueba(prueba: Prueba) {
         pruebaDao.insertPrueba(PruebaEntity.fromDomain(prueba))
     }
 
+    // Datos de ejemplo: 2 pruebas por cada uno de los 3 equipos (solo si la tabla está vacía).
     suspend fun seedInitialDataIfEmpty() {
         if (pruebaDao.getCount() == 0) {
             val initialPruebas = listOf(
+                // Cada Prueba(...) tiene id, equipo, tipo, ubicación, fecha, sus mediciones, estado y observaciones.
                 // Equipo 1: TR-500KVA-01
                 Prueba(
                     id = "PRU-101",
@@ -36,9 +47,9 @@ class PruebaRepository(
                     ubicacion = "Subestación Principal Norte - Celda 01",
                     fechaHora = "2026-08-15 10:30",
                     mediciones = listOf(
-                        Medicion("Resistencia Alta-Tierra (1min)", "4.5 GΩ"),
-                        Medicion("Resistencia Baja-Tierra (1min)", "3.8 GΩ"),
-                        Medicion("Índice de Polarización (IP)", "1.85"),
+                        Medicion("Resistencia Alta-Tierra (1min)", "4.5 GOhm"),
+                        Medicion("Resistencia Baja-Tierra (1min)", "3.8 GOhm"),
+                        Medicion("Indice de Polarizacion", "1.85"),
                         Medicion("Tensión Aplicada", "2500 V")
                     ),
                     estado = EstadoProtocolo.FORMALIZADO,
@@ -95,12 +106,14 @@ class PruebaRepository(
                     ubicacion = "Subestación Distribución Sur",
                     fechaHora = "2026-08-20 16:20",
                     mediciones = listOf(
-                        Medicion("Resistencia Contacto Fase R", "45 µΩ"),
-                        Medicion("Resistencia Contacto Fase S", "120 µΩ"),
-                        Medicion("Resistencia Contacto Fase T", "42 µΩ")
+                        Medicion("Resistencia Contacto Fase R", "45 uOhm"),
+                        Medicion("Resistencia Contacto Fase S", "120 uOhm"),
+                        Medicion("Resistencia Contacto Fase T", "42 uOhm")
                     ),
+                    // Estado 'Fuera de rango': aparecerá en rojo. Lo marcaron a mano los datos de ejemplo (la app no
+                    //   lo calcula).
                     estado = EstadoProtocolo.FUERA_DE_RANGO,
-                    observaciones = "Fase S supera límite máximo permitido (80 µΩ). Requiere mantenimiento urgente en tulipa de contacto."
+                    observaciones = "Fase S supera límite máximo permitido (80 uOhm). Requiere mantenimiento urgente en tulipa de contacto."
                 ),
                 Prueba(
                     id = "PRU-302",
@@ -118,6 +131,7 @@ class PruebaRepository(
                     observaciones = "Fase S presentó corriente de fuga elevada y descarga parcial recurrente."
                 )
             )
+            // Convierte cada Prueba a Entity y guarda todas de una vez.
             pruebaDao.insertAll(initialPruebas.map { PruebaEntity.fromDomain(it) })
         }
     }

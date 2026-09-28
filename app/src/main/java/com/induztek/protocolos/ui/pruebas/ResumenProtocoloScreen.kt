@@ -1,3 +1,9 @@
+// ============================================================================
+// ARCHIVO : ui/pruebas/ResumenProtocoloScreen.kt
+// CAPA    : View (pantalla)
+// RESUMEN : revisión final de lo ingresado (solo lectura) y botón para GUARDAR en la base de datos.
+// ============================================================================
+
 package com.induztek.protocolos.ui.pruebas
 
 import androidx.compose.foundation.background
@@ -36,12 +42,14 @@ import com.induztek.protocolos.ui.theme.NaranjaSeguridad
 import com.induztek.protocolos.ui.theme.TextoSecundario
 import com.induztek.protocolos.viewmodel.PruebaViewModel
 
+// Comparte el mismo PruebaViewModel que el formulario, por eso ve los mismos datos.
 @Composable
 fun ResumenProtocoloScreen(
     viewModel: PruebaViewModel,
     onNavigateBack: () -> Unit,
     onGuardarExito: () -> Unit
 ) {
+    // El estado del formulario, ya completo.
     val state by viewModel.uiState.collectAsState()
 
     Scaffold(
@@ -62,6 +70,7 @@ fun ResumenProtocoloScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Primera tarjeta: datos generales (solo se muestran).
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -104,6 +113,7 @@ fun ResumenProtocoloScreen(
                     Text(text = "Técnico Responsable:", fontSize = 13.sp, color = TextoSecundario)
                     Text(text = state.tecnico, fontSize = 14.sp, fontWeight = FontWeight.Medium)
 
+                    // Solo muestra 'Observaciones' si el usuario escribió algo.
                     if (state.observaciones.isNotBlank()) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(text = "Observaciones:", fontSize = 13.sp, color = TextoSecundario)
@@ -112,6 +122,7 @@ fun ResumenProtocoloScreen(
                 }
             }
 
+            // Segunda tarjeta: mediciones registradas.
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -145,6 +156,8 @@ fun ResumenProtocoloScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
+                // Al tocar: el ViewModel guarda todo y, cuando termina, ejecuta la lambda { onGuardarExito() }
+                //   (navegar a la lista de protocolos).
                 onClick = {
                     viewModel.guardarProtocolo {
                         onGuardarExito()

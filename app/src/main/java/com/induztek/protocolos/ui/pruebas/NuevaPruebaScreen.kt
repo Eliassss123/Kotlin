@@ -1,3 +1,11 @@
+// ============================================================================
+// ARCHIVO : ui/pruebas/NuevaPruebaScreen.kt
+// CAPA    : View (pantalla)
+// RESUMEN : formulario en 3 tarjetas: (1) datos generales, (2) lista dinámica de mediciones, (3) estado y
+//           observaciones.
+//           Todo se guarda en el estado del PruebaViewModel; aquí solo se dibuja y se avisan eventos.
+// ============================================================================
+
 package com.induztek.protocolos.ui.pruebas
 
 import androidx.compose.foundation.background
@@ -55,6 +63,7 @@ import com.induztek.protocolos.ui.theme.NaranjaSeguridad
 import com.induztek.protocolos.ui.theme.TextoSecundario
 import com.induztek.protocolos.viewmodel.PruebaViewModel
 
+// @OptIn: uso una API de Material 3 marcada como 'experimental' (los menús desplegables).
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NuevaPruebaScreen(
@@ -62,12 +71,15 @@ fun NuevaPruebaScreen(
     onNavigateBack: () -> Unit,
     onIrAResumen: () -> Unit
 ) {
+    // 'state' = el formulario completo (objeto NuevaPruebaState).
     val state by viewModel.uiState.collectAsState()
     val equiposDisponibles by viewModel.equiposDisponibles.collectAsState()
 
+    // Estados LOCALES: ¿está abierto cada menú desplegable?
     var dropdownEquipoExpanded by remember { mutableStateOf(false) }
     var dropdownTipoExpanded by remember { mutableStateOf(false) }
 
+    // Lista fija de tipos de prueba disponibles.
     val tiposPruebaValidos = listOf(
         "Resistencia de Aislamiento (Megger)",
         "Relación de Transformación (TTR)",
@@ -77,6 +89,8 @@ fun NuevaPruebaScreen(
         "Termografía Infrarroja"
     )
 
+    // Borradores de la nueva medición (lo escrito antes de pulsar 'Agregar'). Son locales porque aún no forman parte
+    //   del formulario.
     var nuevoCampo by remember { mutableStateOf("") }
     var nuevoValor by remember { mutableStateOf("") }
 
@@ -94,10 +108,12 @@ fun NuevaPruebaScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(FondoApp)
+                // El formulario es largo: la columna se puede desplazar.
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // TARJETA 1: datos generales.
             // Card Datos Generales
             Card(
                 shape = RoundedCornerShape(12.dp),
@@ -115,6 +131,7 @@ fun NuevaPruebaScreen(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     // Dropdown Selección Equipo
+                    // Menú desplegable (como <select>): un campo de texto + un menú con opciones.
                     ExposedDropdownMenuBox(
                         expanded = dropdownEquipoExpanded,
                         onExpandedChange = { dropdownEquipoExpanded = !dropdownEquipoExpanded }
@@ -122,10 +139,12 @@ fun NuevaPruebaScreen(
                         OutlinedTextField(
                             value = state.equipoCodigo,
                             onValueChange = { viewModel.onEquipoCodigoChanged(it) },
+                            // Este campo se puede escribir a mano, además de elegir de la lista.
                             readOnly = false,
                             label = { Text("Código de Equipo") },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownEquipoExpanded) },
                             modifier = Modifier
+                                // Indica que este campo es el 'ancla' del menú (el menú se despliega debajo de él).
                                 .menuAnchor()
                                 .fillMaxWidth()
                         )
@@ -133,7 +152,9 @@ fun NuevaPruebaScreen(
                             expanded = dropdownEquipoExpanded,
                             onDismissRequest = { dropdownEquipoExpanded = false }
                         ) {
+                            // Una opción del menú por cada equipo.
                             equiposDisponibles.forEach { eq ->
+                                // Cada opción: al tocarla, se selecciona el equipo y se cierra el menú.
                                 DropdownMenuItem(
                                     text = { Text("${eq.codigo} - ${eq.tipo}") },
                                     onClick = {
@@ -147,6 +168,7 @@ fun NuevaPruebaScreen(
 
                     Spacer(modifier = Modifier.height(10.dp))
 
+                    // Este campo es de solo lectura (readOnly = true): solo se elige de la lista.
                     // Dropdown Tipo de Prueba
                     ExposedDropdownMenuBox(
                         expanded = dropdownTipoExpanded,
@@ -198,6 +220,7 @@ fun NuevaPruebaScreen(
                 }
             }
 
+            // TARJETA 2: la lista crece o se achica según lo que agregue el usuario.
             // Card Lista Dinámica de Mediciones
             Card(
                 shape = RoundedCornerShape(12.dp),
@@ -214,6 +237,7 @@ fun NuevaPruebaScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
+                    // forEachIndexed da el número de posición (index): se usa para saber cuál eliminar.
                     state.mediciones.forEachIndexed { index, med ->
                         Row(
                             modifier = Modifier
@@ -222,6 +246,8 @@ fun NuevaPruebaScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
+                            // weight(1f) = ocupa todo el espacio libre de la fila (deja el botón de borrar a la
+                            //   derecha).
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = med.campo,
@@ -230,6 +256,7 @@ fun NuevaPruebaScreen(
                                 )
                                 Text(text = med.valor, fontSize = 13.sp, color = TextoSecundario)
                             }
+                            // Botón papelera: pide eliminar la medición de esa posición.
                             IconButton(onClick = { viewModel.eliminarMedicion(index) }) {
                                 Icon(
                                     imageVector = Icons.Default.Delete,
@@ -272,6 +299,7 @@ fun NuevaPruebaScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
+                    // Botón con borde. Solo agrega si ambos campos tienen texto y luego limpia los borradores.
                     OutlinedButton(
                         onClick = {
                             if (nuevoCampo.isNotBlank() && nuevoValor.isNotBlank()) {
@@ -289,6 +317,7 @@ fun NuevaPruebaScreen(
                 }
             }
 
+            // TARJETA 3: estado (radio buttons) y observaciones.
             // Card Estado del Protocolo y Observaciones
             Card(
                 shape = RoundedCornerShape(12.dp),
@@ -305,11 +334,14 @@ fun NuevaPruebaScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
+                    // Dibuja un RadioButton por cada estado posible del enum (así, si el enum cambia, la pantalla se
+                    //   actualiza sola).
                     EstadoProtocolo.entries.forEach { estadoItem ->
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.fillMaxWidth()
                         ) {
+                            // Botón de opción única: 'selected' indica si es el elegido actual.
                             RadioButton(
                                 selected = (state.estado == estadoItem),
                                 onClick = { viewModel.onEstadoChanged(estadoItem) },
@@ -337,6 +369,7 @@ fun NuevaPruebaScreen(
                 }
             }
 
+            // Botón final: se habilita solo con equipo elegido y al menos una medición.
             // Botón Continuar a Resumen
             Button(
                 onClick = onIrAResumen,

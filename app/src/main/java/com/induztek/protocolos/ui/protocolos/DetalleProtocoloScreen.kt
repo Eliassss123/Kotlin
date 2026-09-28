@@ -1,3 +1,9 @@
+// ============================================================================
+// ARCHIVO : ui/protocolos/DetalleProtocoloScreen.kt
+// CAPA    : View (pantalla)
+// RESUMEN : vista de SOLO LECTURA de un protocolo guardado (no se puede editar).
+// ============================================================================
+
 package com.induztek.protocolos.ui.protocolos
 
 import androidx.compose.foundation.background
@@ -35,6 +41,7 @@ import com.induztek.protocolos.ui.theme.FondoApp
 import com.induztek.protocolos.ui.theme.TextoSecundario
 import com.induztek.protocolos.viewmodel.ProtocoloViewModel
 
+// El id llega por la ruta de navegación.
 @Composable
 fun DetalleProtocoloScreen(
     idProtocolo: String,
@@ -43,6 +50,7 @@ fun DetalleProtocoloScreen(
 ) {
     val protocolo by viewModel.selectedProtocolo.collectAsState()
 
+    // Al abrir la pantalla, pide al ViewModel cargar ese protocolo.
     LaunchedEffect(idProtocolo) {
         viewModel.cargarProtocolo(idProtocolo)
     }
@@ -61,11 +69,14 @@ fun DetalleProtocoloScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(FondoApp)
+                // Hace que la columna se pueda desplazar. rememberScrollState() guarda la posición del scroll.
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Si el protocolo ya cargó, dibuja los datos; si es null, cae en '?: run' (mensaje de carga).
             protocolo?.let { prot ->
+                // Primera tarjeta: datos generales del protocolo.
                 Card(
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -116,6 +127,7 @@ fun DetalleProtocoloScreen(
                     }
                 }
 
+                // Segunda tarjeta: lista de mediciones guardadas.
                 Card(
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -131,6 +143,7 @@ fun DetalleProtocoloScreen(
 
                         Spacer(modifier = Modifier.height(10.dp))
 
+                        // Una fila por medición, separadas con línea divisoria.
                         prot.mediciones.forEach { med ->
                             Row(
                                 modifier = Modifier

@@ -1,3 +1,9 @@
+// ============================================================================
+// ARCHIVO : ui/equipos/DetalleEquipoScreen.kt
+// CAPA    : View (pantalla)
+// RESUMEN : datos de un equipo + botón "Nueva prueba" + historial de pruebas anteriores.
+// ============================================================================
+
 package com.induztek.protocolos.ui.equipos
 
 import androidx.compose.foundation.background
@@ -43,6 +49,7 @@ import com.induztek.protocolos.ui.theme.NaranjaSeguridad
 import com.induztek.protocolos.ui.theme.TextoSecundario
 import com.induztek.protocolos.viewmodel.EquipoViewModel
 
+// El código del equipo llega por la ruta de navegación (codigoEquipo).
 @Composable
 fun DetalleEquipoScreen(
     codigoEquipo: String,
@@ -50,9 +57,11 @@ fun DetalleEquipoScreen(
     onNavigateBack: () -> Unit,
     onNuevaPruebaClick: (String) -> Unit
 ) {
+    // Equipo cargado (null mientras carga) y su historial de pruebas.
     val equipo by viewModel.selectedEquipo.collectAsState()
     val historialPruebas by viewModel.historialPruebas.collectAsState()
 
+    // Al abrir la pantalla (o si cambia el código) le pide al ViewModel cargar el equipo y su historial.
     LaunchedEffect(codigoEquipo) {
         viewModel.cargarDetalleEquipo(codigoEquipo)
     }
@@ -73,7 +82,10 @@ fun DetalleEquipoScreen(
                 .background(FondoApp)
                 .padding(16.dp)
         ) {
+            // '?.let { }' ejecuta el bloque SOLO si 'equipo' no es null (y lo llama 'eq' adentro).
+            // Al final del bloque hay '?: run { ... }' = qué mostrar si era null ('Cargando datos...').
             equipo?.let { eq ->
+                // Tarjeta con código, estado, tipo y ubicación.
                 // Tarjeta de información del equipo
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -114,6 +126,7 @@ fun DetalleEquipoScreen(
 
                         Spacer(modifier = Modifier.height(12.dp))
 
+                        // Botón naranja: llama onNuevaPruebaClick con el código del equipo.
                         Button(
                             onClick = { onNuevaPruebaClick(eq.codigo) },
                             modifier = Modifier.fillMaxWidth(),
@@ -145,6 +158,7 @@ fun DetalleEquipoScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
+                // Sin pruebas: mensaje centrado en un Box. Con pruebas: lista.
                 if (historialPruebas.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -159,11 +173,13 @@ fun DetalleEquipoScreen(
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
+                        // Una tarjeta por cada prueba del historial.
                         items(historialPruebas) { prueba ->
                             PruebaHistorialCard(prueba = prueba)
                         }
                     }
                 }
+            // Camino alternativo cuando 'equipo' es null (aún cargando).
             } ?: run {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(text = "Cargando datos del equipo...")
@@ -174,6 +190,7 @@ fun DetalleEquipoScreen(
 }
 
 @Composable
+// Componente de UNA prueba del historial: tipo, estado, fecha, observaciones y mediciones.
 fun PruebaHistorialCard(prueba: Prueba) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -214,6 +231,7 @@ fun PruebaHistorialCard(prueba: Prueba) {
             }
 
             Spacer(modifier = Modifier.height(8.dp))
+            // Línea divisoria horizontal (como <hr>).
             HorizontalDivider(color = Color(0xFFEEEEEE))
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -224,6 +242,7 @@ fun PruebaHistorialCard(prueba: Prueba) {
                 color = AzulPetroleo
             )
 
+            // Recorre las mediciones y dibuja una fila (nombre a la izquierda, valor a la derecha) por cada una.
             prueba.mediciones.forEach { med ->
                 Row(
                     modifier = Modifier

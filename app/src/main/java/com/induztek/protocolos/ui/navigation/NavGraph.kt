@@ -1,3 +1,16 @@
+// ============================================================================
+// ARCHIVO : ui/navigation/NavGraph.kt
+// CAPA    : Navegación
+// RESUMEN : el MAPA de la app: dice qué pantalla se muestra en cada ruta y cómo se pasa de una a otra.
+//           Las pantallas no navegan por sí mismas: avisan con lambdas (onLoginSuccess...) y AQUÍ se decide el
+//             destino.
+//
+//           Flujo principal:
+//           Login -> ListaEquipos -> DetalleEquipo
+//                        |-> NuevaPrueba -> ResumenProtocolo -> ListaProtocolos -> DetalleProtocolo
+//           Recuperar contraseña: Login -> OlvideContrasena -> VerificarCodigo -> NuevaContrasena -> Login
+// ============================================================================
+
 package com.induztek.protocolos.ui.navigation
 
 import androidx.compose.runtime.Composable
@@ -9,6 +22,9 @@ import androidx.navigation.navArgument
 import com.induztek.protocolos.ui.equipos.DetalleEquipoScreen
 import com.induztek.protocolos.ui.equipos.ListaEquiposScreen
 import com.induztek.protocolos.ui.login.LoginScreen
+import com.induztek.protocolos.ui.login.NuevaContrasenaScreen
+import com.induztek.protocolos.ui.login.OlvideContrasenaScreen
+import com.induztek.protocolos.ui.login.VerificarCodigoScreen
 import com.induztek.protocolos.ui.protocolos.DetalleProtocoloScreen
 import com.induztek.protocolos.ui.protocolos.ListaProtocolosScreen
 import com.induztek.protocolos.ui.pruebas.NuevaPruebaScreen
@@ -19,6 +35,7 @@ import com.induztek.protocolos.viewmodel.ProtocoloViewModel
 import com.induztek.protocolos.viewmodel.PruebaViewModel
 
 @Composable
+// Recibe el controlador de navegación y los 4 ViewModels (se comparten entre pantallas).
 fun NavGraph(
     navController: NavHostController,
     loginViewModel: LoginViewModel,
@@ -26,18 +43,68 @@ fun NavGraph(
     pruebaViewModel: PruebaViewModel,
     protocoloViewModel: ProtocoloViewModel
 ) {
+    // NavHost = contenedor que muestra la pantalla de la ruta actual. 'startDestination' = pantalla inicial (Login).
     NavHost(
         navController = navController,
         startDestination = Routes.Login.route
     ) {
         // 1. Login
+        // composable(ruta) { ... } = 'cuando la ruta sea esta, dibuja esta pantalla'.
         composable(Routes.Login.route) {
             LoginScreen(
                 viewModel = loginViewModel,
+                // Lambda: qué hacer cuando el login sale bien -> ir a la lista de equipos.
                 onLoginSuccess = {
                     navController.navigate(Routes.ListaEquipos.route) {
+                        // popUpTo(... inclusive = true) borra el Login del historial: al presionar 'atrás' NO se
+                        //   vuelve al login.
                         popUpTo(Routes.Login.route) { inclusive = true }
                     }
+                },
+                onOlvideContrasenaClick = {
+                    navController.navigate(Routes.OlvideContrasena.route)
+                }
+            )
+        }
+
+        // 1.1 Olvidé mi contraseña
+        composable(Routes.OlvideContrasena.route) {
+            OlvideContrasenaScreen(
+                viewModel = loginViewModel,
+                onCodigoEnviado = {
+                    navController.navigate(Routes.VerificarCodigo.route)
+                },
+                onNavigateBack = {
+                    // popBackStack = volver a la pantalla anterior.
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // 1.2 Verificar código
+        composable(Routes.VerificarCodigo.route) {
+            VerificarCodigoScreen(
+                viewModel = loginViewModel,
+                onCodigoVerificado = {
+                    navController.navigate(Routes.NuevaContrasena.route)
+                },
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // 1.3 Nueva contraseña
+        composable(Routes.NuevaContrasena.route) {
+            NuevaContrasenaScreen(
+                viewModel = loginViewModel,
+                onContrasenaActualizada = {
+                    navController.navigate(Routes.Login.route) {
+                        popUpTo(Routes.Login.route) { inclusive = true }
+                    }
+                },
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }
@@ -46,6 +113,7 @@ fun NavGraph(
         composable(Routes.ListaEquipos.route) {
             ListaEquiposScreen(
                 viewModel = equipoViewModel,
+                // Recibe el código del equipo tocado y navega al detalle armando la ruta con createRoute.
                 onEquipoSelected = { codigo ->
                     navController.navigate(Routes.DetalleEquipo.createRoute(codigo))
                 },
@@ -59,6 +127,7 @@ fun NavGraph(
         }
 
         // 3. Detalle de Equipo + Historial
+        // Ruta CON PARÁMETRO: navArgument declara que 'codigo' es texto; luego se lee desde backStackEntry.arguments.
         composable(
             route = Routes.DetalleEquipo.route,
             arguments = listOf(navArgument("codigo") { type = NavType.StringType })
@@ -68,6 +137,8 @@ fun NavGraph(
                 codigoEquipo = codigo,
                 viewModel = equipoViewModel,
                 onNavigateBack = { navController.popBackStack() },
+                // OJO: 'equipoCodigo' llega pero no se usa: la pantalla Nueva Prueba no preselecciona ese equipo
+                //      (elige el primero de la lista).
                 onNuevaPruebaClick = { equipoCodigo ->
                     navController.navigate(Routes.NuevaPrueba.route)
                 }
@@ -92,6 +163,8 @@ fun NavGraph(
                 onNavigateBack = { navController.popBackStack() },
                 onGuardarExito = {
                     navController.navigate(Routes.ListaProtocolos.route) {
+                        // Al guardar, se limpia el historial hasta la lista de equipos: 'atrás' no vuelve al
+                        //   formulario ya guardado.
                         popUpTo(Routes.ListaEquipos.route)
                     }
                 }
@@ -110,6 +183,7 @@ fun NavGraph(
         }
 
         // 7. Detalle de Protocolo (Solo Lectura)
+        // Ruta con parámetro 'id' para abrir un protocolo concreto.
         composable(
             route = Routes.DetalleProtocolo.route,
             arguments = listOf(navArgument("id") { type = NavType.StringType })

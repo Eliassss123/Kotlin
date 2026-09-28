@@ -1,3 +1,9 @@
+// ============================================================================
+// ARCHIVO : ui/protocolos/ListaProtocolosScreen.kt
+// CAPA    : View (pantalla)
+// RESUMEN : historial de protocolos guardados (los más recientes primero, según la consulta del DAO).
+// ============================================================================
+
 package com.induztek.protocolos.ui.protocolos
 
 import androidx.compose.foundation.background
@@ -35,14 +41,17 @@ import com.induztek.protocolos.ui.theme.FondoApp
 import com.induztek.protocolos.ui.theme.TextoSecundario
 import com.induztek.protocolos.viewmodel.ProtocoloViewModel
 
+// onProtocoloSelected entrega el id del protocolo tocado; NavGraph abre el detalle.
 @Composable
 fun ListaProtocolosScreen(
     viewModel: ProtocoloViewModel,
     onNavigateBack: () -> Unit,
     onProtocoloSelected: (String) -> Unit
 ) {
+    // Lista observada: cuando se guarda un protocolo nuevo, aparece sola.
     val protocolos by viewModel.protocolos.collectAsState()
 
+    // Esqueleto con barra superior (ver ListaEquiposScreen).
     Scaffold(
         topBar = {
             InduztekTopBar(
@@ -67,6 +76,7 @@ fun ListaProtocolosScreen(
                     Text(text = "No se registran protocolos guardados", color = TextoSecundario)
                 }
             } else {
+                // Lista con scroll (solo dibuja lo visible). spacedBy(12.dp) = separación entre tarjetas.
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
@@ -83,6 +93,7 @@ fun ListaProtocolosScreen(
 }
 
 @Composable
+// Componente de UNA tarjeta de protocolo.
 fun ProtocoloCard(
     protocolo: Protocolo,
     onClick: () -> Unit
