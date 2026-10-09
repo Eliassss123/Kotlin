@@ -339,6 +339,69 @@ fun LoginScreen(
                         )
                     }
                 }
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                // Selector de Perfiles Demo (Anexo 2)
+                Text(
+                    text = "Perfiles de Acceso Demo (Anexo 2):",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Gray
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    androidx.compose.foundation.layout.Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Button(
+                            onClick = { viewModel.seleccionarPerfilDemo("tecnico@induztek.cl", "Tecnico2026!") },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF0F4F8)),
+                            shape = RoundedCornerShape(6.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(text = "P-01 Técnico", fontSize = 11.sp, color = AzulPetroleo, fontWeight = FontWeight.SemiBold)
+                        }
+
+                        Button(
+                            onClick = { viewModel.seleccionarPerfilDemo("ingeniero@induztek.cl", "Ingeniero2026!") },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF0F4F8)),
+                            shape = RoundedCornerShape(6.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(text = "P-02 Ingeniero", fontSize = 11.sp, color = AzulPetroleo, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+
+                    androidx.compose.foundation.layout.Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Button(
+                            onClick = { viewModel.seleccionarPerfilDemo("jefetecnico@induztek.cl", "Jefe2026!") },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF0F4F8)),
+                            shape = RoundedCornerShape(6.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(text = "P-03 Jefe Técnico", fontSize = 11.sp, color = AzulPetroleo, fontWeight = FontWeight.SemiBold)
+                        }
+
+                        Button(
+                            onClick = { viewModel.seleccionarPerfilDemo("cliente@plantalampa.cl", "Cliente2026!") },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFF3E0)),
+                            shape = RoundedCornerShape(6.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(text = "P-04 Cliente", fontSize = 11.sp, color = Color(0xFFE65100), fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
             }
         }
     }

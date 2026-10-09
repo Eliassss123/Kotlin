@@ -1,9 +1,8 @@
 // ============================================================================
 // ARCHIVO : data/local/EquipoEntity.kt
 // CAPA    : Datos locales (Room)
-// RESUMEN : la TABLA 'equipos'. Entity = formato en que se guarda en la base; Equipo (model) = formato que usa la
-//           app.
-//           toDomain() / fromDomain() convierten de uno a otro.
+// RESUMEN : Tabla 'equipos' ampliada con datos de placa de características (FT-03 sec. 2)
+//           y campos para validación de duplicados en terreno (RT-02).
 // ============================================================================
 
 package com.induztek.protocolos.data.local
@@ -13,37 +12,61 @@ import androidx.room.PrimaryKey
 import com.induztek.protocolos.model.Equipo
 import com.induztek.protocolos.model.EstadoProtocolo
 
-// @Entity: cada objeto de esta clase es una fila de la tabla 'equipos'.
 @Entity(tableName = "equipos")
 data class EquipoEntity(
-    // Clave primaria: identifica cada fila de forma única.
     @PrimaryKey val id: String,
     val codigo: String,
+    val tagCliente: String = "",
     val tipo: String,
+    val cliente: String = "",
     val ubicacion: String,
-    // En la base se guarda como TEXTO (el label del enum), no como enum.
+    val marca: String = "",
+    val modelo: String = "",
+    val numeroSerie: String = "",
+    val potenciaTension: String = "",
+    val anio: String = "2020",
+    val tensiones: String = "23 kV / 380 V",
+    val tap: String = "Tap 3 (Normal)",
+    val conexion: String = "Dyn11",
     val ultimoEstado: String
 ) {
-    // De fila de la BD -> objeto Equipo. Convierte el texto del estado en enum con fromLabel.
     fun toDomain(): Equipo {
         return Equipo(
             id = id,
             codigo = codigo,
+            tagCliente = tagCliente,
             tipo = tipo,
+            cliente = cliente,
             ubicacion = ubicacion,
+            marca = marca,
+            modelo = modelo,
+            numeroSerie = numeroSerie,
+            potenciaTension = potenciaTension,
+            anio = anio,
+            tensiones = tensiones,
+            tap = tap,
+            conexion = conexion,
             ultimoEstado = EstadoProtocolo.fromLabel(ultimoEstado)
         )
     }
 
-    // companion object: funciones de la clase (no de cada objeto).
     companion object {
-        // De objeto Equipo -> fila de la BD. El enum se guarda como su label (texto).
         fun fromDomain(equipo: Equipo): EquipoEntity {
             return EquipoEntity(
                 id = equipo.id,
                 codigo = equipo.codigo,
+                tagCliente = equipo.tagCliente,
                 tipo = equipo.tipo,
+                cliente = equipo.cliente,
                 ubicacion = equipo.ubicacion,
+                marca = equipo.marca,
+                modelo = equipo.modelo,
+                numeroSerie = equipo.numeroSerie,
+                potenciaTension = equipo.potenciaTension,
+                anio = equipo.anio,
+                tensiones = equipo.tensiones,
+                tap = equipo.tap,
+                conexion = equipo.conexion,
                 ultimoEstado = equipo.ultimoEstado.label
             )
         }

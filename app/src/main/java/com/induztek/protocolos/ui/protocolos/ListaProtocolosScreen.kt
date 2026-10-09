@@ -1,7 +1,8 @@
 // ============================================================================
 // ARCHIVO : ui/protocolos/ListaProtocolosScreen.kt
 // CAPA    : View (pantalla)
-// RESUMEN : historial de protocolos guardados (los más recientes primero, según la consulta del DAO).
+// RESUMEN : Historial de protocolos con visualización adaptada al rol de usuario:
+//           - Para clientes (P-04): filtrado por su empresa (RT-10) y marca "Pendiente de formalización" (RN-19).
 // ============================================================================
 
 package com.induztek.protocolos.ui.protocolos
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,6 +27,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -33,29 +36,42 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.induztek.protocolos.model.PerfilUsuario
 import com.induztek.protocolos.model.Protocolo
 import com.induztek.protocolos.ui.components.EstadoChip
 import com.induztek.protocolos.ui.components.InduztekTopBar
+import com.induztek.protocolos.ui.components.ResultadoChip
 import com.induztek.protocolos.ui.theme.AzulPetroleo
 import com.induztek.protocolos.ui.theme.FondoApp
 import com.induztek.protocolos.ui.theme.TextoSecundario
+import com.induztek.protocolos.viewmodel.LoginViewModel
 import com.induztek.protocolos.viewmodel.ProtocoloViewModel
 
-// onProtocoloSelected entrega el id del protocolo tocado; NavGraph abre el detalle.
 @Composable
 fun ListaProtocolosScreen(
     viewModel: ProtocoloViewModel,
+    loginViewModel: LoginViewModel,
     onNavigateBack: () -> Unit,
     onProtocoloSelected: (String) -> Unit
 ) {
-    // Lista observada: cuando se guarda un protocolo nuevo, aparece sola.
     val protocolos by viewModel.protocolos.collectAsState()
+    val usuarioActivo by loginViewModel.usuarioActivo.collectAsState()
 
-    // Esqueleto con barra superior (ver ListaEquiposScreen).
+    val perfil = usuarioActivo?.getPerfil() ?: PerfilUsuario.TECNICO_TERRENO
+    val esCliente = perfil == PerfilUsuario.CLIENTE
+
+    LaunchedEffect(usuarioActivo) {
+        if (esCliente && !usuarioActivo?.empresaCliente.isNullOrBlank()) {
+            viewModel.setEmpresaCliente(usuarioActivo?.empresaCliente)
+        } else {
+            viewModel.setEmpresaCliente(null)
+        }
+    }
+
     Scaffold(
         topBar = {
             InduztekTopBar(
-                titulo = "Historial de Protocolos",
+                titulo = if (esCliente) "Protocolos de ${usuarioActivo?.empresaCliente ?: "Empresa"}" else "Historial de Protocolos",
                 canNavigateBack = true,
                 onNavigateBack = onNavigateBack
             )
@@ -68,6 +84,23 @@ fun ListaProtocolosScreen(
                 .background(FondoApp)
                 .padding(16.dp)
         ) {
+            if (esCliente) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFECEFF1))
+                ) {
+                    Text(
+                        text = "Vista de Cliente (P-04): Los protocolos no formalizados se muestran como 'Pendiente de formalización' hasta su aprobación final por ingeniería (RN-19).",
+                        fontSize = 12.sp,
+                        color = Color(0xFF37474F),
+                        modifier = Modifier.padding(10.dp)
+                    )
+                }
+            }
+
             if (protocolos.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -76,13 +109,13 @@ fun ListaProtocolosScreen(
                     Text(text = "No se registran protocolos guardados", color = TextoSecundario)
                 }
             } else {
-                // Lista con scroll (solo dibuja lo visible). spacedBy(12.dp) = separación entre tarjetas.
                 LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(protocolos) { protocolo ->
                         ProtocoloCard(
                             protocolo = protocolo,
+                            esCliente = esCliente,
                             onClick = { onProtocoloSelected(protocolo.id) }
                         )
                     }
@@ -93,9 +126,9 @@ fun ListaProtocolosScreen(
 }
 
 @Composable
-// Componente de UNA tarjeta de protocolo.
 fun ProtocoloCard(
     protocolo: Protocolo,
+    esCliente: Boolean,
     onClick: () -> Unit
 ) {
     Card(
@@ -104,9 +137,9 @@ fun ProtocoloCard(
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(14.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -118,22 +151,26 @@ fun ProtocoloCard(
                     fontWeight = FontWeight.Bold,
                     color = AzulPetroleo
                 )
-                EstadoChip(estado = protocolo.estado)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    ResultadoChip(resultado = protocolo.resultadoGlobal)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    EstadoChip(estado = protocolo.estado, esCliente = esCliente)
+                }
             }
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Text(
-                text = "Equipo: ${protocolo.equipoCodigo} (${protocolo.tipoEquipo})",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
-            )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "📅 ${protocolo.fechaHora} | 👤 ${protocolo.tecnico}",
-                fontSize = 12.sp,
+                text = "Equipo: ${protocolo.equipoCodigo} (${protocolo.tipoEquipo})",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium
+            )
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            Text(
+                text = "OT: ${protocolo.ordenTrabajo} | 📅 ${protocolo.fechaHora} | 👤 ${protocolo.tecnicoCreador}",
+                fontSize = 11.sp,
                 color = TextoSecundario
             )
         }

@@ -19,6 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import com.induztek.protocolos.ui.theme.AzulPetroleo
 
+import androidx.compose.foundation.layout.RowScope
+
 // @OptIn: acepto usar una API de Material 3 que Google marcó como 'experimental'.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,10 +28,12 @@ import com.induztek.protocolos.ui.theme.AzulPetroleo
 fun InduztekTopBar(
     titulo: String,
     canNavigateBack: Boolean = false,
-    onNavigateBack: () -> Unit = {}
+    onNavigateBack: () -> Unit = {},
+    actions: @Composable RowScope.() -> Unit = {}
 ) {
     // TopAppBar = barra superior de Material.
     TopAppBar(
+        actions = actions,
         // Las llaves { } reciben otro Composable (el contenido del título).
         title = {
             Text(
