@@ -1,17 +1,25 @@
+try {
+    val processEnvironment = Class.forName("java.lang.ProcessEnvironment")
+    val unmodifiableMapField = processEnvironment.getDeclaredField("theUnmodifiableEnvironment")
+    unmodifiableMapField.isAccessible = true
+    val map = unmodifiableMapField.get(null) as? MutableMap<Any, Any>
+    map?.remove("ANDROID_PREFS_ROOT")
+
+    val envField = processEnvironment.getDeclaredField("theEnvironment")
+    envField.isAccessible = true
+    val envMap = envField.get(null) as? MutableMap<Any, Any>
+    envMap?.remove("ANDROID_PREFS_ROOT")
+} catch (e: Throwable) {
+    // Ignore if reflection is restricted
+}
+
 pluginManagement {
     repositories {
-        google {
-            content {
-                includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
-                includeGroupByRegex("androidx.*")
-            }
-        }
+        google()
         mavenCentral()
         gradlePluginPortal()
     }
 }
-
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -20,5 +28,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Induztek"
+rootProject.name = "InduztekProtocolos"
 include(":app")
