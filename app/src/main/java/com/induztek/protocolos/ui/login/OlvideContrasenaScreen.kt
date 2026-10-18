@@ -35,6 +35,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -43,6 +44,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -50,6 +52,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.induztek.protocolos.ui.theme.AzulPetroleo
+import com.induztek.protocolos.ui.theme.AzulPetroleoDark
 import com.induztek.protocolos.ui.theme.NaranjaSeguridad
 import com.induztek.protocolos.viewmodel.LoginViewModel
 import com.induztek.protocolos.viewmodel.RecuperacionUiState
@@ -75,7 +78,7 @@ fun OlvideContrasenaScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(AzulPetroleo),
+            .background(Color(0xFF0D47A1)),
         contentAlignment = Alignment.Center
     ) {
         Card(
@@ -141,6 +144,7 @@ fun OlvideContrasenaScreen(
                     value = correo,
                     onValueChange = { viewModel.onCorreoRecuperacionChanged(it) },
                     label = { Text("Correo Electrónico") },
+                    textStyle = TextStyle(color = Color.Black),
                     leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
                     isError = !isEmailValid,
                     supportingText = {
@@ -154,6 +158,19 @@ fun OlvideContrasenaScreen(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.Black,
+                        errorTextColor = Color.Black,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        errorContainerColor = Color.White,
+                        cursorColor = Color.Black,
+                        focusedBorderColor = AzulPetroleo,
+                        unfocusedBorderColor = Color.LightGray,
+                        focusedLabelColor = AzulPetroleo,
+                        unfocusedLabelColor = Color.Gray
+                    ),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Done

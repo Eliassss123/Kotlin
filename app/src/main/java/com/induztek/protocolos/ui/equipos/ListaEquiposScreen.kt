@@ -271,6 +271,9 @@ fun ListaEquiposScreen(
                         Text(
                             text = "Equipos & Diagnóstico Induztek",
                             fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            lineHeight = 19.sp,
+                            maxLines = 2,
                             color = Color.White
                         )
                     },
@@ -375,12 +378,25 @@ fun ListaEquiposScreen(
                     Button(
                         onClick = onVerVisitasClick,
                         modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(containerColor = AzulPetroleo),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = AzulPetroleo,
+                            contentColor = Color.White
+                        ),
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Icon(Icons.Default.Engineering, contentDescription = null, modifier = Modifier.height(16.dp))
+                        Icon(
+                            imageVector = Icons.Default.Engineering,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Visitas", fontSize = 13.sp)
+                        Text(
+                            text = "Visitas",
+                            color = Color.White,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
 
                     OutlinedButton(

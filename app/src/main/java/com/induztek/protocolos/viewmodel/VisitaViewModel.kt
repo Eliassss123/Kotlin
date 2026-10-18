@@ -39,6 +39,9 @@ import java.util.Date
 import java.util.Locale
 import java.util.UUID
 
+/**
+ * Estado para la creación de una nueva visita técnica en terreno.
+ */
 data class NuevaVisitaState(
     val ordenTrabajo: String = "OT-2026-085",
     val cliente: String = "Planta Lampa",
@@ -51,6 +54,10 @@ data class NuevaVisitaState(
     val errorValidacion: String? = null
 )
 
+/**
+ * ViewModel que gestiona el ciclo de visitas técnicas, apertura, adición de equipos con generación automática
+ * de protocolos (RT-03, RN-05) y cierre de visita con emisión de acta (RT-08).
+ */
 class VisitaViewModel(
     private val visitaRepository: VisitaRepository,
     private val protocoloRepository: ProtocoloRepository,
@@ -83,6 +90,7 @@ class VisitaViewModel(
         }
     }
 
+    /** Flujo con todas las visitas registradas. */
     val todasLasVisitas: StateFlow<List<Visita>> = visitaRepository.allVisitas
         .stateIn(
             scope = viewModelScope,
@@ -126,7 +134,10 @@ class VisitaViewModel(
         _mensajeError.value = null
     }
 
-    // RT-01: Registro de visita. El ingeniero a cargo es OBLIGATORIO (aunque no asista)
+    /**
+     * RT-01: Crea una nueva visita técnica exigiendo obligatoriamente el ingeniero a cargo (Aclaración 4 y 7).
+     * @param onSuccess Callback que recibe el ID de la visita creada.
+     */
     fun crearVisita(onSuccess: (String) -> Unit) {
         val state = _nuevaVisitaState.value
         if (state.ordenTrabajo.isBlank()) {
@@ -169,6 +180,9 @@ class VisitaViewModel(
         }
     }
 
+    /**
+     * Carga el detalle de una visita y sus protocolos asociados.
+     */
     fun cargarDetalleVisita(visitaId: String) {
         viewModelScope.launch {
             val v = visitaRepository.getVisitaById(visitaId)
@@ -181,6 +195,9 @@ class VisitaViewModel(
         }
     }
 
+    /**
+     * Carga un acta generada por ID.
+     */
     fun cargarActa(actaId: String) {
         viewModelScope.launch {
             val acta = actaRepository.getActaById(actaId)
@@ -191,13 +208,14 @@ class VisitaViewModel(
         }
     }
 
-    // RT-03, RN-05: Al elegir un equipo, generar automáticamente las pruebas según su tipo.
-    // Bloquear un segundo protocolo del mismo equipo en la misma visita (UNIQUE).
+    /**
+     * RT-03, RN-05: Agrega un equipo a la visita, generando automáticamente sus pruebas técnicas requeridas
+     * y validando unicidad (RN-02).
+     */
     fun agregarEquipoAVisita(equipo: Equipo, tecnicoUsuario: String, onProtocoloCreado: (String) -> Unit) {
         val visita = _visitaSeleccionada.value ?: return
 
         viewModelScope.launch {
-            // Verificar unicidad (visita, equipo)
             val yaExiste = protocoloRepository.existeProtocoloParaEquipoEnVisita(visita.id, equipo.codigo)
             if (yaExiste) {
                 _mensajeError.value = "Ya existe un protocolo registrado para el equipo ${equipo.codigo} en esta visita (RN-02)."
@@ -210,7 +228,6 @@ class VisitaViewModel(
             val idProtocolo = "PROT-$timestamp"
             val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
 
-            // Generar pruebas requeridas según RN-05
             val nombresPruebas = ReglasNegocio.obtenerPruebasRequeridasPorTipo(equipo.tipo)
             val pruebasGeneradas = nombresPruebas.mapIndexed { idx, nombrePrueba ->
                 Prueba(
@@ -223,7 +240,7 @@ class VisitaViewModel(
                     fechaHora = sdf.format(Date()),
                     estadoPrueba = EstadoPrueba.REALIZADA,
                     motivoNoRealizada = "",
-                    resultado = if (ReglasNegocio.esPruebaConAsignacionManual(nombrePrueba)) ResultadoPrueba.APROBADO else ResultadoPrueba.APROBADO,
+                    resultado = ResultadoPrueba.APROBADO,
                     instrumento = if (nombrePrueba.contains("TTR")) "Vanguard ATRT-03 S2" else if (nombrePrueba.contains("contacto")) "AEMC 6250" else if (nombrePrueba.contains("operación")) "Omicron CMC 356" else "Megger MIT525",
                     calibracionVigente = true,
                     temperaturaAmbiente = visita.temperaturaAmbiente,
@@ -233,7 +250,6 @@ class VisitaViewModel(
                 )
             }
 
-            // Insertar pruebas en base de datos
             pruebasGeneradas.forEach { pruebaRepository.insertPrueba(it) }
 
             val resultadoGlobal = ReglasNegocio.calcularResultadoGlobal(pruebasGeneradas)
@@ -263,16 +279,15 @@ class VisitaViewModel(
             )
 
             protocoloRepository.insertProtocolo(nuevoProtocolo)
-
-            // Actualizar estado en equipo
             equipoRepository.insertEquipo(equipo.copy(ultimoEstado = EstadoProtocolo.REGISTRADO_TERRENO))
 
             onProtocoloCreado(idProtocolo)
         }
     }
 
-    // RT-08: Cierre de visita y generación de Acta
-    // Valida que no haya pruebas en blanco. Genera una sola acta por visita con todos los protocolos.
+    /**
+     * RT-08: Cierra la visita técnica tras validar que no existan pruebas incompletas y genera un Acta única de entrega.
+     */
     fun cerrarVisitaYGenerarActa(
         recibidoPor: String,
         onSuccess: (Acta) -> Unit,
@@ -295,7 +310,6 @@ class VisitaViewModel(
                 return@launch
             }
 
-            // Validar que no haya pruebas en blanco en ningún protocolo
             for (prot in protocolos) {
                 for (prueba in prot.pruebas) {
                     val errorPrueba = ReglasNegocio.validarPruebaCompleta(prueba)
@@ -309,7 +323,6 @@ class VisitaViewModel(
             val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
             val fechaEmision = sdf.format(Date())
 
-            // Resumen de protocolos y pruebas no realizadas
             val resumenBuilder = StringBuilder()
             protocolos.forEach { p ->
                 resumenBuilder.append("• Protocolo ${p.codigoProtocolo} (${p.equipoCodigo}): ${p.resultadoGlobal.label}\n")

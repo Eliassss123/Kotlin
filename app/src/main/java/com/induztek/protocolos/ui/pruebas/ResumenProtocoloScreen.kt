@@ -16,8 +16,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -37,12 +41,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.induztek.protocolos.util.ImageStorageHelper
 import com.induztek.protocolos.ui.components.EstadoChip
 import com.induztek.protocolos.ui.components.InduztekTopBar
 import com.induztek.protocolos.ui.theme.AzulPetroleo
@@ -217,6 +226,46 @@ fun ResumenProtocoloScreen(
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(text = "Observaciones de Campo:", fontSize = 12.sp, color = TextoSecundario)
                         Text(text = state.observaciones, fontSize = 13.sp, color = Color.DarkGray)
+                    }
+                }
+            }
+
+            // TARJETA DE EVIDENCIA FOTOGRÁFICA (Opcional, si existen fotos)
+            if (state.fotos.isNotEmpty()) {
+                Card(
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+                ) {
+                    Column(modifier = Modifier.padding(18.dp)) {
+                        Text(
+                            text = "Evidencia Fotográfica (${state.fotos.size})",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = AzulPetroleo
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            itemsIndexed(state.fotos) { index, fotoPath ->
+                                val bitmap = remember(fotoPath) {
+                                    ImageStorageHelper.cargarBitmap(fotoPath)
+                                }
+                                if (bitmap != null) {
+                                    Image(
+                                        bitmap = bitmap.asImageBitmap(),
+                                        contentDescription = "Foto ${index + 1}",
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier
+                                            .size(90.dp)
+                                            .clip(RoundedCornerShape(8.dp))
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

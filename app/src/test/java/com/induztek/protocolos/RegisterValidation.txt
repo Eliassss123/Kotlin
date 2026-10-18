@@ -1,0 +1,143 @@
+=============================================================================
+REPOSITORIO DE EJERCICIOS Y CARACTERÍSTICAS FUTURAS - INDUZTEK PROTOCOLOS
+=============================================================================
+Este archivo contiene los fragmentos de código de práctica y características
+futuras guardados dentro de una carpeta oculta del proyecto (ignorada por Git).
+
+---
+
+1. CONTADOR DE CARACTERES EN TIEMPO REAL (OlvideContrasenaScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'OlvideContrasenaScreen.kt', justo después del 'OutlinedTextField' del correo.
+* Código:
+-----------------------------------------------------------------------------
+Spacer(modifier = Modifier.height(4.dp))
+if (correo.isNotEmpty()) {
+    Text(
+        text = "Caracteres escritos: ${correo.length}",
+        fontSize = 11.sp,
+        color = Color.Gray,
+        modifier = Modifier.align(Alignment.End)
+    )
+}
+-----------------------------------------------------------------------------
+
+
+2. NOTIFICACIÓN DE BIENVENIDA AL INICIAR SESIÓN (LoginScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'LoginScreen.kt', dentro de 'LaunchedEffect(uiState)' cuando el estado sea Success, antes de 'onLoginSuccess()'.
+* Código:
+-----------------------------------------------------------------------------
+android.widget.Toast.makeText(context, "¡Bienvenido $email!", android.widget.Toast.LENGTH_LONG).show()
+-----------------------------------------------------------------------------
+
+
+3. SALUDO DINÁMICO SEGÚN LA HORA DEL DÍA (LoginScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'LoginScreen.kt', dentro de la tarjeta de login, debajo del título.
+* Código:
+-----------------------------------------------------------------------------
+val horaActual = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+val saludo = when {
+    horaActual < 12 -> "Buenos días"
+    horaActual < 18 -> "Buenas tardes"
+    else -> "Buenas noches"
+}
+Text(text = "$saludo, por favor inicia sesión", color = Color.White)
+-----------------------------------------------------------------------------
+
+
+4. NOTIFICACIÓN AL GUARDAR PRUEBA (NuevaPruebaScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'NuevaPruebaScreen.kt', dentro de la propiedad 'onClick' del botón de continuar al resumen.
+* Código:
+-----------------------------------------------------------------------------
+android.widget.Toast.makeText(context, "Prueba guardada con éxito", android.widget.Toast.LENGTH_SHORT).show()
+-----------------------------------------------------------------------------
+
+
+5. CONTADOR DINÁMICO DE PROTOCOLOS (DetalleActaScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'DetalleActaScreen.kt', dentro de la tarjeta de resumen de protocolos.
+* Código:
+-----------------------------------------------------------------------------
+Text(
+    text = "Total de protocolos incluidos en esta visita: ${protocolos.size}",
+    fontSize = 12.sp,
+    color = Color.Gray
+)
+-----------------------------------------------------------------------------
+
+
+6. BOTÓN DE COPIAR RESUMEN CON TOAST (DetalleActaScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'DetalleActaScreen.kt', en las tarjetas de detalle.
+* Código:
+-----------------------------------------------------------------------------
+val context = LocalContext.current
+Button(
+    onClick = {
+        android.widget.Toast.makeText(context, "Resumen del acta copiado al portapapeles", android.widget.Toast.LENGTH_SHORT).show()
+    }
+) {
+    Text("Copiar Resumen")
+}
+-----------------------------------------------------------------------------
+
+
+7. INDICADOR DE PROGRESO DE DÍGITOS - [X/6] (VerificarCodigoScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'VerificarCodigoScreen.kt', debajo del campo de código de 6 dígitos.
+* Código:
+-----------------------------------------------------------------------------
+Text(
+    text = "Dígitos ingresados: ${codigoIngresado.length}/6",
+    fontSize = 11.sp,
+    color = Color.Gray
+)
+-----------------------------------------------------------------------------
+
+
+8. CARACTERÍSTICAS FUTURAS PARA CREAR EQUIPO (CrearEquipoScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlas: Al final del formulario de creación de equipos.
+* Código (Limpiar Todo):
+Button(
+    onClick = { /* viewModel.limpiarFormulario() */ },
+    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+) {
+    Text("Limpiar Todo", color = Color.White)
+}
+
+* Código (Contador de campos rellenados):
+val camposCompletados = listOf(state.codigo, state.tipo, state.cliente, state.ubicacion).count { it.isNotBlank() }
+Text(
+    text = "Campos principales completados: $camposCompletados / 4",
+    fontSize = 12.sp,
+    color = MaterialTheme.colorScheme.onSurfaceVariant
+)
+-----------------------------------------------------------------------------
+
+
+9. CARACTERÍSTICAS FUTURAS PARA PERFIL (PerfilScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlas: En la pantalla de perfil.
+* Código (Cambiar contraseña):
+OutlinedButton(
+    onClick = { /* Navegar a pantalla de cambio de contraseña */ },
+    modifier = Modifier.fillMaxWidth()
+) {
+    Icon(Icons.Default.Lock, contentDescription = null)
+    Spacer(Modifier.width(8.dp))
+    Text("Cambiar Contraseña")
+}
+
+* Código (Indicador de versión):
+Text(
+    text = "Induztek Protocolos v1.0.0 (Build 2026)",
+    fontSize = 12.sp,
+    color = Color.Gray,
+    textAlign = TextAlign.Center,
+    modifier = Modifier.fillMaxWidth()
+)
+-----------------------------------------------------------------------------

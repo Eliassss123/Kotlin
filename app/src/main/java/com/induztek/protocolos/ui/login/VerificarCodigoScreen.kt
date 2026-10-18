@@ -32,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -41,6 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -79,7 +81,7 @@ fun VerificarCodigoScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(AzulPetroleo),
+            .background(Color(0xFF0D47A1)),
         contentAlignment = Alignment.Center
     ) {
         Card(
@@ -147,8 +149,22 @@ fun VerificarCodigoScreen(
                         }
                     },
                     label = { Text("Código de 6 dígitos") },
+                    textStyle = TextStyle(color = Color.Black),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.Black,
+                        errorTextColor = Color.Black,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        errorContainerColor = Color.White,
+                        cursorColor = Color.Black,
+                        focusedBorderColor = AzulPetroleo,
+                        unfocusedBorderColor = Color.LightGray,
+                        focusedLabelColor = AzulPetroleo,
+                        unfocusedLabelColor = Color.Gray
+                    ),
                     keyboardOptions = KeyboardOptions(
                         // Abre el teclado numérico.
                         keyboardType = KeyboardType.Number,
@@ -230,8 +246,8 @@ fun VerificarCodigoScreen(
                     Text(
                         text = "Simulación: no se envía correo real. Tu nuevo código es: $codigoGenerado",
                         fontSize = 15.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.Black
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
                     )
                 }
             },

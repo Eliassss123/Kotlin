@@ -21,6 +21,10 @@ import com.induztek.protocolos.model.Prueba
 import com.induztek.protocolos.model.ResultadoPrueba
 import com.induztek.protocolos.model.SyncStatus
 
+/**
+ * Entidad de Room que representa la tabla 'protocolos' en la base de datos local.
+ * Almacena la estructura completa de un protocolo de pruebas con serialización JSON para pruebas, mediciones y fotos.
+ */
 @Entity(tableName = "protocolos")
 data class ProtocoloEntity(
     @PrimaryKey val id: String,
@@ -45,11 +49,16 @@ data class ProtocoloEntity(
     val syncStatus: String = "Pendiente de Sincronización",
     val observaciones: String = "",
     val pruebasJson: String = "[]",
-    val medicionesJson: String = "[]"
+    val medicionesJson: String = "[]",
+    val fotosJson: String = "[]"
 ) {
+    /**
+     * Convierte la entidad [ProtocoloEntity] al modelo de dominio [Protocolo], deserializando JSONs de pruebas, mediciones y fotos.
+     */
     fun toDomain(): Protocolo {
         val listMedType = object : TypeToken<List<Medicion>>() {}.type
         val listPruType = object : TypeToken<List<Prueba>>() {}.type
+        val listFotoType = object : TypeToken<List<String>>() {}.type
         val medicionesList: List<Medicion> = try {
             Gson().fromJson(medicionesJson, listMedType) ?: emptyList()
         } catch (e: Exception) {
@@ -57,6 +66,11 @@ data class ProtocoloEntity(
         }
         val pruebasList: List<Prueba> = try {
             Gson().fromJson(pruebasJson, listPruType) ?: emptyList()
+        } catch (e: Exception) {
+            emptyList()
+        }
+        val fotosList: List<String> = try {
+            Gson().fromJson(fotosJson, listFotoType) ?: emptyList()
         } catch (e: Exception) {
             emptyList()
         }
@@ -83,12 +97,16 @@ data class ProtocoloEntity(
             fechaFormalizacion = fechaFormalizacion,
             syncStatus = SyncStatus.fromLabel(syncStatus),
             observaciones = observaciones,
+            fotos = fotosList,
             pruebas = pruebasList,
             mediciones = medicionesList
         )
     }
 
     companion object {
+        /**
+         * Crea una instancia de [ProtocoloEntity] a partir del modelo de dominio [Protocolo], serializando listas a JSON.
+         */
         fun fromDomain(protocolo: Protocolo): ProtocoloEntity {
             return ProtocoloEntity(
                 id = protocolo.id,
@@ -113,7 +131,8 @@ data class ProtocoloEntity(
                 syncStatus = protocolo.syncStatus.label,
                 observaciones = protocolo.observaciones,
                 pruebasJson = Gson().toJson(protocolo.pruebas),
-                medicionesJson = Gson().toJson(protocolo.mediciones)
+                medicionesJson = Gson().toJson(protocolo.mediciones),
+                fotosJson = Gson().toJson(protocolo.fotos)
             )
         }
     }

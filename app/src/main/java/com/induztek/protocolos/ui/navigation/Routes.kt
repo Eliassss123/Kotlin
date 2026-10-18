@@ -20,12 +20,12 @@ sealed class Routes(val route: String) {
 
     object ListaVisitas : Routes("lista_visitas")
     object NuevaVisita : Routes("nueva_visita")
-    object DetalleVisita : Routes("detalle_visita/{id}") {
-        fun createRoute(id: String) = "detalle_visita/$id"
+    object DetalleVisita : Routes("detalle_visita/{visitaId}") {
+        fun createRoute(visitaId: String) = "detalle_visita/$visitaId"
     }
 
-    object CapturaPrueba : Routes("captura_prueba/{id}") {
-        fun createRoute(id: String) = "captura_prueba/$id"
+    object CapturaPrueba : Routes("captura_prueba/{pruebaId}") {
+        fun createRoute(pruebaId: String) = "captura_prueba/$pruebaId"
     }
 
     object ListaProtocolos : Routes("lista_protocolos")
@@ -33,8 +33,8 @@ sealed class Routes(val route: String) {
         fun createRoute(id: String) = "detalle_protocolo/$id"
     }
 
-    object DetalleActa : Routes("detalle_acta/{id}") {
-        fun createRoute(id: String) = "detalle_acta/$id"
+    object DetalleActa : Routes("detalle_acta/{actaId}") {
+        fun createRoute(actaId: String) = "detalle_acta/$actaId"
     }
 
     object Admin : Routes("admin")

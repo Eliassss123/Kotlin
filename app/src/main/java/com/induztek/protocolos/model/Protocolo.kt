@@ -36,6 +36,7 @@ data class Protocolo(
     val fechaFormalizacion: String? = null,
     val syncStatus: SyncStatus = SyncStatus.PENDIENTE,
     val observaciones: String = "",
+    val fotos: List<String> = emptyList(),
     val pruebas: List<Prueba> = emptyList(),
     val mediciones: List<Medicion> = emptyList()
 ) {

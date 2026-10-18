@@ -78,8 +78,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.induztek.protocolos.data.local.UsuarioEntity
 import com.induztek.protocolos.ui.theme.AzulPetroleo
+import com.induztek.protocolos.ui.theme.AzulPetroleoLight
 import com.induztek.protocolos.ui.theme.FondoApp
 import com.induztek.protocolos.ui.theme.NaranjaSeguridad
+import com.induztek.protocolos.ui.theme.TarjetaFondo
+import androidx.compose.material3.MaterialTheme
 import com.induztek.protocolos.util.ImageStorageHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -293,7 +296,7 @@ fun PerfilScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(
@@ -330,7 +333,7 @@ fun PerfilScreen(
                             "Sin biografía registrada. Pulsa el lápiz para añadir una descripción de tus funciones o vinculación laboral."
                         },
                         fontSize = 14.sp,
-                        color = if (!usuario?.biografia.isNullOrBlank()) Color.DarkGray else Color.Gray,
+                        color = if (!usuario?.biografia.isNullOrBlank()) Color.White else Color.Gray,
                         lineHeight = 20.sp
                     )
 
@@ -361,30 +364,42 @@ fun PerfilScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+
+
+
+
+
+
+
+
+
+
             // Tarjeta de información de cuenta
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    //Texto
                     Text(
                         text = "Información de cuenta",
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
                         color = AzulPetroleo
                     )
-
+                //Estetica
                     FilaInfoPerfil(
                         icono = Icons.Default.Email,
                         etiqueta = "Correo",
-                        valor = usuario?.correo ?: "—"
+                        valor = usuario?.correo ?: "—",
+                        textColor = AzulPetroleoLight
                     )
 
                     HorizontalDivider()
@@ -415,7 +430,7 @@ fun PerfilScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
                     shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(
@@ -560,7 +575,7 @@ fun PerfilScreen(
                     Text(
                         text = "Escribe una breve descripción de tu rol, experiencia laboral o relación con Induztek:",
                         fontSize = 13.sp,
-                        color = Color.DarkGray
+                        color = Color.White
                     )
                     OutlinedTextField(
                         value = biografiaTexto,
@@ -596,7 +611,8 @@ fun PerfilScreen(
 private fun FilaInfoPerfil(
     icono: ImageVector,
     etiqueta: String,
-    valor: String
+    valor: String,
+    textColor: Color = MaterialTheme.colorScheme.onSurface
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -605,19 +621,20 @@ private fun FilaInfoPerfil(
         Icon(
             imageVector = icono,
             contentDescription = null,
-            tint = AzulPetroleo,
+            tint = AzulPetroleoLight,
             modifier = Modifier.size(22.dp)
         )
         Column {
             Text(
                 text = etiqueta,
                 fontSize = 11.sp,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = valor,
                 fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
+                color = textColor
             )
         }
     }

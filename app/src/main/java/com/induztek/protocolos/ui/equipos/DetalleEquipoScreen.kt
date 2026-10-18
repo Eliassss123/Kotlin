@@ -157,28 +157,45 @@ fun DetalleEquipoScreen(
                         }
 
                         // Datos de Placa de Características (FT-03 sec. 2)
+                        Spacer(modifier = Modifier.height(10.dp))
+                        HorizontalDivider(color = Color(0xFFEEEEEE))
                         Spacer(modifier = Modifier.height(8.dp))
-                        HorizontalDivider(color = Color(0xFFF5F5F5))
-                        Spacer(modifier = Modifier.height(6.dp))
 
                         Text(
-                            text = "Datos de Placa de Características:",
-                            fontSize = 12.sp,
+                            text = "Datos de Placa de Características",
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                             color = AzulPetroleo
                         )
 
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(text = "• Marca/Modelo: ${eq.marca} ${eq.modelo}", fontSize = 12.sp)
-                            Text(text = "• Año: ${eq.anio}", fontSize = 12.sp)
-                        }
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(text = "• N/S: ${eq.numeroSerie}", fontSize = 12.sp)
-                            Text(text = "• Potencia: ${eq.potenciaTension}", fontSize = 12.sp)
-                        }
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(text = "• Tensiones: ${eq.tensiones}", fontSize = 12.sp)
-                            Text(text = "• Conexión: ${eq.conexion}", fontSize = 12.sp)
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color(0xFFF8F9FA), RoundedCornerShape(8.dp))
+                                .padding(10.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            DatoPlacaItem(etiqueta = "Marca / Modelo", valor = "${eq.marca} ${eq.modelo}".trim().ifBlank { "—" })
+                            DatoPlacaItem(etiqueta = "N° de Serie", valor = eq.numeroSerie.ifBlank { "—" })
+                            Row(modifier = Modifier.fillMaxWidth()) {
+                                Box(modifier = Modifier.weight(1f)) {
+                                    DatoPlacaItem(etiqueta = "Año de Fabricación", valor = eq.anio.ifBlank { "—" })
+                                }
+                                Box(modifier = Modifier.weight(1f)) {
+                                    DatoPlacaItem(etiqueta = "Potencia", valor = eq.potenciaTension.ifBlank { "—" })
+                                }
+                            }
+                            DatoPlacaItem(etiqueta = "Tensiones", valor = eq.tensiones.ifBlank { "—" })
+                            Row(modifier = Modifier.fillMaxWidth()) {
+                                Box(modifier = Modifier.weight(1f)) {
+                                    DatoPlacaItem(etiqueta = "Grupo Conexión", valor = eq.conexion.ifBlank { "—" })
+                                }
+                                Box(modifier = Modifier.weight(1f)) {
+                                    DatoPlacaItem(etiqueta = "Posición Tap", valor = eq.getTapEtiqueta())
+                                }
+                            }
                         }
                     }
                 }
@@ -297,5 +314,22 @@ fun PruebaHistorialItem(prueba: Prueba) {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun DatoPlacaItem(etiqueta: String, valor: String) {
+    Column {
+        Text(
+            text = etiqueta,
+            fontSize = 11.sp,
+            color = TextoSecundario
+        )
+        Text(
+            text = valor,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color(0xFF263238)
+        )
     }
 }

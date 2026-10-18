@@ -12,6 +12,10 @@ import androidx.room.PrimaryKey
 import com.induztek.protocolos.model.PerfilUsuario
 import java.util.UUID
 
+/**
+ * Entidad de Room que representa la tabla 'usuarios' en la base de datos local.
+ * Almacena credenciales, perfiles (P-01 a P-04), estado de activación (RF-22) y datos de perfil de usuario.
+ */
 @Entity(tableName = "usuarios")
 data class UsuarioEntity(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
@@ -24,5 +28,8 @@ data class UsuarioEntity(
     val fotoPerfil: String? = null,
     val biografia: String? = null
 ) {
+    /**
+     * Retorna el [PerfilUsuario] asociado al código de perfil del usuario.
+     */
     fun getPerfil(): PerfilUsuario = PerfilUsuario.fromCodigo(perfilCodigo)
 }
