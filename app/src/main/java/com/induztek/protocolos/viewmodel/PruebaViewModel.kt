@@ -28,6 +28,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * Estado de la UI para el formulario de creación de una nueva prueba y protocolo asociado.
+ */
 data class NuevaPruebaState(
     val ordenTrabajo: String = "OT-2026-084",
     val equipoCodigo: String = "",
@@ -46,9 +49,14 @@ data class NuevaPruebaState(
     ),
     val estado: EstadoProtocolo = EstadoProtocolo.REGISTRADO_TERRENO,
     val observaciones: String = "",
-    val tecnico: String = "Juan Pérez (Técnico de Terreno)"
+    val tecnico: String = "Juan Pérez (Técnico de Terreno)",
+    val fotos: List<String> = emptyList()
 )
 
+/**
+ * ViewModel que maneja el formulario de nueva prueba, plantillas predefinidas de mediciones,
+ * trazabilidad de instrumentos y guardado de protocolos.
+ */
 class PruebaViewModel(
     private val equipoRepository: EquipoRepository,
     private val pruebaRepository: PruebaRepository,
@@ -75,11 +83,13 @@ class PruebaViewModel(
         }
     }
 
+    /** Establece el técnico de sesión actual. */
     fun setUsuarioSesion(nombre: String, correo: String, rol: String) {
         val labelTecnico = "$nombre ($rol - $correo)"
         _uiState.value = _uiState.value.copy(tecnico = labelTecnico)
     }
 
+    /** Selecciona un equipo y actualiza su ubicación. */
     fun setEquipo(equipo: Equipo) {
         _uiState.value = _uiState.value.copy(
             equipoCodigo = equipo.codigo,
@@ -101,6 +111,7 @@ class PruebaViewModel(
         _uiState.value = _uiState.value.copy(ordenTrabajo = ot)
     }
 
+    /** Actualiza el tipo de prueba y carga automáticamente la plantilla e instrumento recomendados. */
     fun onTipoPruebaChanged(tipo: String) {
         val instrumentoRecomendado = when {
             tipo.contains("Megger", ignoreCase = true) -> "Megger MIT525 (Cal. Vigente 2026)"
@@ -126,6 +137,7 @@ class PruebaViewModel(
         _uiState.value = _uiState.value.copy(mediciones = plantilla)
     }
 
+    /** Retorna una plantilla de mediciones estándar según el tipo de prueba. */
     private fun obtenerPlantillaPorTipo(tipo: String): List<Medicion> {
         return when {
             tipo.contains("Megger", ignoreCase = true) -> listOf(
@@ -217,6 +229,26 @@ class PruebaViewModel(
         }
     }
 
+    fun agregarFoto(path: String) {
+        if (path.isNotBlank()) {
+            val lista = _uiState.value.fotos.toMutableList()
+            lista.add(path)
+            _uiState.value = _uiState.value.copy(fotos = lista)
+        }
+    }
+
+    fun eliminarFoto(index: Int) {
+        val lista = _uiState.value.fotos.toMutableList()
+        if (index in lista.indices) {
+            val path = lista.removeAt(index)
+            com.induztek.protocolos.util.ImageStorageHelper.eliminarArchivo(path)
+            _uiState.value = _uiState.value.copy(fotos = lista)
+        }
+    }
+
+    /**
+     * Guarda la nueva prueba y su protocolo generado en los repositorios locales.
+     */
     fun guardarProtocolo(onSuccess: () -> Unit) {
         viewModelScope.launch {
             val state = _uiState.value
@@ -257,6 +289,7 @@ class PruebaViewModel(
                 humedad = state.humedad,
                 actaEntregadaCliente = true,
                 observaciones = state.observaciones,
+                fotos = state.fotos,
                 mediciones = state.mediciones
             )
 

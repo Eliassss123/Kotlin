@@ -15,42 +15,62 @@ import com.induztek.protocolos.model.ResultadoPrueba
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
+/**
+ * Repositorio encargado de gestionar pruebas técnicas, mediciones e histórico para comparación (RN-09, RT-06).
+ */
 class PruebaRepository(
     private val pruebaDao: PruebaDao
 ) {
+    /**
+     * Obtiene un flujo con las pruebas de un equipo.
+     */
     fun getPruebasByEquipo(equipoCodigo: String): Flow<List<Prueba>> {
         return pruebaDao.getPruebasByEquipo(equipoCodigo).map { entities ->
             entities.map { it.toDomain() }
         }
     }
 
+    /**
+     * Obtiene un flujo con las pruebas de un protocolo.
+     */
     fun getPruebasByProtocolo(protocoloId: String): Flow<List<Prueba>> {
         return pruebaDao.getPruebasByProtocolo(protocoloId).map { entities ->
             entities.map { it.toDomain() }
         }
     }
 
+    /**
+     * Busca y retorna una prueba por su ID.
+     */
     suspend fun getPruebaById(id: String): Prueba? {
         return pruebaDao.getPruebaById(id)?.toDomain()
     }
 
-    // RN-09, RT-06: Obtener última prueba previa del mismo tipo para calcular variación
+    /**
+     * RN-09, RT-06: Obtiene la última prueba previa del mismo tipo para calcular variación.
+     */
     suspend fun getUltimaPruebaPorTipo(equipoCodigo: String, tipoPrueba: String): Prueba? {
         return pruebaDao.getUltimaPruebaPorTipo(equipoCodigo, tipoPrueba)?.toDomain()
     }
 
+    /** Flujo con todas las pruebas registradas. */
     val allPruebas: Flow<List<Prueba>> = pruebaDao.getAllPruebas().map { entities ->
         entities.map { it.toDomain() }
     }
 
+    /**
+     * Inserta o actualiza una prueba.
+     */
     suspend fun insertPrueba(prueba: Prueba) {
         pruebaDao.insertPrueba(PruebaEntity.fromDomain(prueba))
     }
 
+    /**
+     * Puebla la base de datos con pruebas iniciales si la tabla está vacía.
+     */
     suspend fun seedInitialDataIfEmpty() {
         if (pruebaDao.getCount() == 0) {
             val initialPruebas = listOf(
-                // Transformador TR-500KVA-01
                 Prueba(
                     id = "PRU-101",
                     protocoloId = "PROT-2026-001",
@@ -131,7 +151,6 @@ class PruebaRepository(
                     variacionHistoricaPorcentaje = 0.0,
                     superaVariacion25 = false
                 ),
-                // Relé REL-SEL751-02
                 Prueba(
                     id = "PRU-201",
                     protocoloId = "PROT-2026-002",
@@ -159,7 +178,6 @@ class PruebaRepository(
                     variacionHistoricaPorcentaje = 0.0,
                     superaVariacion25 = false
                 ),
-                // Celda MT CEL-MT24-03 (Observado por contacto alto)
                 Prueba(
                     id = "PRU-301",
                     protocoloId = "PROT-2026-003",

@@ -32,6 +32,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+/**
+ * Estado temporal para la edición o captura de una prueba técnica dentro de un protocolo.
+ */
 data class EdicionPruebaState(
     val pruebaId: String = "",
     val tipoPrueba: String = "",
@@ -49,6 +52,10 @@ data class EdicionPruebaState(
     val observaciones: String = ""
 )
 
+/**
+ * ViewModel que gestiona la captura y edición de protocolos, cálculos automáticos (RT-05),
+ * validación de instrumentos (RN-11), comparación histórica (RN-09) y formalización (RN-04).
+ */
 class ProtocoloViewModel(
     private val protocoloRepository: ProtocoloRepository,
     private val pruebaRepository: PruebaRepository,
@@ -83,7 +90,9 @@ class ProtocoloViewModel(
         }
     }
 
-    // Lista de protocolos con filtro por empresa cliente para P-04 (RT-10)
+    /**
+     * Lista reactiva de protocolos con soporte para filtrado por empresa cliente (P-04, RT-10).
+     */
     val protocolos: StateFlow<List<Protocolo>> = combine(
         protocoloRepository.allProtocolos,
         _empresaClienteFiltro
@@ -106,6 +115,9 @@ class ProtocoloViewModel(
         _empresaClienteFiltro.value = empresa
     }
 
+    /**
+     * Carga un protocolo específico y sus pruebas asociadas por ID.
+     */
     fun cargarProtocolo(id: String) {
         viewModelScope.launch {
             val prot = protocoloRepository.getProtocoloById(id)
@@ -118,7 +130,9 @@ class ProtocoloViewModel(
         }
     }
 
-    // Preparar edición de una prueba técnica por ID
+    /**
+     * Prepara el estado de edición de una prueba buscando por su ID.
+     */
     fun iniciarEdicionPrueba(pruebaId: String) {
         viewModelScope.launch {
             val p = pruebaRepository.getPruebaById(pruebaId)
@@ -128,14 +142,15 @@ class ProtocoloViewModel(
         }
     }
 
-    // Preparar edición de una prueba técnica
+    /**
+     * Prepara el estado de edición de una [Prueba] calculando variaciones históricas y plantillas.
+     */
     fun iniciarEdicionPrueba(prueba: Prueba) {
         viewModelScope.launch {
             val esManual = ReglasNegocio.esPruebaConAsignacionManual(prueba.tipoPrueba)
             val inst = _instrumentosDisponibles.value.find { it.modelo.contains(prueba.instrumento) || prueba.instrumento.contains(it.modelo) }
                 ?: _instrumentosDisponibles.value.firstOrNull()
 
-            // RT-06, RN-09: Buscar medición anterior del mismo tipo de prueba para comparación histórica
             val ultimaPrevia = pruebaRepository.getUltimaPruebaPorTipo(prueba.equipoCodigo, prueba.tipoPrueba)
             val valorAnterior = ultimaPrevia?.mediciones?.firstOrNull { it.valorNumerico != null }?.valorNumerico
 
@@ -193,7 +208,9 @@ class ProtocoloViewModel(
         _edicionPruebaState.value = _edicionPruebaState.value?.copy(resultadoManual = res)
     }
 
-    // Actualizar valor de medición con recálculo automático inmediato (RT-05)
+    /**
+     * Actualiza una medición específica y dispara el recálculo automático inmediato (RT-05).
+     */
     fun actualizarMedicion(index: Int, nuevoValorNum: Double?, nuevaUnidad: String, momento: MomentoMedicion) {
         val current = _edicionPruebaState.value ?: return
         val lista = current.mediciones.toMutableList()
@@ -223,7 +240,9 @@ class ProtocoloViewModel(
         }
     }
 
-    // RT-05: Cálculos automáticos por reglas de negocio
+    /**
+     * RT-05: Realiza cálculos automáticos de resultados (IP, TTR, Resistencia de Contactos, etc.) según reglas de negocio.
+     */
     private fun recalcularResultadoPrueba() {
         val state = _edicionPruebaState.value ?: return
         if (state.estadoPrueba == EstadoPrueba.NO_REALIZADA) {
@@ -242,14 +261,12 @@ class ProtocoloViewModel(
         var nuevoResultado = ResultadoPrueba.APROBADO
 
         when {
-            // Aislación: IP = 10 min / 1 min
             tipo.contains("aislación") || tipo.contains("aislamiento") -> {
                 val med1min = ReglasNegocio.filtrarMedicionVigente(mediciones, "Lectura 1 min (R1min)")?.valorNumerico ?: 4.5
                 val med10min = ReglasNegocio.filtrarMedicionVigente(mediciones, "Lectura 10 min (R10min)")?.valorNumerico ?: 8.5
                 val (ip, res) = ReglasNegocio.calcularIndicePolarizacion(med1min, med10min)
                 nuevoResultado = res
 
-                // Actualizar o añadir IP en la lista de mediciones
                 val listaActualizada = mediciones.map {
                     if (it.campo.contains("IP") || it.campo.contains("Polarización")) {
                         it.copy(valorNumerico = ip)
@@ -258,7 +275,6 @@ class ProtocoloViewModel(
                 _edicionPruebaState.value = state.copy(mediciones = listaActualizada, resultadoCalculado = nuevoResultado)
                 return
             }
-            // TTR: Error % = ((medida - teórica) / teórica) * 100
             tipo.contains("ttr") || tipo.contains("transformación") -> {
                 val teorica = ReglasNegocio.filtrarMedicionVigente(mediciones, "Relación Teórica (Placa)")?.valorNumerico ?: 21.74
                 val medidaU = ReglasNegocio.filtrarMedicionVigente(mediciones, "Relación Medida (Fase U)")?.valorNumerico ?: 21.75
@@ -273,12 +289,10 @@ class ProtocoloViewModel(
                 _edicionPruebaState.value = state.copy(mediciones = listaActualizada, resultadoCalculado = nuevoResultado)
                 return
             }
-            // Contactos: <= 50 µΩ Aprobado, 50-100 Observado, >100 Rechazado
             tipo.contains("contacto") -> {
                 val maxResistencia = mediciones.mapNotNull { it.valorNumerico }.maxOrNull() ?: 45.0
                 nuevoResultado = ReglasNegocio.evaluarResistenciaContactos(maxResistencia)
             }
-            // Relé: Error tiempo de disparo
             tipo.contains("operación") || tipo.contains("inyección") -> {
                 val teorico = ReglasNegocio.filtrarMedicionVigente(mediciones, "Tiempo Teórico de Curva")?.valorNumerico ?: 0.40
                 val medido = ReglasNegocio.filtrarMedicionVigente(mediciones, "Tiempo Medido de Disparo")?.valorNumerico ?: 0.41
@@ -290,12 +304,13 @@ class ProtocoloViewModel(
         _edicionPruebaState.value = state.copy(resultadoCalculado = nuevoResultado)
     }
 
-    // Guardar cambios de la prueba y recalcular resultado global del protocolo
+    /**
+     * Guarda la edición de la prueba y recalcula el resultado global del protocolo (RN-10).
+     */
     fun guardarEdicionPrueba(onSuccess: () -> Unit, onError: (String) -> Unit) {
         val state = _edicionPruebaState.value ?: return
         val prot = _selectedProtocolo.value ?: return
 
-        // Validar no vacía si es NO_REALIZADA (Aclaración 2)
         if (state.estadoPrueba == EstadoPrueba.NO_REALIZADA && state.motivoNoRealizada.isBlank()) {
             onError("Si la prueba es NO REALIZADA, debe registrar obligatoriamente el motivo (Aclaración 2).")
             return
@@ -329,7 +344,6 @@ class ProtocoloViewModel(
 
             pruebaRepository.insertPrueba(pruebaActualizada)
 
-            // Recalcular lista de pruebas del protocolo y resultado global (RN-10)
             val listaPruebas = _pruebasDelProtocolo.value.map {
                 if (it.id == pruebaActualizada.id) pruebaActualizada else it
             }
@@ -349,7 +363,9 @@ class ProtocoloViewModel(
         }
     }
 
-    // RN-04, RN-16, RT-09: Formalización del protocolo
+    /**
+     * RN-04, RN-16, RT-09: Formaliza el protocolo mediante aprobación o observación por Ingeniero / Jefe Técnico.
+     */
     fun formalizarProtocolo(usuarioFormalizador: String, esAprobacion: Boolean, onSuccess: () -> Unit) {
         val prot = _selectedProtocolo.value ?: return
         viewModelScope.launch {
@@ -357,6 +373,38 @@ class ProtocoloViewModel(
             protocoloRepository.formalizarProtocolo(prot.id, usuarioFormalizador, nuevoEstado)
             cargarProtocolo(prot.id)
             onSuccess()
+        }
+    }
+
+    /**
+     * Agrega una foto de evidencia al protocolo.
+     */
+    fun agregarFotoAProtocolo(path: String) {
+        val prot = _selectedProtocolo.value ?: return
+        if (path.isBlank()) return
+        val lista = prot.fotos.toMutableList()
+        lista.add(path)
+        val actualizado = prot.copy(fotos = lista)
+        _selectedProtocolo.value = actualizado
+        viewModelScope.launch {
+            protocoloRepository.insertProtocolo(actualizado)
+        }
+    }
+
+    /**
+     * Elimina una foto de evidencia del protocolo.
+     */
+    fun eliminarFotoDeProtocolo(index: Int) {
+        val prot = _selectedProtocolo.value ?: return
+        val lista = prot.fotos.toMutableList()
+        if (index in lista.indices) {
+            val path = lista.removeAt(index)
+            com.induztek.protocolos.util.ImageStorageHelper.eliminarArchivo(path)
+            val actualizado = prot.copy(fotos = lista)
+            _selectedProtocolo.value = actualizado
+            viewModelScope.launch {
+                protocoloRepository.insertProtocolo(actualizado)
+            }
         }
     }
 }

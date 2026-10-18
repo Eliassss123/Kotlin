@@ -33,6 +33,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -89,7 +91,7 @@ fun NuevaContrasenaScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(AzulPetroleo),
+            .background(Color(0xFF0D47A1)),
         contentAlignment = Alignment.Center
     ) {
         Card(
@@ -156,6 +158,7 @@ fun NuevaContrasenaScreen(
                     value = nuevaContrasena,
                     onValueChange = { viewModel.onNuevaContrasenaChanged(it) },
                     label = { Text("Nueva Contraseña") },
+                    textStyle = TextStyle(color = Color.Black),
                     leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                     trailingIcon = {
                         IconButton(onClick = { isPassVisible = !isPassVisible }) {
@@ -179,6 +182,19 @@ fun NuevaContrasenaScreen(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.Black,
+                        errorTextColor = Color.Black,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        errorContainerColor = Color.White,
+                        cursorColor = Color.Black,
+                        focusedBorderColor = AzulPetroleo,
+                        unfocusedBorderColor = Color.LightGray,
+                        focusedLabelColor = AzulPetroleo,
+                        unfocusedLabelColor = Color.Gray
+                    ),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
                         imeAction = ImeAction.Next
@@ -193,6 +209,7 @@ fun NuevaContrasenaScreen(
                     value = confirmarContrasena,
                     onValueChange = { viewModel.onConfirmarContrasenaChanged(it) },
                     label = { Text("Confirmar Contraseña") },
+                    textStyle = TextStyle(color = Color.Black),
                     leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                     trailingIcon = {
                         IconButton(onClick = { isConfirmPassVisible = !isConfirmPassVisible }) {
@@ -215,6 +232,19 @@ fun NuevaContrasenaScreen(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.Black,
+                        errorTextColor = Color.Black,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        errorContainerColor = Color.White,
+                        cursorColor = Color.Black,
+                        focusedBorderColor = AzulPetroleo,
+                        unfocusedBorderColor = Color.LightGray,
+                        focusedLabelColor = AzulPetroleo,
+                        unfocusedLabelColor = Color.Gray
+                    ),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
                         imeAction = ImeAction.Done

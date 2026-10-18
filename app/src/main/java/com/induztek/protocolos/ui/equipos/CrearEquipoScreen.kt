@@ -31,7 +31,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,11 +48,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import com.induztek.protocolos.model.TipoEquipo
 import com.induztek.protocolos.ui.components.InduztekTopBar
-import com.induztek.protocolos.ui.theme.AzulPetroleo
+import com.induztek.protocolos.ui.theme.AzulPetroleoLight
 import com.induztek.protocolos.ui.theme.FondoApp
 import com.induztek.protocolos.ui.theme.NaranjaSeguridad
+import com.induztek.protocolos.ui.theme.TarjetaFondo
 import com.induztek.protocolos.viewmodel.EquipoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,8 +67,21 @@ fun CrearEquipoScreen(
 ) {
     val state by viewModel.nuevoEquipoState.collectAsState()
     var dropdownTipoExpanded by remember { mutableStateOf(false) }
+    var dropdownConexionExpanded by remember { mutableStateOf(false) }
 
     val tiposDisponibles = TipoEquipo.entries.map { it.nombre }
+    val opcionesConexion = listOf("Dyn1", "Dyn5", "Dyn11", "Yyn0", "YNyn0", "Dd0", "Otro")
+
+    val textFieldColors = OutlinedTextFieldDefaults.colors(
+        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+        focusedBorderColor = AzulPetroleoLight,
+        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+        focusedLabelColor = AzulPetroleoLight,
+        unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
+    )
 
     Scaffold(
         topBar = {
@@ -109,7 +127,7 @@ fun CrearEquipoScreen(
             // Datos Principales
             Card(
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = TarjetaFondo),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -117,7 +135,7 @@ fun CrearEquipoScreen(
                         text = "1. Identificación y Ubicación",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
-                        color = AzulPetroleo
+                        color = AzulPetroleoLight
                     )
 
                     Spacer(modifier = Modifier.height(10.dp))
@@ -125,9 +143,24 @@ fun CrearEquipoScreen(
                     OutlinedTextField(
                         value = state.codigo,
                         onValueChange = { viewModel.onCodigoChanged(it) },
-                        label = { Text("Código Interno / TAG Induztek *") },
+                        label = {
+                            Text(
+                                if (state.codigo.isBlank()) "Código Interno / TAG (Obligatorio si no hay N° Serie)"
+                                else "Código Interno / TAG *"
+                            )
+                        },
+                        placeholder = { Text("Ej: TR-500KVA-01 o TAG-CAB-MT1") },
+                        supportingText = {
+                            Text(
+                                text = "Ejemplo de TAG válido: TR-500KVA-01. Si el equipo no posee TAG, complete Marca y N° de Serie obligatoriamente.",
+                                fontSize = 11.sp,
+                                //Aqui cambie el color del texto ejemplo
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        colors = textFieldColors
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -137,7 +170,8 @@ fun CrearEquipoScreen(
                         onValueChange = { viewModel.onTagClienteChanged(it) },
                         label = { Text("TAG Asignado por Cliente (Placa)") },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        colors = textFieldColors
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -154,7 +188,8 @@ fun CrearEquipoScreen(
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownTipoExpanded) },
                             modifier = Modifier
                                 .menuAnchor()
-                                .fillMaxWidth()
+                                .fillMaxWidth(),
+                            colors = textFieldColors
                         )
                         ExposedDropdownMenu(
                             expanded = dropdownTipoExpanded,
@@ -179,7 +214,8 @@ fun CrearEquipoScreen(
                         onValueChange = { viewModel.onClienteNuevoChanged(it) },
                         label = { Text("Empresa Cliente *") },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        colors = textFieldColors
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -189,7 +225,8 @@ fun CrearEquipoScreen(
                         onValueChange = { viewModel.onUbicacionNuevaChanged(it) },
                         label = { Text("Instalación / Subestación *") },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        colors = textFieldColors
                     )
                 }
             }
@@ -197,7 +234,7 @@ fun CrearEquipoScreen(
             // Datos de Placa de Características (FT-03 sec. 2)
             Card(
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = TarjetaFondo),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -205,7 +242,7 @@ fun CrearEquipoScreen(
                         text = "2. Datos de Placa de Características (FT-03)",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
-                        color = AzulPetroleo
+                        color = AzulPetroleoLight
                     )
 
                     Spacer(modifier = Modifier.height(10.dp))
@@ -214,17 +251,21 @@ fun CrearEquipoScreen(
                         OutlinedTextField(
                             value = state.marca,
                             onValueChange = { viewModel.onMarcaChanged(it) },
-                            label = { Text("Marca") },
+                            label = { Text(if (state.codigo.isBlank()) "Marca *" else "Marca") },
+                            placeholder = { Text("Ej: WEG, Schneider") },
                             modifier = Modifier.weight(1f),
-                            singleLine = true
+                            singleLine = true,
+                            colors = textFieldColors
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         OutlinedTextField(
                             value = state.modelo,
                             onValueChange = { viewModel.onModeloChanged(it) },
                             label = { Text("Modelo") },
+                            placeholder = { Text("Ej: TP-500-23") },
                             modifier = Modifier.weight(1f),
-                            singleLine = true
+                            singleLine = true,
+                            colors = textFieldColors
                         )
                     }
 
@@ -234,17 +275,33 @@ fun CrearEquipoScreen(
                         OutlinedTextField(
                             value = state.numeroSerie,
                             onValueChange = { viewModel.onNumeroSerieChanged(it) },
-                            label = { Text("N° Serie") },
+                            label = { Text(if (state.codigo.isBlank()) "N° Serie *" else "N° Serie") },
+                            placeholder = { Text("Ej: SN-2024-991") },
                             modifier = Modifier.weight(1f),
-                            singleLine = true
+                            singleLine = true,
+                            colors = textFieldColors
                         )
                         Spacer(modifier = Modifier.width(8.dp))
+                        val anioInvalido = state.anio.isNotBlank() && (state.anio.length == 4 && state.anio.toIntOrNull() !in 1900..2026)
                         OutlinedTextField(
                             value = state.anio,
                             onValueChange = { viewModel.onAnioChanged(it) },
-                            label = { Text("Año") },
+                            label = { Text("Año *") },
+                            placeholder = { Text("1900-2026") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            isError = anioInvalido,
+                            supportingText = {
+                                if (anioInvalido) {
+                                    Text("Año no válido. Debe ser entre 1900 y 2026", color = Color.Red, fontSize = 11.sp)
+                                } else if (state.anio.isNotBlank() && state.anio.length < 4) {
+                                    Text("Ingrese 4 dígitos", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                } else {
+                                    Text("Rango: 1900-2026", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            },
                             modifier = Modifier.weight(1f),
-                            singleLine = true
+                            singleLine = true,
+                            colors = textFieldColors
                         )
                     }
 
@@ -253,9 +310,13 @@ fun CrearEquipoScreen(
                     OutlinedTextField(
                         value = state.potenciaTension,
                         onValueChange = { viewModel.onPotenciaTensionChanged(it) },
-                        label = { Text("Potencia (kVA / MVA)") },
+                        label = { Text("Potencia (solo números en kVA)") },
+                        placeholder = { Text("Ej: 500") },
+                        suffix = { Text("kVA") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        colors = textFieldColors
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -264,8 +325,10 @@ fun CrearEquipoScreen(
                         value = state.tensiones,
                         onValueChange = { viewModel.onTensionesChanged(it) },
                         label = { Text("Tensiones (Primario / Secundario)") },
+                        placeholder = { Text("Ej: 23 kV / 380 V") },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        colors = textFieldColors
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -274,17 +337,68 @@ fun CrearEquipoScreen(
                         OutlinedTextField(
                             value = state.tap,
                             onValueChange = { viewModel.onTapChanged(it) },
-                            label = { Text("Posición Tap") },
+                            label = { Text("Posición Tap (Entero)") },
+                            placeholder = { Text("Ej: 3") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            supportingText = {
+                                if (state.tap == "3") {
+                                    Text("Tap 3 (Nominal)", color = AzulPetroleoLight, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                                } else if (state.tap.isNotBlank()) {
+                                    Text("Tap ${state.tap}", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                } else {
+                                    Text("Ingrese entero (ej: 3)", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            },
                             modifier = Modifier.weight(1f),
-                            singleLine = true
+                            singleLine = true,
+                            colors = textFieldColors
                         )
+
                         Spacer(modifier = Modifier.width(8.dp))
+
+                        ExposedDropdownMenuBox(
+                            expanded = dropdownConexionExpanded,
+                            onExpandedChange = { dropdownConexionExpanded = !dropdownConexionExpanded },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            OutlinedTextField(
+                                value = state.conexion,
+                                onValueChange = {},
+                                readOnly = true,
+                                label = { Text("Grupo Conexión") },
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownConexionExpanded) },
+                                modifier = Modifier
+                                    .menuAnchor()
+                                    .fillMaxWidth(),
+                                colors = textFieldColors
+                            )
+                            ExposedDropdownMenu(
+                                expanded = dropdownConexionExpanded,
+                                onDismissRequest = { dropdownConexionExpanded = false }
+                            ) {
+                                opcionesConexion.forEach { opc ->
+                                    DropdownMenuItem(
+                                        text = { Text(opc) },
+                                        onClick = {
+                                            viewModel.onConexionChanged(opc)
+                                            dropdownConexionExpanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    if (state.conexion == "Otro") {
+                        Spacer(modifier = Modifier.height(8.dp))
                         OutlinedTextField(
-                            value = state.conexion,
-                            onValueChange = { viewModel.onConexionChanged(it) },
-                            label = { Text("Grupo Conexión") },
-                            modifier = Modifier.weight(1f),
-                            singleLine = true
+                            value = state.conexionOtro,
+                            onValueChange = { viewModel.onConexionOtroChanged(it) },
+                            label = { Text("Especificar otro Grupo de Conexión *") },
+                            placeholder = { Text("Ej: Yd11, Dz0") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            colors = textFieldColors
                         )
                     }
                 }

@@ -47,6 +47,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
@@ -101,6 +102,20 @@ fun CapturaPruebaScreen(
     var mensajeErrorLocal by remember { mutableStateOf<String?>(null) }
 
     val unidadesComunes = listOf("GΩ", "MΩ", "kΩ", "Ω", "mΩ", "µΩ", "kV", "V", "A", "mA", "s", "ms", "%", "ratio", "°C")
+
+    val lightTextFieldColors = OutlinedTextFieldDefaults.colors(
+        focusedTextColor = Color.Black,
+        unfocusedTextColor = Color.Black,
+        errorTextColor = Color.Black,
+        focusedContainerColor = Color.White,
+        unfocusedContainerColor = Color.White,
+        errorContainerColor = Color.White,
+        cursorColor = Color.Black,
+        focusedBorderColor = AzulPetroleo,
+        unfocusedBorderColor = Color.LightGray,
+        focusedLabelColor = AzulPetroleo,
+        unfocusedLabelColor = Color.Gray
+    )
 
     Scaffold(
         topBar = {
@@ -168,7 +183,8 @@ fun CapturaPruebaScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(90.dp),
-                                maxLines = 3
+                                maxLines = 3,
+                                colors = lightTextFieldColors
                             )
                         }
                     }
@@ -354,7 +370,8 @@ fun CapturaPruebaScreen(
                                             label = { Text("Valor numérico") },
                                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                                             modifier = Modifier.weight(1.5f),
-                                            singleLine = true
+                                            singleLine = true,
+                                            colors = lightTextFieldColors
                                         )
 
                                         Spacer(modifier = Modifier.width(8.dp))
@@ -371,7 +388,8 @@ fun CapturaPruebaScreen(
                                                 readOnly = true,
                                                 label = { Text("Unidad") },
                                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownUnidadExpanded) },
-                                                modifier = Modifier.menuAnchor()
+                                                modifier = Modifier.menuAnchor(),
+                                                colors = lightTextFieldColors
                                             )
                                             ExposedDropdownMenu(
                                                 expanded = dropdownUnidadExpanded,
@@ -502,7 +520,8 @@ fun CapturaPruebaScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(90.dp),
-                        maxLines = 3
+                        maxLines = 3,
+                        colors = lightTextFieldColors
                     )
                 }
 

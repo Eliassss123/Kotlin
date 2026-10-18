@@ -25,6 +25,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.UUID
 
+/**
+ * Estado de la UI para el formulario de creación de un equipo nuevo en terreno.
+ */
 data class NuevoEquipoState(
     val codigo: String = "",
     val tagCliente: String = "",
@@ -37,12 +40,17 @@ data class NuevoEquipoState(
     val potenciaTension: String = "",
     val anio: String = "2024",
     val tensiones: String = "23 kV / 380 V",
-    val tap: String = "Tap 3 (Normal)",
+    val tap: String = "3",
     val conexion: String = "Dyn11",
+    val conexionOtro: String = "",
     val errorValidacion: String? = null,
     val advertenciaDuplicado: String? = null
 )
 
+/**
+ * ViewModel que gestiona la lista de equipos, filtrado reactivo, placa de características (FT-03),
+ * detección de duplicados en terreno (RT-02) y restricciones para usuario cliente (P-04).
+ */
 class EquipoViewModel(
     private val equipoRepository: EquipoRepository,
     private val pruebaRepository: PruebaRepository
@@ -67,7 +75,10 @@ class EquipoViewModel(
         }
     }
 
-    // Filtrado reactivo con buscador, clasificación (Primario/Secundario) y empresa cliente (P-04)
+    /**
+     * Flujo reactivo combinado que filtra la lista de equipos según buscador de texto,
+     * clasificación (Primario/Secundario) y empresa cliente (RT-10, P-04).
+     */
     val equipos: StateFlow<List<Equipo>> = combine(
         equipoRepository.allEquipos,
         _searchQuery,
@@ -76,12 +87,10 @@ class EquipoViewModel(
     ) { lista, query, clasificacion, empresaCliente ->
         var resultado = lista
 
-        // RT-10: Si es usuario cliente (P-04), filtrar solo su empresa
         if (!empresaCliente.isNullOrBlank()) {
             resultado = resultado.filter { it.cliente.equals(empresaCliente, ignoreCase = true) }
         }
 
-        // Aclaración 1: Filtrable por Primario / Secundario
         if (clasificacion != null) {
             resultado = resultado.filter { it.clasificacion == clasificacion }
         }
@@ -103,14 +112,17 @@ class EquipoViewModel(
         initialValue = emptyList()
     )
 
+    /** Actualiza el texto de búsqueda de equipos. */
     fun onSearchQueryChanged(newQuery: String) {
         _searchQuery.value = newQuery
     }
 
+    /** Establece el filtro de clasificación (Primario / Secundario). */
     fun setFiltroClasificacion(clasificacion: ClasificacionEquipo?) {
         _filtroClasificacion.value = clasificacion
     }
 
+    /** Establece el filtro por empresa cliente (P-04). */
     fun setEmpresaCliente(empresa: String?) {
         _empresaClienteFiltro.value = empresa
     }
@@ -121,6 +133,10 @@ class EquipoViewModel(
     private val _historialPruebas = MutableStateFlow<List<Prueba>>(emptyList())
     val historialPruebas: StateFlow<List<Prueba>> = _historialPruebas.asStateFlow()
 
+    /**
+     * Carga el detalle de un equipo específico y su historial de pruebas asociadas.
+     * @param codigo Código único del equipo.
+     */
     fun cargarDetalleEquipo(codigo: String) {
         viewModelScope.launch {
             val equipo = equipoRepository.getEquipoByCodigo(codigo)
@@ -133,63 +149,86 @@ class EquipoViewModel(
         }
     }
 
-    // --- Creación de equipo nuevo en terreno (RT-02) ---
+    /** Actualiza el código en el formulario de nuevo equipo. */
     fun onCodigoChanged(codigo: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(codigo = codigo, errorValidacion = null)
         verificarPosibleDuplicado()
     }
 
+    /** Actualiza el tag del cliente en el nuevo equipo. */
     fun onTagClienteChanged(tag: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(tagCliente = tag, errorValidacion = null)
         verificarPosibleDuplicado()
     }
 
+    /** Actualiza el tipo de equipo. */
     fun onTipoChanged(tipo: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(tipo = tipo)
     }
 
+    /** Actualiza el cliente del nuevo equipo. */
     fun onClienteNuevoChanged(cliente: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(cliente = cliente, errorValidacion = null)
     }
 
+    /** Actualiza la ubicación o instalación del nuevo equipo. */
     fun onUbicacionNuevaChanged(ubicacion: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(ubicacion = ubicacion, errorValidacion = null)
         verificarPosibleDuplicado()
     }
 
+    /** Actualiza la marca del equipo. */
     fun onMarcaChanged(marca: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(marca = marca)
     }
 
+    /** Actualiza el modelo del equipo. */
     fun onModeloChanged(modelo: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(modelo = modelo)
     }
 
+    /** Actualiza el número de serie del equipo. */
     fun onNumeroSerieChanged(serie: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(numeroSerie = serie, errorValidacion = null)
         verificarPosibleDuplicado()
     }
 
+    /** Actualiza la potencia y tensión del equipo. */
     fun onPotenciaTensionChanged(potencia: String) {
-        _nuevoEquipoState.value = _nuevoEquipoState.value.copy(potenciaTension = potencia)
+        val soloNumeros = potencia.filter { it.isDigit() }
+        _nuevoEquipoState.value = _nuevoEquipoState.value.copy(potenciaTension = soloNumeros)
     }
 
+    /** Actualiza el año de fabricación del equipo. */
     fun onAnioChanged(anio: String) {
-        _nuevoEquipoState.value = _nuevoEquipoState.value.copy(anio = anio)
+        val soloNumeros = anio.filter { it.isDigit() }.take(4)
+        _nuevoEquipoState.value = _nuevoEquipoState.value.copy(anio = soloNumeros, errorValidacion = null)
     }
 
+    /** Actualiza las tensiones nominales. */
     fun onTensionesChanged(tensiones: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(tensiones = tensiones)
     }
 
+    /** Actualiza el tap del equipo. */
     fun onTapChanged(tap: String) {
-        _nuevoEquipoState.value = _nuevoEquipoState.value.copy(tap = tap)
+        val soloNumeros = tap.filter { it.isDigit() }.take(2)
+        _nuevoEquipoState.value = _nuevoEquipoState.value.copy(tap = soloNumeros)
     }
 
+    /** Actualiza el tipo de conexión. */
     fun onConexionChanged(conexion: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(conexion = conexion)
     }
 
+    /** Actualiza el texto personalizado de conexión si se selecciona "Otro". */
+    fun onConexionOtroChanged(otro: String) {
+        _nuevoEquipoState.value = _nuevoEquipoState.value.copy(conexionOtro = otro)
+    }
+
+    /**
+     * RT-02: Verifica si ya existe un equipo similar en la misma ubicación y emite advertencia si es duplicado.
+     */
     private fun verificarPosibleDuplicado() {
         val state = _nuevoEquipoState.value
         if (state.ubicacion.isNotBlank() && (state.tagCliente.isNotBlank() || state.numeroSerie.isNotBlank() || state.codigo.isNotBlank())) {
@@ -211,12 +250,24 @@ class EquipoViewModel(
         }
     }
 
+    /**
+     * Valida y guarda un nuevo equipo en el repositorio de equipos.
+     * @param onSuccess Callback que recibe el [Equipo] creado exitosamente.
+     */
     fun guardarEquipoNuevo(onSuccess: (Equipo) -> Unit) {
         val state = _nuevoEquipoState.value
-        if (state.codigo.isBlank()) {
-            _nuevoEquipoState.value = state.copy(errorValidacion = "El código o TAG interno es obligatorio")
-            return
+
+        val codigoIngresado = state.codigo.trim()
+        val tieneTag = codigoIngresado.isNotBlank()
+        if (!tieneTag) {
+            if (state.marca.isBlank() || state.numeroSerie.isBlank()) {
+                _nuevoEquipoState.value = state.copy(
+                    errorValidacion = "El código del TAG es obligatorio (ej: TR-500KVA-01, CAB-XLPE-05). Si el equipo no posee TAG, debe ingresar obligatoriamente Marca y N° de Serie para identificarlo."
+                )
+                return
+            }
         }
+
         if (state.cliente.isBlank()) {
             _nuevoEquipoState.value = state.copy(errorValidacion = "El cliente es obligatorio")
             return
@@ -226,10 +277,31 @@ class EquipoViewModel(
             return
         }
 
+        val anioInt = state.anio.toIntOrNull()
+        if (anioInt == null || anioInt !in 1900..2026) {
+            _nuevoEquipoState.value = state.copy(
+                errorValidacion = "El año ingresado '${state.anio}' no es válido. Debe ser un número de 4 dígitos entre 1900 y 2026."
+            )
+            return
+        }
+
+        val codigoFinal = if (tieneTag) {
+            codigoIngresado.uppercase()
+        } else {
+            "EQ-${state.marca.trim().take(4).uppercase()}-${state.numeroSerie.trim().uppercase()}"
+        }
+
+        val tapGuardar = state.tap.filter { it.isDigit() }.ifBlank { "3" }
+        val conexionFinal = if (state.conexion == "Otro" && state.conexionOtro.isNotBlank()) {
+            state.conexionOtro.trim()
+        } else {
+            state.conexion.trim()
+        }
+
         viewModelScope.launch {
             val nuevoEquipo = Equipo(
                 id = "EQ-" + UUID.randomUUID().toString().take(8).uppercase(),
-                codigo = state.codigo.trim().uppercase(),
+                codigo = codigoFinal,
                 tagCliente = state.tagCliente.trim().uppercase(),
                 tipo = state.tipo,
                 cliente = state.cliente.trim(),
@@ -237,17 +309,17 @@ class EquipoViewModel(
                 marca = state.marca.trim(),
                 modelo = state.modelo.trim(),
                 numeroSerie = state.numeroSerie.trim(),
-                potenciaTension = state.potenciaTension.trim(),
+                potenciaTension = if (state.potenciaTension.isNotBlank()) "${state.potenciaTension.trim()} kVA" else "",
                 anio = state.anio.trim(),
                 tensiones = state.tensiones.trim(),
-                tap = state.tap.trim(),
-                conexion = state.conexion.trim(),
+                tap = tapGuardar,
+                conexion = conexionFinal,
                 ultimoEstado = EstadoProtocolo.REGISTRADO_TERRENO,
                 empeorando = false
             )
 
             equipoRepository.insertEquipo(nuevoEquipo)
-            _nuevoEquipoState.value = NuevoEquipoState() // Reset
+            _nuevoEquipoState.value = NuevoEquipoState()
             onSuccess(nuevoEquipo)
         }
     }

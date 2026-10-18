@@ -14,23 +14,37 @@ import com.induztek.protocolos.model.Visita
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
+/**
+ * Repositorio encargado de gestionar visitas técnicas en terreno, apertura, cierre y sincronización (RT-01, RT-08).
+ */
 class VisitaRepository(
     private val visitaDao: VisitaDao
 ) {
+    /** Flujo con todas las visitas registradas. */
     val allVisitas: Flow<List<Visita>> = visitaDao.getAllVisitas().map { entities ->
         entities.map { it.toDomain() }
     }
 
+    /** Flujo con la visita actualmente activa (en curso). */
     val visitaActiva: Flow<Visita?> = visitaDao.getVisitaActiva().map { it?.toDomain() }
 
+    /**
+     * Busca y retorna una visita por su ID.
+     */
     suspend fun getVisitaById(id: String): Visita? {
         return visitaDao.getVisitaById(id)?.toDomain()
     }
 
+    /**
+     * Inserta o actualiza una visita en la base de datos local.
+     */
     suspend fun insertVisita(visita: Visita) {
         visitaDao.insertVisita(VisitaEntity.fromDomain(visita))
     }
 
+    /**
+     * Cierra una visita técnica cambiando su estado a cerrada.
+     */
     suspend fun cerrarVisita(id: String) {
         val entity = visitaDao.getVisitaById(id)
         if (entity != null) {
@@ -38,6 +52,9 @@ class VisitaRepository(
         }
     }
 
+    /**
+     * Puebla la base de datos con visitas iniciales si la tabla está vacía.
+     */
     suspend fun seedInitialDataIfEmpty() {
         if (visitaDao.getCount() == 0) {
             val initialVisitas = listOf(

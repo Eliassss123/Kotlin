@@ -11,6 +11,10 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.induztek.protocolos.model.Instrumento
 
+/**
+ * Entidad de Room que representa la tabla 'instrumentos' en la base de datos local.
+ * Almacena trazabilidad metrológica, números de serie y fechas de vencimiento de calibración.
+ */
 @Entity(tableName = "instrumentos")
 data class InstrumentoEntity(
     @PrimaryKey val id: String,
@@ -21,6 +25,9 @@ data class InstrumentoEntity(
     val vencimientoCalibracion: String,
     val activo: Boolean = true
 ) {
+    /**
+     * Convierte la entidad [InstrumentoEntity] al modelo de dominio [Instrumento].
+     */
     fun toDomain(): Instrumento {
         return Instrumento(
             id = id,
@@ -34,6 +41,9 @@ data class InstrumentoEntity(
     }
 
     companion object {
+        /**
+         * Crea una instancia de [InstrumentoEntity] a partir del modelo de dominio [Instrumento].
+         */
         fun fromDomain(instrumento: Instrumento): InstrumentoEntity {
             return InstrumentoEntity(
                 id = instrumento.id,

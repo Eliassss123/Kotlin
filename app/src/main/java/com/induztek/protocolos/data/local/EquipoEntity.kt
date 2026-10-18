@@ -12,6 +12,10 @@ import androidx.room.PrimaryKey
 import com.induztek.protocolos.model.Equipo
 import com.induztek.protocolos.model.EstadoProtocolo
 
+/**
+ * Entidad de Room que representa la tabla 'equipos' en la base de datos local.
+ * Almacena especificaciones técnicas de placa, ubicación, cliente y estado del último protocolo.
+ */
 @Entity(tableName = "equipos")
 data class EquipoEntity(
     @PrimaryKey val id: String,
@@ -26,10 +30,13 @@ data class EquipoEntity(
     val potenciaTension: String = "",
     val anio: String = "2020",
     val tensiones: String = "23 kV / 380 V",
-    val tap: String = "Tap 3 (Normal)",
+    val tap: String = "3",
     val conexion: String = "Dyn11",
     val ultimoEstado: String
 ) {
+    /**
+     * Convierte la entidad de base de datos [EquipoEntity] al modelo de dominio [Equipo].
+     */
     fun toDomain(): Equipo {
         return Equipo(
             id = id,
@@ -51,6 +58,9 @@ data class EquipoEntity(
     }
 
     companion object {
+        /**
+         * Crea una instancia de [EquipoEntity] a partir del modelo de dominio [Equipo].
+         */
         fun fromDomain(equipo: Equipo): EquipoEntity {
             return EquipoEntity(
                 id = equipo.id,

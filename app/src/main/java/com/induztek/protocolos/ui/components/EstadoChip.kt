@@ -43,6 +43,8 @@ fun EstadoChip(
         color = textColor,
         fontSize = 12.sp,
         fontWeight = FontWeight.Bold,
+        maxLines = 1,
+        softWrap = false,
         modifier = modifier
             .background(color = backgroundColor, shape = RoundedCornerShape(12.dp))
             .padding(horizontal = 10.dp, vertical = 4.dp)
@@ -66,6 +68,8 @@ fun ResultadoChip(
         color = textColor,
         fontSize = 11.sp,
         fontWeight = FontWeight.Bold,
+        maxLines = 1,
+        softWrap = false,
         modifier = modifier
             .background(color = backgroundColor, shape = RoundedCornerShape(8.dp))
             .padding(horizontal = 8.dp, vertical = 3.dp)

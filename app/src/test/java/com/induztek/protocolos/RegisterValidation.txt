@@ -1,0 +1,341 @@
+=============================================================================
+REPOSITORIO DE EJERCICIOS Y CARACTERÍSTICAS FUTURAS - INDUZTEK PROTOCOLOS
+=============================================================================
+Este archivo contiene los fragmentos de código de práctica y características
+futuras guardados dentro de una carpeta oculta del proyecto (ignorada por Git).
+
+---
+
+1. CONTADOR DE CARACTERES EN TIEMPO REAL (OlvideContrasenaScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'OlvideContrasenaScreen.kt', justo después del 'OutlinedTextField' del correo.
+
+-----------------------------------------------------------------------------
+Spacer(modifier = Modifier.height(4.dp))
+if (correo.isNotEmpty()) {
+    Text(
+        text = "Caracteres escritos: ${correo.length}",
+        fontSize = 11.sp,
+        color = Color.Gray,
+        modifier = Modifier.align(Alignment.End)
+    )
+}
+-----------------------------------------------------------------------------
+
+
+2. NOTIFICACIÓN DE BIENVENIDA AL INICIAR SESIÓN (LoginScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'LoginScreen.kt', dentro de 'LaunchedEffect(uiState)' cuando el estado sea Success, antes de 'onLoginSuccess()'.
+
+-----------------------------------------------------------------------------
+android.widget.Toast.makeText(context, "¡Bienvenido $email!", android.widget.Toast.LENGTH_LONG).show()
+-----------------------------------------------------------------------------
+
+
+3. SALUDO DINÁMICO SEGÚN LA HORA DEL DÍA (LoginScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'LoginScreen.kt', dentro de la tarjeta de login, debajo del título.
+
+-----------------------------------------------------------------------------
+val horaActual = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+val saludo = when {
+    horaActual < 12 -> "Buenos días"
+    horaActual < 18 -> "Buenas tardes"
+    else -> "Buenas noches"
+}
+Text(text = "$saludo, por favor inicia sesión", color = Color.White)
+-----------------------------------------------------------------------------
+
+
+4. NOTIFICACIÓN AL GUARDAR PRUEBA (NuevaPruebaScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'NuevaPruebaScreen.kt', dentro de la propiedad 'onClick' del botón de continuar al resumen.
+
+-----------------------------------------------------------------------------
+android.widget.Toast.makeText(context, "Prueba guardada con éxito", android.widget.Toast.LENGTH_SHORT).show()
+-----------------------------------------------------------------------------
+
+
+5. CONTADOR DINÁMICO DE PROTOCOLOS (DetalleActaScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'DetalleActaScreen.kt', dentro de la tarjeta de resumen de protocolos.
+
+-----------------------------------------------------------------------------
+Text(
+    text = "Total de protocolos incluidos en esta visita: ${protocolos.size}",
+    fontSize = 12.sp,
+    color = Color.Gray
+)
+-----------------------------------------------------------------------------
+
+
+6. BOTÓN DE COPIAR RESUMEN CON TOAST (DetalleActaScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'DetalleActaScreen.kt', en las tarjetas de detalle.
+* Código:
+-----------------------------------------------------------------------------
+val context = LocalContext.current
+Button(
+    onClick = {
+        android.widget.Toast.makeText(context, "Resumen del acta copiado al portapapeles", android.widget.Toast.LENGTH_SHORT).show()
+    }
+) {
+    Text("Copiar Resumen")
+}
+-----------------------------------------------------------------------------
+
+
+7. INDICADOR DE PROGRESO DE DÍGITOS - [X/6] (VerificarCodigoScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'VerificarCodigoScreen.kt', debajo del campo de código de 6 dígitos.
+* Código:
+-----------------------------------------------------------------------------
+Text(
+    text = "Dígitos ingresados: ${codigoIngresado.length}/6",
+    fontSize = 11.sp,
+    color = Color.Gray
+)
+-----------------------------------------------------------------------------
+
+
+8. CARACTERÍSTICAS FUTURAS PARA CREAR EQUIPO (CrearEquipoScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlas: Al final del formulario de creación de equipos.
+* Código (Limpiar Todo):
+Button(
+    onClick = { /* viewModel.limpiarFormulario() */ },
+    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+) {
+    Text("Limpiar Todo", color = Color.White)
+}
+
+* Código (Contador de campos rellenados):
+val camposCompletados = listOf(state.codigo, state.tipo, state.cliente, state.ubicacion).count { it.isNotBlank() }
+Text(
+    text = "Campos principales completados: $camposCompletados / 4",
+    fontSize = 12.sp,
+    color = MaterialTheme.colorScheme.onSurfaceVariant
+)
+-----------------------------------------------------------------------------
+
+
+9. CARACTERÍSTICAS FUTURAS PARA PERFIL (PerfilScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlas: En la pantalla de perfil.
+* Código (Cambiar contraseña):
+OutlinedButton(
+    onClick = { /* Navegar a pantalla de cambio de contraseña */ },
+    modifier = Modifier.fillMaxWidth()
+) {
+    Icon(Icons.Default.Lock, contentDescription = null)
+    Spacer(Modifier.width(8.dp))
+    Text("Cambiar Contraseña")
+}
+
+* Código (Indicador de versión):
+Text(
+    text = "Induztek Protocolos v1.0.0 (Build 2026)",
+    fontSize = 12.sp,
+    color = Color.Gray,
+    textAlign = TextAlign.Center,
+    modifier = Modifier.fillMaxWidth()
+)
+-----------------------------------------------------------------------------
+
+
+10. FILTRO RÁPIDO DE VIGENTES VS VENCIDOS (AdminScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'AdminScreen.kt', dentro de la pestaña de instrumentos (caso 0 del when), arriba del LazyColumn.
+* Código:
+-----------------------------------------------------------------------------
+var soloVigentes by remember { mutableStateOf(false) }
+val instrumentosFiltrados = if (soloVigentes) instrumentos.filter { it.estaCalibracionVigente() } else instrumentos
+
+Row(
+    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+    horizontalArrangement = Arrangement.spacedBy(8.dp)
+) {
+    FilterChip(
+        selected = soloVigentes,
+        onClick = { soloVigentes = !soloVigentes },
+        label = { Text("Mostrar solo vigentes") }
+    )
+}
+-----------------------------------------------------------------------------
+
+
+11. RESUMEN ESTADÍSTICO TOTAL (AdminScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'AdminScreen.kt', al inicio de la pestaña de instrumentos.
+* Código:
+-----------------------------------------------------------------------------
+Card(
+    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+    shape = RoundedCornerShape(8.dp)
+) {
+    Row(
+        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceAround
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = "Total Instrumentos", fontSize = 12.sp, color = Color.Gray)
+            Text(text = "${instrumentos.size}", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = AzulPetroleo)
+        }
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = "Personal Registrado", fontSize = 12.sp, color = Color.Gray)
+            Text(text = "${personal.size}", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = NaranjaSeguridad)
+        }
+    }
+}
+-----------------------------------------------------------------------------
+
+
+12. BOTÓN DE "INICIAR NUEVA PRUEBA" DIRECTO (DetalleEquipoScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'DetalleEquipoScreen.kt', dentro del Scaffold como un floatingActionButton (FAB).
+* Código:
+-----------------------------------------------------------------------------
+floatingActionButton = {
+    FloatingActionButton(
+        onClick = { onIniciarVisitaClick() },
+        containerColor = NaranjaSeguridad,
+        contentColor = Color.Black
+    ) {
+        Icon(Icons.Default.Add, contentDescription = "Nueva Prueba")
+    }
+}
+-----------------------------------------------------------------------------
+
+
+13. INDICADOR VISUAL DE SALUD / DEGRADACIÓN (DetalleEquipoScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'DetalleEquipoScreen.kt', dentro de la Tarjeta 1 (Ficha Técnica y Datos de Placa).
+* Código:
+-----------------------------------------------------------------------------
+val nivelSalud = if (eq.empeorando) "En Alerta / Degradado" else "Saludable / Estable"
+val colorSalud = if (eq.empeorando) Color(0xFFD32F2F) else Color(0xFF2E7D32)
+
+Row(
+    modifier = Modifier.fillMaxWidth().background(colorSalud.copy(alpha = 0.1f), RoundedCornerShape(8.dp)).padding(8.dp),
+    verticalAlignment = Alignment.CenterVertically
+) {
+    Text(
+        text = "Estado de Salud: $nivelSalud",
+        fontSize = 12.sp,
+        fontWeight = FontWeight.Bold,
+        color = colorSalud
+    )
+}
+-----------------------------------------------------------------------------
+
+
+14. CONTADOR DINÁMICO DE EQUIPOS (ListaEquiposScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'ListaEquiposScreen.kt', arriba de la lista o debajo de la barra de búsqueda.
+* Código:
+-----------------------------------------------------------------------------
+Text(
+    text = "Mostrando ${equipos.size} equipos en catálogo",
+    fontSize = 12.sp,
+    color = TextoSecundario,
+    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+)
+-----------------------------------------------------------------------------
+
+
+15. FILTRO RÁPIDO DE EQUIPOS CON ALERTA - RT-07 (ListaEquiposScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'ListaEquiposScreen.kt', junto a los chips de clasificación (Primario/Secundario).
+* Código:
+-----------------------------------------------------------------------------
+var soloAlertas by remember { mutableStateOf(false) }
+val equiposFiltrados = if (soloAlertas) equipos.filter { it.empeorando } else equipos
+
+FilterChip(
+    selected = soloAlertas,
+    onClick = { soloAlertas = !soloAlertas },
+    label = { Text("⚠️ Con Alerta RT-07") },
+    colors = FilterChipDefaults.filterChipColors(
+        selectedContainerColor = Color(0xFFFFEBEE),
+        selectedLabelColor = Color(0xFFD32F2F)
+    )
+)
+-----------------------------------------------------------------------------
+
+
+16. BOTÓN DE REFRESCAR CATÁLOGO / PULL-TO-REFRESH (ListaEquiposScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'ListaEquiposScreen.kt', en la barra superior (TopAppBar) o como un IconButton de recarga.
+* Código:
+-----------------------------------------------------------------------------
+IconButton(
+    onClick = {
+        //viewModel.cargarEquipos()
+        android.widget.Toast.makeText(context, "Catálogo actualizado", android.widget.Toast.LENGTH_SHORT).show()
+    }
+) {
+    Icon(Icons.Default.Refresh, contentDescription = "Actualizar", tint = Color.White)
+}
+-----------------------------------------------------------------------------
+
+
+17. MEDIDOR DE FORTALEZA DE CONTRASEÑA (NuevaContrasenaScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'NuevaContrasenaScreen.kt', debajo del campo de nueva contraseña.
+* Código:
+-----------------------------------------------------------------------------
+val fuerza = when {
+    nuevaContrasena.length > 10 && nuevaContrasena.any { it.isDigit() } -> "Fuerte"
+    nuevaContrasena.length > 6 -> "Media"
+    else -> "Débil"
+}
+Text(text = "Nivel de seguridad: $fuerza", fontSize = 11.sp, color = Color.Gray)
+-----------------------------------------------------------------------------
+
+
+18. LISTA INTERACTIVA DE REQUISITOS CUMPLIDOS (NuevaContrasenaScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'NuevaContrasenaScreen.kt', debajo del campo de nueva contraseña.
+* Código:
+-----------------------------------------------------------------------------
+val tieneLongitud = nuevaContrasena.length >= 8
+val tieneNumero = nuevaContrasena.any { it.isDigit() }
+
+Column(modifier = Modifier.padding(vertical = 4.dp)) {
+    Text(text = "${if (tieneLongitud) "✓" else "•"} Mínimo 8 caracteres", fontSize = 11.sp, color = if (tieneLongitud) Color(0xFF2E7D32) else Color.Gray)
+    Text(text = "${if (tieneNumero) "✓" else "•"} Al menos un número", fontSize = 11.sp, color = if (tieneNumero) Color(0xFF2E7D32) else Color.Gray)
+}
+-----------------------------------------------------------------------------
+
+
+19. INDICADOR DE COINCIDENCIA EN TIEMPO REAL (NuevaContrasenaScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'NuevaContrasenaScreen.kt', debajo del campo de confirmar contraseña.
+* Código:
+-----------------------------------------------------------------------------
+if (confirmarContrasena.isNotBlank()) {
+    val coinciden = nuevaContrasena == confirmarContrasena
+    Text(
+        text = if (coinciden) "✓ Las contraseñas coinciden" else "⚠ Las contraseñas no coinciden",
+        fontSize = 11.sp,
+        color = if (coinciden) Color(0xFF2E7D32) else Color(0xFFD32F2F)
+    )
+}
+-----------------------------------------------------------------------------
+
+
+20. BOTÓN DE GENERADOR DE CONTRASEÑA SEGURA (NuevaContrasenaScreen.kt)
+-----------------------------------------------------------------------------
+* Dónde pegarlo: En 'NuevaContrasenaScreen.kt', junto a la etiqueta del campo de nueva contraseña.
+* Código:
+-----------------------------------------------------------------------------
+TextButton(
+    onClick = {
+        val passSugerida = "Induztek2026!#"
+        viewModel.onNuevaContrasenaChanged(passSugerida)
+        viewModel.onConfirmarContrasenaChanged(passSugerida)
+    }
+) {
+    Text("Generar contraseña segura", fontSize = 11.sp, color = AzulPetroleoLight)
+}
+-----------------------------------------------------------------------------

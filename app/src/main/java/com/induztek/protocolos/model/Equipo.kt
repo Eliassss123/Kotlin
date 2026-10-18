@@ -30,7 +30,7 @@ data class Equipo(
     val potenciaTension: String = "",
     val anio: String = "2020",
     val tensiones: String = "23 kV / 380 V",
-    val tap: String = "Tap 3 (Normal)",
+    val tap: String = "3",
     val conexion: String = "Dyn11",
     // Estado del último protocolo registrado
     val ultimoEstado: EstadoProtocolo = EstadoProtocolo.REGISTRADO_TERRENO,
@@ -39,4 +39,16 @@ data class Equipo(
 ) {
     val clasificacion: ClasificacionEquipo
         get() = TipoEquipo.fromNombre(tipo).clasificacion
+
+    // Calcula la etiqueta Nominal en la app para la posición de Tap
+    fun getTapEtiqueta(): String {
+        val t = tap.trim()
+        val num = t.filter { it.isDigit() }.toIntOrNull() ?: t.toIntOrNull()
+        return when {
+            num == 3 -> "$num (Nominal)"
+            num != null -> "$num"
+            t.isNotBlank() && t != "N/A" -> t
+            else -> "N/A"
+        }
+    }
 }

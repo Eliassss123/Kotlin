@@ -21,39 +21,59 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * Repositorio encargado de gestionar protocolos de prueba, formalización (RN-04) y control de unicidad (RN-02).
+ */
 class ProtocoloRepository(
     private val protocoloDao: ProtocoloDao
 ) {
+    /** Flujo con todos los protocolos registrados. */
     val allProtocolos: Flow<List<Protocolo>> = protocoloDao.getAllProtocolos().map { entities ->
         entities.map { it.toDomain() }
     }
 
+    /**
+     * Obtiene un flujo con los protocolos asociados a una visita.
+     */
     fun getProtocolosByVisita(visitaId: String): Flow<List<Protocolo>> {
         return protocoloDao.getProtocolosByVisita(visitaId).map { entities ->
             entities.map { it.toDomain() }
         }
     }
 
+    /**
+     * Obtiene un flujo con los protocolos de un equipo.
+     */
     fun getProtocolosByEquipo(equipoCodigo: String): Flow<List<Protocolo>> {
         return protocoloDao.getProtocolosByEquipo(equipoCodigo).map { entities ->
             entities.map { it.toDomain() }
         }
     }
 
+    /**
+     * Busca y retorna un protocolo por su ID.
+     */
     suspend fun getProtocoloById(id: String): Protocolo? {
         return protocoloDao.getProtocoloById(id)?.toDomain()
     }
 
-    // RN-02, Aclaración 5: Bloquear segundo protocolo del mismo equipo en la visita
+    /**
+     * RN-02, Aclaración 5: Valida si ya existe un protocolo para el equipo en la visita dada.
+     */
     suspend fun existeProtocoloParaEquipoEnVisita(visitaId: String, equipoCodigo: String): Boolean {
         return protocoloDao.getProtocoloByVisitaYEquipo(visitaId, equipoCodigo) != null
     }
 
+    /**
+     * Inserta o actualiza un protocolo.
+     */
     suspend fun insertProtocolo(protocolo: Protocolo) {
         protocoloDao.insertProtocolo(ProtocoloEntity.fromDomain(protocolo))
     }
 
-    // RN-04, RN-16, RT-09: Formalización manual por Ingeniero (P-02) o Jefe Técnico (P-03)
+    /**
+     * RN-04, RN-16, RT-09: Formaliza un protocolo registrando el usuario formalizador y fecha actual.
+     */
     suspend fun formalizarProtocolo(id: String, usuarioFormalizador: String, nuevoEstado: EstadoProtocolo) {
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
         val fecha = sdf.format(Date())
@@ -65,6 +85,9 @@ class ProtocoloRepository(
         )
     }
 
+    /**
+     * Puebla la base de datos con protocolos iniciales si la tabla está vacía.
+     */
     suspend fun seedInitialDataIfEmpty() {
         if (protocoloDao.getCount() == 0) {
             val initialProtocolos = listOf(

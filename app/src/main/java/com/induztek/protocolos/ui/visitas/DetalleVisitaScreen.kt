@@ -261,6 +261,9 @@ fun DetalleVisitaScreen(
                     }
                 } else {
                     LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         items(protocolos) { prot ->
@@ -438,8 +441,10 @@ fun ProtocoloItemCard(
                     text = "${protocolo.codigoProtocolo} · ${protocolo.equipoCodigo}",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
-                    color = AzulPetroleo
+                    color = AzulPetroleo,
+                    modifier = Modifier.weight(1f)
                 )
+                Spacer(modifier = Modifier.width(6.dp))
                 ResultadoChip(resultado = protocolo.resultadoGlobal)
             }
 

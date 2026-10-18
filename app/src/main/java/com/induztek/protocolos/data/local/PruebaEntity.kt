@@ -18,6 +18,10 @@ import com.induztek.protocolos.model.Medicion
 import com.induztek.protocolos.model.Prueba
 import com.induztek.protocolos.model.ResultadoPrueba
 
+/**
+ * Entidad de Room que representa la tabla 'pruebas' en la base de datos local.
+ * Almacena los resultados de cada prueba individual, instrumentos utilizados, mediciones serializadas y variaciones históricas.
+ */
 @Entity(tableName = "pruebas")
 data class PruebaEntity(
     @PrimaryKey val id: String,
@@ -42,6 +46,9 @@ data class PruebaEntity(
     val variacionHistoricaPorcentaje: Double? = null,
     val superaVariacion25: Boolean = false
 ) {
+    /**
+     * Convierte la entidad [PruebaEntity] al modelo de dominio [Prueba], deserializando las mediciones desde JSON.
+     */
     fun toDomain(): Prueba {
         val listType = object : TypeToken<List<Medicion>>() {}.type
         val medicionesList: List<Medicion> = try {
@@ -76,6 +83,9 @@ data class PruebaEntity(
     }
 
     companion object {
+        /**
+         * Crea una instancia de [PruebaEntity] a partir del modelo de dominio [Prueba], serializando las mediciones a JSON.
+         */
         fun fromDomain(prueba: Prueba): PruebaEntity {
             return PruebaEntity(
                 id = prueba.id,

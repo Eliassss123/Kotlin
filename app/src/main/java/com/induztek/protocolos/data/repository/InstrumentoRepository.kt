@@ -12,29 +12,46 @@ import com.induztek.protocolos.model.Instrumento
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
+/**
+ * Repositorio para la gestión de instrumentos de prueba, control de calibración y vigencia metrológica (RN-11, RT-11).
+ */
 class InstrumentoRepository(
     private val instrumentoDao: InstrumentoDao
 ) {
+    /** Flujo con todos los instrumentos registrados. */
     val allInstrumentos: Flow<List<Instrumento>> = instrumentoDao.getAllInstrumentos().map { entities ->
         entities.map { it.toDomain() }
     }
 
+    /** Flujo con los instrumentos activos y disponibles para ensayos. */
     val instrumentosActivos: Flow<List<Instrumento>> = instrumentoDao.getInstrumentosActivos().map { entities ->
         entities.map { it.toDomain() }
     }
 
+    /**
+     * Busca y retorna un instrumento por su ID.
+     */
     suspend fun getInstrumentoById(id: String): Instrumento? {
         return instrumentoDao.getInstrumentoById(id)?.toDomain()
     }
 
+    /**
+     * Inserta o actualiza un instrumento en la base de datos.
+     */
     suspend fun insertInstrumento(instrumento: Instrumento) {
         instrumentoDao.insertInstrumento(InstrumentoEntity.fromDomain(instrumento))
     }
 
+    /**
+     * Actualiza la fecha de vencimiento de calibración de un instrumento (RT-11).
+     */
     suspend fun actualizarCalibracion(id: String, nuevoVencimiento: String) {
         instrumentoDao.actualizarCalibracion(id, nuevoVencimiento)
     }
 
+    /**
+     * Puebla la base de datos con instrumentos iniciales si la tabla está vacía.
+     */
     suspend fun seedInitialDataIfEmpty() {
         if (instrumentoDao.getCount() == 0) {
             val initialInstrumentos = listOf(
@@ -80,7 +97,7 @@ class InstrumentoRepository(
                     marca = "HVA",
                     modelo = "HVA28 VLF Test Set",
                     numeroSerie = "HVA-2022-441",
-                    vencimientoCalibracion = "2026-08-01", // Vencido para demostración de alerta RN-11
+                    vencimientoCalibracion = "2026-08-01",
                     activo = true
                 )
             )
