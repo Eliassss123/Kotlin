@@ -65,6 +65,10 @@ class ProtocoloRepository(
         )
     }
 
+    suspend fun actualizarArchivoBlob(id: String, blob: ByteArray?) {
+        protocoloDao.actualizarArchivoBlob(id, blob)
+    }
+
     suspend fun seedInitialDataIfEmpty() {
         if (protocoloDao.getCount() == 0) {
             val initialProtocolos = listOf(

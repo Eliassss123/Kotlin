@@ -6,10 +6,12 @@
 
 package com.induztek.protocolos.ui.login
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,10 +19,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Pin
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -41,6 +47,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -49,6 +59,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.induztek.protocolos.ui.theme.AzulPetroleo
 import com.induztek.protocolos.ui.theme.NaranjaSeguridad
+import com.induztek.protocolos.ui.theme.TextoPrincipal
+import com.induztek.protocolos.ui.theme.TextoSecundario
+import com.induztek.protocolos.ui.theme.induztekTextFieldColors
 import com.induztek.protocolos.viewmodel.LoginViewModel
 import com.induztek.protocolos.viewmodel.RecuperacionUiState
 
@@ -64,6 +77,9 @@ fun VerificarCodigoScreen(
     val recuperacionState by viewModel.recuperacionState.collectAsState()
     val mostrarDialog by viewModel.mostrarDialogCodigo.collectAsState()
     val codigoGenerado by viewModel.codigoGenerado.collectAsState()
+
+    val context = LocalContext.current
+    val clipboardManager = LocalClipboardManager.current
 
     // El botón solo se habilita con exactamente 6 dígitos.
     val canSubmit = codigoIngresado.length == 6
@@ -140,17 +156,47 @@ fun VerificarCodigoScreen(
 
                 OutlinedTextField(
                     value = codigoIngresado,
-                    // Limita la entrada: solo acepta el texto nuevo si tiene 6 caracteres o menos.
-                    onValueChange = {
-                        if (it.length <= 6) {
-                            viewModel.onCodigoIngresadoChanged(it)
-                        }
+                    onValueChange = { input ->
+                        val digits = input.filter { it.isDigit() }.take(6)
+                        viewModel.onCodigoIngresadoChanged(digits)
                     },
                     label = { Text("Código de 6 dígitos") },
+                    textStyle = TextStyle(color = TextoPrincipal, fontSize = 20.sp, fontWeight = FontWeight.Bold, letterSpacing = 3.sp),
+                    colors = induztekTextFieldColors(),
+                    trailingIcon = {
+                        IconButton(
+                            onClick = {
+                                val clipText = clipboardManager.getText()?.text?.trim()
+                                if (!clipText.isNullOrBlank()) {
+                                    val digits = clipText.filter { it.isDigit() }.take(6)
+                                    if (digits.isNotEmpty()) {
+                                        viewModel.onCodigoIngresadoChanged(digits)
+                                        Toast.makeText(context, "Código pegado: $digits", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        Toast.makeText(context, "El portapapeles no contiene dígitos", Toast.LENGTH_SHORT).show()
+                                    }
+                                } else {
+                                    Toast.makeText(context, "El portapapeles está vacío", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ContentPaste,
+                                contentDescription = "Pegar código copiado",
+                                tint = AzulPetroleo
+                            )
+                        }
+                    },
+                    supportingText = {
+                        Text(
+                            text = if (codigoIngresado.length == 6) "✓ Código completo (6 dígitos)" else "${codigoIngresado.length}/6 dígitos numéricos (o toca el ícono para pegar)",
+                            color = if (codigoIngresado.length == 6) Color(0xFF2E7D32) else Color.Gray,
+                            fontSize = 12.sp
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
-                        // Abre el teclado numérico.
                         keyboardType = KeyboardType.Number,
                         imeAction = ImeAction.Done
                     )
@@ -228,11 +274,53 @@ fun VerificarCodigoScreen(
             text = {
                 Column {
                     Text(
-                        text = "Simulación: no se envía correo real. Tu nuevo código es: $codigoGenerado",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.Black
+                        text = "Simulación: tu nuevo código de verificación es:",
+                        fontSize = 13.sp,
+                        color = TextoSecundario
                     )
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF1F5F9)),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 14.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            SelectionContainer {
+                                Text(
+                                    text = codigoGenerado ?: "",
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = AzulPetroleo,
+                                    letterSpacing = 4.sp
+                                )
+                            }
+                            Button(
+                                onClick = {
+                                    clipboardManager.setText(AnnotatedString(codigoGenerado ?: ""))
+                                    Toast.makeText(context, "Código ${codigoGenerado ?: ""} copiado al portapapeles", Toast.LENGTH_SHORT).show()
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = AzulPetroleo),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                shape = RoundedCornerShape(6.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ContentCopy,
+                                    contentDescription = "Copiar",
+                                    modifier = Modifier.size(16.dp),
+                                    tint = Color.White
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Copiar", fontSize = 12.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
                 }
             },
             confirmButton = {

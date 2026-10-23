@@ -54,6 +54,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -64,6 +65,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -74,6 +76,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.induztek.protocolos.ui.theme.AzulPetroleo
 import com.induztek.protocolos.ui.theme.NaranjaSeguridad
+import com.induztek.protocolos.ui.theme.TextoPrincipal
+import com.induztek.protocolos.ui.theme.TextoSecundario
+import com.induztek.protocolos.ui.theme.induztekTextFieldColors
 import com.induztek.protocolos.viewmodel.LoginUiState
 import com.induztek.protocolos.viewmodel.LoginViewModel
 
@@ -206,14 +211,21 @@ fun LoginScreen(
                     value = email,
                     onValueChange = { viewModel.onEmailChanged(it) },
                     label = { Text("Correo Electrónico") },
+                    textStyle = TextStyle(color = TextoPrincipal, fontSize = 15.sp),
+                    colors = induztekTextFieldColors(),
                     leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
                     // isError pinta el campo en rojo. supportingText es el texto de ayuda bajo el campo (aquí, el
                     //   mensaje de error).
                     isError = !isEmailValid,
                     supportingText = {
                         if (!isEmailValid) {
+                            val errorMsg = when {
+                                !email.contains("@") -> "Falta el '@' en el correo (ej: usuario@induztek.cl)"
+                                !email.contains(".") || email.endsWith(".") -> "Falta el dominio (ej: .cl o .com)"
+                                else -> "Ingresa un correo válido"
+                            }
                             Text(
-                                text = "Ingresa un correo válido",
+                                text = errorMsg,
                                 color = MaterialTheme.colorScheme.error,
                                 fontSize = 12.sp
                             )
@@ -237,6 +249,8 @@ fun LoginScreen(
                     value = password,
                     onValueChange = { viewModel.onPasswordChanged(it) },
                     label = { Text("Contraseña") },
+                    textStyle = TextStyle(color = TextoPrincipal, fontSize = 15.sp),
+                    colors = induztekTextFieldColors(),
                     leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                     // Ícono a la DERECHA (leadingIcon = a la izquierda). Es un botón que alterna isPasswordVisible
                     //   (ojo abierto/cerrado).
@@ -276,23 +290,20 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Texto tocable para recuperar la contraseña.
-                // ¿Olvidaste tu contraseña?
-                Text(
-                    text = "¿Olvidaste tu contraseña?",
-                    color = AzulPetroleo,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        // clickable vuelve tocable cualquier elemento (como onclick). Al tocar: prepara el flujo en
-                        //   el ViewModel y avisa a NavGraph para navegar.
-                        .clickable {
-                            viewModel.prepararRecuperacion()
-                            onOlvideContrasenaClick()
-                        }
-                        .padding(vertical = 4.dp)
-                )
+                TextButton(
+                    onClick = {
+                        viewModel.prepararRecuperacion()
+                        onOlvideContrasenaClick()
+                    },
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text(
+                        text = "¿Olvidaste tu contraseña?",
+                        color = AzulPetroleo,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 

@@ -9,6 +9,7 @@
 
 package com.induztek.protocolos.data.local
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.Gson
@@ -40,7 +41,9 @@ data class PruebaEntity(
     val medicionesJson: String,
     val observaciones: String,
     val variacionHistoricaPorcentaje: Double? = null,
-    val superaVariacion25: Boolean = false
+    val superaVariacion25: Boolean = false,
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
+    val archivoBlob: ByteArray? = null
 ) {
     fun toDomain(): Prueba {
         val listType = object : TypeToken<List<Medicion>>() {}.type
@@ -71,7 +74,8 @@ data class PruebaEntity(
             mediciones = medicionesList,
             observaciones = observaciones,
             variacionHistoricaPorcentaje = variacionHistoricaPorcentaje,
-            superaVariacion25 = superaVariacion25
+            superaVariacion25 = superaVariacion25,
+            archivoBlob = archivoBlob
         )
     }
 
@@ -98,7 +102,8 @@ data class PruebaEntity(
                 medicionesJson = Gson().toJson(prueba.mediciones),
                 observaciones = prueba.observaciones,
                 variacionHistoricaPorcentaje = prueba.variacionHistoricaPorcentaje,
-                superaVariacion25 = prueba.superaVariacion25
+                superaVariacion25 = prueba.superaVariacion25,
+                archivoBlob = prueba.archivoBlob
             )
         }
     }

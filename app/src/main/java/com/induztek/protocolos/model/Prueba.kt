@@ -33,7 +33,8 @@ data class Prueba(
     val mediciones: List<Medicion> = emptyList(),
     val observaciones: String = "",
     val variacionHistoricaPorcentaje: Double? = null,
-    val superaVariacion25: Boolean = false
+    val superaVariacion25: Boolean = false,
+    val archivoBlob: ByteArray? = null
 ) {
     // Compatibilidad con vistas previas
     val estado: EstadoProtocolo

@@ -217,12 +217,20 @@ class EquipoViewModel(
             _nuevoEquipoState.value = state.copy(errorValidacion = "El código o TAG interno es obligatorio")
             return
         }
+        if (!state.codigo.trim().matches("^[a-zA-Z0-9\\-]+$".toRegex())) {
+            _nuevoEquipoState.value = state.copy(errorValidacion = "El TAG debe ser alfanumérico sin caracteres especiales (ej: TRF-01)")
+            return
+        }
         if (state.cliente.isBlank()) {
             _nuevoEquipoState.value = state.copy(errorValidacion = "El cliente es obligatorio")
             return
         }
         if (state.ubicacion.isBlank()) {
             _nuevoEquipoState.value = state.copy(errorValidacion = "La instalación/ubicación es obligatoria")
+            return
+        }
+        if (state.anio.isNotBlank() && !state.anio.trim().matches("^\\d{4}$".toRegex())) {
+            _nuevoEquipoState.value = state.copy(errorValidacion = "El año de fabricación debe tener exactamente 4 dígitos numéricos (ej: 2022)")
             return
         }
 

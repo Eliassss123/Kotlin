@@ -7,6 +7,7 @@
 
 package com.induztek.protocolos.data.local
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.induztek.protocolos.model.PerfilUsuario
@@ -22,7 +23,9 @@ data class UsuarioEntity(
     val empresaCliente: String? = null,
     val activo: Boolean = true,
     val fotoPerfil: String? = null,
-    val biografia: String? = null
+    val biografia: String? = null,
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
+    val archivoBlob: ByteArray? = null
 ) {
     fun getPerfil(): PerfilUsuario = PerfilUsuario.fromCodigo(perfilCodigo)
 }

@@ -44,6 +44,9 @@ interface ProtocoloDao {
     @Query("UPDATE protocolos SET estado = :nuevoEstado, formalizadoPor = :formalizadoPor, fechaFormalizacion = :fechaFormalizacion WHERE id = :id")
     suspend fun formalizarProtocolo(id: String, nuevoEstado: String, formalizadoPor: String, fechaFormalizacion: String)
 
+    @Query("UPDATE protocolos SET archivoBlob = :blob WHERE id = :id")
+    suspend fun actualizarArchivoBlob(id: String, blob: ByteArray?)
+
     @Query("SELECT COUNT(*) FROM protocolos")
     suspend fun getCount(): Int
 }

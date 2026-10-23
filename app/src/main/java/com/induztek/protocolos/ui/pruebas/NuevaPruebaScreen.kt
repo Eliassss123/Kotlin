@@ -23,7 +23,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
@@ -61,12 +64,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.TextStyle
 import com.induztek.protocolos.model.EstadoProtocolo
 import com.induztek.protocolos.ui.components.InduztekTopBar
 import com.induztek.protocolos.ui.theme.AzulPetroleo
 import com.induztek.protocolos.ui.theme.FondoApp
 import com.induztek.protocolos.ui.theme.NaranjaSeguridad
+import com.induztek.protocolos.ui.theme.TextoPrincipal
 import com.induztek.protocolos.ui.theme.TextoSecundario
+import com.induztek.protocolos.ui.theme.induztekTextFieldColors
 import com.induztek.protocolos.viewmodel.PruebaViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -132,6 +138,8 @@ fun NuevaPruebaScreen(
                         value = state.ordenTrabajo,
                         onValueChange = { viewModel.onOrdenTrabajoChanged(it) },
                         label = { Text("Orden de Trabajo (OT)") },
+                        textStyle = TextStyle(color = TextoPrincipal, fontSize = 15.sp),
+                        colors = induztekTextFieldColors(),
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -148,6 +156,8 @@ fun NuevaPruebaScreen(
                             onValueChange = { viewModel.onEquipoCodigoChanged(it) },
                             readOnly = false,
                             label = { Text("Código de Equipo / TAG") },
+                            textStyle = TextStyle(color = TextoPrincipal, fontSize = 15.sp),
+                            colors = induztekTextFieldColors(),
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownEquipoExpanded) },
                             modifier = Modifier
                                 .menuAnchor()
@@ -181,6 +191,8 @@ fun NuevaPruebaScreen(
                             onValueChange = {},
                             readOnly = true,
                             label = { Text("Tipo de Prueba") },
+                            textStyle = TextStyle(color = TextoPrincipal, fontSize = 15.sp),
+                            colors = induztekTextFieldColors(),
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownTipoExpanded) },
                             modifier = Modifier
                                 .menuAnchor()
@@ -208,6 +220,8 @@ fun NuevaPruebaScreen(
                         value = state.ubicacion,
                         onValueChange = { viewModel.onUbicacionChanged(it) },
                         label = { Text("Cliente / Instalación") },
+                        textStyle = TextStyle(color = TextoPrincipal, fontSize = 15.sp),
+                        colors = induztekTextFieldColors(),
                         modifier = Modifier.fillMaxWidth()
                     )
 
@@ -217,6 +231,8 @@ fun NuevaPruebaScreen(
                         value = state.tecnico,
                         onValueChange = { viewModel.onTecnicoChanged(it) },
                         label = { Text("Técnico / Responsable de Terreno") },
+                        textStyle = TextStyle(color = TextoPrincipal, fontSize = 15.sp),
+                        colors = induztekTextFieldColors(),
                         modifier = Modifier.fillMaxWidth()
                     )
 
@@ -226,6 +242,8 @@ fun NuevaPruebaScreen(
                         value = state.fechaHora,
                         onValueChange = { viewModel.onFechaHoraChanged(it) },
                         label = { Text("Fecha y Hora") },
+                        textStyle = TextStyle(color = TextoPrincipal, fontSize = 15.sp),
+                        colors = induztekTextFieldColors(),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -294,17 +312,37 @@ fun NuevaPruebaScreen(
                     Row(modifier = Modifier.fillMaxWidth()) {
                         OutlinedTextField(
                             value = state.temperaturaAmbiente,
-                            onValueChange = { viewModel.onTemperaturaAmbienteChanged(it) },
-                            label = { Text("Temp. Ambiente") },
+                            onValueChange = { input ->
+                                val clean = input.filter { it.isDigit() || it == '.' || it == ',' || it == '-' }
+                                if (clean.count { it == '.' || it == ',' } <= 1) {
+                                    viewModel.onTemperaturaAmbienteChanged(clean)
+                                }
+                            },
+                            label = { Text("Temp. (°C)") },
+                            textStyle = TextStyle(color = TextoPrincipal, fontSize = 15.sp),
+                            colors = induztekTextFieldColors(),
                             leadingIcon = { Icon(Icons.Default.Thermostat, contentDescription = null) },
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Decimal,
+                                imeAction = ImeAction.Next
+                            ),
                             modifier = Modifier.weight(1f),
                             singleLine = true
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         OutlinedTextField(
                             value = state.humedad,
-                            onValueChange = { viewModel.onHumedadChanged(it) },
+                            onValueChange = { input ->
+                                val digitsOnly = input.filter { it.isDigit() }.take(3)
+                                viewModel.onHumedadChanged(digitsOnly)
+                            },
                             label = { Text("Humedad (%)") },
+                            textStyle = TextStyle(color = TextoPrincipal, fontSize = 15.sp),
+                            colors = induztekTextFieldColors(),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Number,
+                                imeAction = ImeAction.Next
+                            ),
                             modifier = Modifier.weight(1f),
                             singleLine = true
                         )
@@ -385,14 +423,24 @@ fun NuevaPruebaScreen(
                             value = nuevoCampo,
                             onValueChange = { nuevoCampo = it },
                             label = { Text("Parámetro/Punto") },
+                            textStyle = TextStyle(color = TextoPrincipal, fontSize = 15.sp),
+                            colors = induztekTextFieldColors(),
                             modifier = Modifier.weight(1f),
                             singleLine = true
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         OutlinedTextField(
                             value = nuevoValor,
-                            onValueChange = { nuevoValor = it },
+                            onValueChange = { input ->
+                                val clean = input.filter { it.isDigit() || it == '.' || it == ',' || it == '-' }
+                                if (clean.count { it == '.' || it == ',' } <= 1) {
+                                    nuevoValor = clean
+                                }
+                            },
                             label = { Text("Valor Medido") },
+                            textStyle = TextStyle(color = TextoPrincipal, fontSize = 15.sp),
+                            colors = induztekTextFieldColors(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             modifier = Modifier.weight(1f),
                             singleLine = true
                         )
@@ -457,6 +505,8 @@ fun NuevaPruebaScreen(
                         value = state.observaciones,
                         onValueChange = { viewModel.onObservacionesChanged(it) },
                         label = { Text("Observaciones y recomendaciones de campo") },
+                        textStyle = TextStyle(color = TextoPrincipal, fontSize = 14.sp),
+                        colors = induztekTextFieldColors(),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(100.dp),

@@ -72,12 +72,15 @@ import com.induztek.protocolos.model.EstadoPrueba
 import com.induztek.protocolos.model.Medicion
 import com.induztek.protocolos.model.MomentoMedicion
 import com.induztek.protocolos.model.ResultadoPrueba
+import androidx.compose.ui.text.TextStyle
 import com.induztek.protocolos.ui.components.InduztekTopBar
 import com.induztek.protocolos.ui.components.ResultadoChip
 import com.induztek.protocolos.ui.theme.AzulPetroleo
 import com.induztek.protocolos.ui.theme.FondoApp
 import com.induztek.protocolos.ui.theme.NaranjaSeguridad
+import com.induztek.protocolos.ui.theme.TextoPrincipal
 import com.induztek.protocolos.ui.theme.TextoSecundario
+import com.induztek.protocolos.ui.theme.induztekTextFieldColors
 import com.induztek.protocolos.viewmodel.ProtocoloViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -165,6 +168,8 @@ fun CapturaPruebaScreen(
                                 onValueChange = { viewModel.onMotivoNoRealizadaChanged(it) },
                                 label = { Text("Motivo de No Realización * (Obligatorio)") },
                                 placeholder = { Text("P. ej: Equipo no energizado, falta de accesibilidad, clima adverso...") },
+                                textStyle = TextStyle(color = TextoPrincipal, fontSize = 14.sp),
+                                colors = induztekTextFieldColors(),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(90.dp),
@@ -205,6 +210,8 @@ fun CapturaPruebaScreen(
                                     readOnly = true,
                                     label = { Text("Instrumento Utilizado *") },
                                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownInstrumentoExpanded) },
+                                    textStyle = TextStyle(color = TextoPrincipal, fontSize = 14.sp),
+                                    colors = induztekTextFieldColors(),
                                     modifier = Modifier
                                         .menuAnchor()
                                         .fillMaxWidth()
@@ -347,11 +354,17 @@ fun CapturaPruebaScreen(
                                         OutlinedTextField(
                                             value = valorTexto,
                                             onValueChange = { nuevo ->
-                                                valorTexto = nuevo
-                                                val num = nuevo.replace(",", ".").toDoubleOrNull()
-                                                viewModel.actualizarMedicion(index, num, med.unidad, momentoActual)
+                                                val clean = nuevo.filter { it.isDigit() || it == '.' || it == ',' || it == '-' }
+                                                val dotCount = clean.count { it == '.' || it == ',' }
+                                                if (dotCount <= 1 && (!clean.contains('-') || (clean.startsWith('-') && clean.count { it == '-' } == 1))) {
+                                                    valorTexto = clean
+                                                    val num = clean.replace(",", ".").toDoubleOrNull()
+                                                    viewModel.actualizarMedicion(index, num, med.unidad, momentoActual)
+                                                }
                                             },
                                             label = { Text("Valor numérico") },
+                                            textStyle = TextStyle(color = TextoPrincipal, fontSize = 15.sp, fontWeight = FontWeight.SemiBold),
+                                            colors = induztekTextFieldColors(),
                                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                                             modifier = Modifier.weight(1.5f),
                                             singleLine = true
@@ -370,6 +383,8 @@ fun CapturaPruebaScreen(
                                                 onValueChange = {},
                                                 readOnly = true,
                                                 label = { Text("Unidad") },
+                                                textStyle = TextStyle(color = TextoPrincipal, fontSize = 15.sp, fontWeight = FontWeight.SemiBold),
+                                                colors = induztekTextFieldColors(),
                                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownUnidadExpanded) },
                                                 modifier = Modifier.menuAnchor()
                                             )
@@ -499,6 +514,8 @@ fun CapturaPruebaScreen(
                         value = s.observaciones,
                         onValueChange = { viewModel.onObservacionesPruebaChanged(it) },
                         label = { Text("Observaciones técnicas y diagnóstico de prueba") },
+                        textStyle = TextStyle(color = TextoPrincipal, fontSize = 14.sp),
+                        colors = induztekTextFieldColors(),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(90.dp),

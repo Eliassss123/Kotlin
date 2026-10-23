@@ -37,7 +37,8 @@ data class Protocolo(
     val syncStatus: SyncStatus = SyncStatus.PENDIENTE,
     val observaciones: String = "",
     val pruebas: List<Prueba> = emptyList(),
-    val mediciones: List<Medicion> = emptyList()
+    val mediciones: List<Medicion> = emptyList(),
+    val archivoBlob: ByteArray? = null
 ) {
     val esInmutable: Boolean
         get() = estado == EstadoProtocolo.FORMALIZADO

@@ -8,10 +8,12 @@
 
 package com.induztek.protocolos.ui.login
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,10 +21,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.LockReset
 import androidx.compose.material3.AlertDialog
@@ -43,6 +48,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -51,6 +60,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.induztek.protocolos.ui.theme.AzulPetroleo
 import com.induztek.protocolos.ui.theme.NaranjaSeguridad
+import com.induztek.protocolos.ui.theme.TextoPrincipal
+import com.induztek.protocolos.ui.theme.TextoSecundario
+import com.induztek.protocolos.ui.theme.induztekTextFieldColors
 import com.induztek.protocolos.viewmodel.LoginViewModel
 import com.induztek.protocolos.viewmodel.RecuperacionUiState
 
@@ -66,6 +78,9 @@ fun OlvideContrasenaScreen(
     val recuperacionState by viewModel.recuperacionState.collectAsState()
     val mostrarDialog by viewModel.mostrarDialogCodigo.collectAsState()
     val codigoGenerado by viewModel.codigoGenerado.collectAsState()
+
+    val context = LocalContext.current
+    val clipboardManager = LocalClipboardManager.current
 
     val isEmailValid = correo.isEmpty() || viewModel.validarCorreo(correo)
     // Solo se puede enviar si el correo tiene formato válido.
@@ -141,12 +156,19 @@ fun OlvideContrasenaScreen(
                     value = correo,
                     onValueChange = { viewModel.onCorreoRecuperacionChanged(it) },
                     label = { Text("Correo Electrónico") },
+                    textStyle = TextStyle(color = TextoPrincipal, fontSize = 15.sp),
+                    colors = induztekTextFieldColors(),
                     leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
                     isError = !isEmailValid,
                     supportingText = {
                         if (!isEmailValid) {
+                            val errorMsg = when {
+                                !correo.contains("@") -> "Falta el '@' en el correo (ej: usuario@induztek.cl)"
+                                !correo.contains(".") || correo.endsWith(".") -> "Falta el dominio (ej: .cl o .com)"
+                                else -> "Ingresa un correo válido"
+                            }
                             Text(
-                                text = "Ingresa un correo válido",
+                                text = errorMsg,
                                 color = MaterialTheme.colorScheme.error,
                                 fontSize = 12.sp
                             )
@@ -225,15 +247,57 @@ fun OlvideContrasenaScreen(
             text = {
                 Column {
                     Text(
-                        // '$codigoGenerado' dentro del texto inserta el valor de la variable (string template).
-                        text = "Simulación: no se envía correo real. Tu código es: $codigoGenerado",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.Black
+                        text = "Simulación: no se envía correo real. Tu código de verificación es:",
+                        fontSize = 13.sp,
+                        color = TextoSecundario
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF1F5F9)),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 14.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            SelectionContainer {
+                                Text(
+                                    text = codigoGenerado ?: "",
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = AzulPetroleo,
+                                    letterSpacing = 4.sp
+                                )
+                            }
+                            Button(
+                                onClick = {
+                                    clipboardManager.setText(AnnotatedString(codigoGenerado ?: ""))
+                                    Toast.makeText(context, "Código ${codigoGenerado ?: ""} copiado al portapapeles", Toast.LENGTH_SHORT).show()
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = AzulPetroleo),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                shape = RoundedCornerShape(6.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ContentCopy,
+                                    contentDescription = "Copiar",
+                                    modifier = Modifier.size(16.dp),
+                                    tint = Color.White
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Copiar", fontSize = 12.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = "Usa este código en la siguiente pantalla para restablecer tu contraseña.",
+                        text = "Copia este código y úsalo en la siguiente pantalla para restablecer tu contraseña.",
                         fontSize = 12.sp,
                         color = Color.Gray
                     )

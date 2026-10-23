@@ -34,6 +34,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -124,8 +128,14 @@ fun CrearEquipoScreen(
 
                     OutlinedTextField(
                         value = state.codigo,
-                        onValueChange = { viewModel.onCodigoChanged(it) },
+                        onValueChange = { input ->
+                            val clean = input.filter { it.isLetterOrDigit() || it == '-' }.uppercase()
+                            viewModel.onCodigoChanged(clean)
+                        },
                         label = { Text("Código Interno / TAG Induztek *") },
+                        supportingText = {
+                            Text("Formato alfanumérico estricto (ej: TRF-01, CAB-XLPE)", fontSize = 11.sp, color = Color.Gray)
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -134,7 +144,10 @@ fun CrearEquipoScreen(
 
                     OutlinedTextField(
                         value = state.tagCliente,
-                        onValueChange = { viewModel.onTagClienteChanged(it) },
+                        onValueChange = { input ->
+                            val clean = input.filter { it.isLetterOrDigit() || it == '-' }.uppercase()
+                            viewModel.onTagClienteChanged(clean)
+                        },
                         label = { Text("TAG Asignado por Cliente (Placa)") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
@@ -241,8 +254,20 @@ fun CrearEquipoScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         OutlinedTextField(
                             value = state.anio,
-                            onValueChange = { viewModel.onAnioChanged(it) },
-                            label = { Text("Año") },
+                            onValueChange = { input ->
+                                val digitsOnly = input.filter { it.isDigit() }.take(4)
+                                viewModel.onAnioChanged(digitsOnly)
+                            },
+                            label = { Text("Año (4 dígitos)") },
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Number,
+                                imeAction = ImeAction.Next
+                            ),
+                            supportingText = {
+                                if (state.anio.isNotEmpty() && state.anio.length < 4) {
+                                    Text("4 dígitos", color = MaterialTheme.colorScheme.error, fontSize = 10.sp)
+                                }
+                            },
                             modifier = Modifier.weight(1f),
                             singleLine = true
                         )

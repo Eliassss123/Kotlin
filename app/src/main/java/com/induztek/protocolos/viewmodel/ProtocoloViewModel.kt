@@ -118,6 +118,16 @@ class ProtocoloViewModel(
         }
     }
 
+    fun actualizarFotoEvidencia(idProtocolo: String, bytes: ByteArray?) {
+        viewModelScope.launch {
+            protocoloRepository.actualizarArchivoBlob(idProtocolo, bytes)
+            val actual = _selectedProtocolo.value
+            if (actual != null && actual.id == idProtocolo) {
+                _selectedProtocolo.value = actual.copy(archivoBlob = bytes)
+            }
+        }
+    }
+
     // Preparar edición de una prueba técnica por ID
     fun iniciarEdicionPrueba(pruebaId: String) {
         viewModelScope.launch {

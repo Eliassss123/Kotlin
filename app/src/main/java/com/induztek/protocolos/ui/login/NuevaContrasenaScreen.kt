@@ -44,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -54,6 +55,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.induztek.protocolos.ui.theme.AzulPetroleo
 import com.induztek.protocolos.ui.theme.NaranjaSeguridad
+import com.induztek.protocolos.ui.theme.TextoPrincipal
+import com.induztek.protocolos.ui.theme.TextoSecundario
+import com.induztek.protocolos.ui.theme.induztekTextFieldColors
 import com.induztek.protocolos.viewmodel.LoginViewModel
 import com.induztek.protocolos.viewmodel.RecuperacionUiState
 
@@ -140,9 +144,7 @@ fun NuevaContrasenaScreen(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
-                    // OJO: este texto está DESACTUALIZADO. La validación real (LoginViewModel.validarContrasena)
-                    //      exige 8 caracteres, mayúscula, minúscula, número y símbolo.
-                    text = "Crea tu nueva contraseña de al menos 6 caracteres.",
+                    text = "Crea tu nueva contraseña de al menos 8 caracteres (debe incluir mayúscula, minúscula, número y un símbolo).",
                     fontSize = 13.sp,
                     color = Color.Gray,
                     textAlign = TextAlign.Center
@@ -150,12 +152,13 @@ fun NuevaContrasenaScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Campo 1: contraseña nueva.
                 // Campo Nueva Contraseña
                 OutlinedTextField(
                     value = nuevaContrasena,
                     onValueChange = { viewModel.onNuevaContrasenaChanged(it) },
                     label = { Text("Nueva Contraseña") },
+                    textStyle = TextStyle(color = TextoPrincipal, fontSize = 15.sp),
+                    colors = induztekTextFieldColors(),
                     leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                     trailingIcon = {
                         IconButton(onClick = { isPassVisible = !isPassVisible }) {
@@ -169,9 +172,9 @@ fun NuevaContrasenaScreen(
                     isError = !isNuevaValid,
                     supportingText = {
                         if (!isNuevaValid) {
+                            val errorMsg = viewModel.mensajeValidacionContrasena(nuevaContrasena)
                             Text(
-                                // OJO: mismo texto desactualizado (la regla real es más estricta).
-                                text = "La contraseña debe tener al menos 6 caracteres",
+                                text = errorMsg ?: "La contraseña no cumple los requisitos de seguridad",
                                 color = MaterialTheme.colorScheme.error,
                                 fontSize = 12.sp
                             )
@@ -193,6 +196,8 @@ fun NuevaContrasenaScreen(
                     value = confirmarContrasena,
                     onValueChange = { viewModel.onConfirmarContrasenaChanged(it) },
                     label = { Text("Confirmar Contraseña") },
+                    textStyle = TextStyle(color = TextoPrincipal, fontSize = 15.sp),
+                    colors = induztekTextFieldColors(),
                     leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                     trailingIcon = {
                         IconButton(onClick = { isConfirmPassVisible = !isConfirmPassVisible }) {

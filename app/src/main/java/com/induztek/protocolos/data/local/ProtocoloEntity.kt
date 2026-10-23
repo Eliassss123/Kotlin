@@ -10,6 +10,7 @@
 
 package com.induztek.protocolos.data.local
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.Gson
@@ -45,7 +46,9 @@ data class ProtocoloEntity(
     val syncStatus: String = "Pendiente de Sincronización",
     val observaciones: String = "",
     val pruebasJson: String = "[]",
-    val medicionesJson: String = "[]"
+    val medicionesJson: String = "[]",
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
+    val archivoBlob: ByteArray? = null
 ) {
     fun toDomain(): Protocolo {
         val listMedType = object : TypeToken<List<Medicion>>() {}.type
@@ -84,7 +87,8 @@ data class ProtocoloEntity(
             syncStatus = SyncStatus.fromLabel(syncStatus),
             observaciones = observaciones,
             pruebas = pruebasList,
-            mediciones = medicionesList
+            mediciones = medicionesList,
+            archivoBlob = archivoBlob
         )
     }
 
@@ -113,7 +117,8 @@ data class ProtocoloEntity(
                 syncStatus = protocolo.syncStatus.label,
                 observaciones = protocolo.observaciones,
                 pruebasJson = Gson().toJson(protocolo.pruebas),
-                medicionesJson = Gson().toJson(protocolo.mediciones)
+                medicionesJson = Gson().toJson(protocolo.mediciones),
+                archivoBlob = protocolo.archivoBlob
             )
         }
     }
