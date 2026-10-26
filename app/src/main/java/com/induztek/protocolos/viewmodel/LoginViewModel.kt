@@ -1,9 +1,9 @@
-// ============================================================================
-// ARCHIVO : viewmodel/LoginViewModel.kt
-// CAPA    : ViewModel (MVVM) - LÓGICA DE NEGOCIO de autenticación
-// RESUMEN : Maneja autenticación, perfiles P-01 a P-04, verificación de usuario activo (RF-22)
-//           y flujo de recuperación de contraseñas.
-// ============================================================================
+
+
+
+
+
+
 
 package com.induztek.protocolos.viewmodel
 
@@ -19,9 +19,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
-/**
- * Estados posibles de la interfaz de inicio de sesión.
- */
+
 sealed class LoginUiState {
     object Idle : LoginUiState()
     object Loading : LoginUiState()
@@ -29,9 +27,7 @@ sealed class LoginUiState {
     data class Error(val message: String) : LoginUiState()
 }
 
-/**
- * Estados posibles para el flujo de recuperación de contraseña.
- */
+
 sealed class RecuperacionUiState {
     object Idle : RecuperacionUiState()
     object Loading : RecuperacionUiState()
@@ -41,10 +37,7 @@ sealed class RecuperacionUiState {
     data class Error(val message: String) : RecuperacionUiState()
 }
 
-/**
- * ViewModel que maneja la lógica de autenticación, validación de credenciales,
- * perfiles de usuario (P-01 a P-04), verificación de personal activo (RF-22) y recuperación de claves.
- */
+
 class LoginViewModel(
     private val usuarioRepository: UsuarioRepository? = null,
     private val sessionManager: com.induztek.protocolos.util.SessionManager? = null
@@ -62,18 +55,14 @@ class LoginViewModel(
     private val _usuarioActivo = MutableStateFlow<UsuarioEntity?>(null)
     val usuarioActivo: StateFlow<UsuarioEntity?> = _usuarioActivo.asStateFlow()
 
-    /**
-     * Carga credenciales de demostración para un perfil específico (P-01 a P-04).
-     */
+    
     fun seleccionarPerfilDemo(correoDemo: String, claveDemo: String) {
         _email.value = correoDemo
         _password.value = claveDemo
         _uiState.value = LoginUiState.Idle
     }
 
-    /**
-     * Cierra la sesión activa del usuario y limpia los estados.
-     */
+    
     fun cerrarSesion() {
         _usuarioActivo.value = null
         _email.value = ""
@@ -82,9 +71,7 @@ class LoginViewModel(
         sessionManager?.cerrarSesion()
     }
 
-    /**
-     * Actualiza la foto de perfil del usuario activo.
-     */
+    
     fun actualizarFotoPerfil(fotoPath: String?) {
         val actual = _usuarioActivo.value ?: return
         val actualizado = actual.copy(fotoPerfil = fotoPath)
@@ -94,9 +81,7 @@ class LoginViewModel(
         }
     }
 
-    /**
-     * Actualiza la biografía del usuario activo.
-     */
+    
     fun actualizarBiografia(biografia: String?) {
         val actual = _usuarioActivo.value ?: return
         val actualizado = actual.copy(biografia = biografia)
@@ -148,9 +133,7 @@ class LoginViewModel(
         }
     }
 
-    /**
-     * Valida si el formato de un correo electrónico es correcto.
-     */
+    
     fun validarCorreo(correo: String): Boolean {
         if (correo.isBlank()) return false
         return try {
@@ -161,9 +144,7 @@ class LoginViewModel(
         }
     }
 
-    /**
-     * Valida que la contraseña cumpla con los requisitos de seguridad (mínimo 8 caracteres, mayúscula, minúscula, número y símbolo).
-     */
+    
     fun validarContrasena(pass: String): Boolean {
         val p = pass.trim()
         if (p.length < 8) return false
@@ -174,9 +155,7 @@ class LoginViewModel(
         return true
     }
 
-    /**
-     * Retorna un mensaje descriptivo de error si la contraseña no cumple con los requisitos.
-     */
+    
     fun mensajeValidacionContrasena(pass: String): String? {
         val p = pass.trim()
         if (p.isEmpty()) return null
@@ -229,9 +208,7 @@ class LoginViewModel(
     val isLoginInputValid: Boolean
         get() = validarCorreo(_email.value) && validarContrasena(_password.value)
 
-    /**
-     * Ejecuta el proceso de inicio de sesión validando credenciales y estado activo del usuario (RF-22).
-     */
+    
     fun login() {
         val emailValue = _email.value.trim()
         val passwordValue = _password.value.trim()
@@ -284,9 +261,7 @@ class LoginViewModel(
         }
     }
 
-    /**
-     * Prepara el flujo de recuperación de contraseña cargando el correo actual.
-     */
+    
     fun prepararRecuperacion() {
         _correoRecuperacion.value = _email.value
         _codigoIngresado.value = ""
@@ -297,9 +272,7 @@ class LoginViewModel(
         _mostrarDialogCodigo.value = false
     }
 
-    /**
-     * Solicita y genera un código de verificación para restablecer la contraseña.
-     */
+    
     fun solicitarCodigo(correo: String? = null) {
         val emailAUsar = (correo ?: _correoRecuperacion.value).trim()
         if (!validarCorreo(emailAUsar)) {
@@ -333,9 +306,7 @@ class LoginViewModel(
         }
     }
 
-    /**
-     * Verifica que el código ingresado sea correcto y no haya expirado (10 minutos).
-     */
+    
     fun verificarCodigo(codigoIngresado: String? = null) {
         val codigoTarget = (codigoIngresado ?: _codigoIngresado.value).trim()
         val emailTarget = _correoRecuperacion.value.trim()
@@ -372,9 +343,7 @@ class LoginViewModel(
         }
     }
 
-    /**
-     * Actualiza la contraseña del usuario tras verificar exitosamente el código.
-     */
+    
     fun actualizarContrasena(nueva: String? = null) {
         val nuevaPass = (nueva ?: _nuevaContrasena.value).trim()
         val confirmPass = _confirmarContrasena.value.trim()

@@ -1,9 +1,9 @@
-// ============================================================================
-// ARCHIVO : viewmodel/EquipoViewModel.kt
-// CAPA    : ViewModel (MVVM)
-// RESUMEN : Gestión de equipos, datos de placa (FT-03 sec. 2), detección de duplicados en terreno (RT-02),
-//           filtro por empresa para cliente (RT-10, P-04) e indicador de tendencia histórica (RT-07).
-// ============================================================================
+
+
+
+
+
+
 
 package com.induztek.protocolos.viewmodel
 
@@ -25,9 +25,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-/**
- * Estado de la UI para el formulario de creación de un equipo nuevo en terreno.
- */
+
 data class NuevoEquipoState(
     val codigo: String = "",
     val tagCliente: String = "",
@@ -47,10 +45,7 @@ data class NuevoEquipoState(
     val advertenciaDuplicado: String? = null
 )
 
-/**
- * ViewModel que gestiona la lista de equipos, filtrado reactivo, placa de características (FT-03),
- * detección de duplicados en terreno (RT-02) y restricciones para usuario cliente (P-04).
- */
+
 class EquipoViewModel(
     private val equipoRepository: EquipoRepository,
     private val pruebaRepository: PruebaRepository
@@ -75,10 +70,7 @@ class EquipoViewModel(
         }
     }
 
-    /**
-     * Flujo reactivo combinado que filtra la lista de equipos según buscador de texto,
-     * clasificación (Primario/Secundario) y empresa cliente (RT-10, P-04).
-     */
+    
     val equipos: StateFlow<List<Equipo>> = combine(
         equipoRepository.allEquipos,
         _searchQuery,
@@ -112,17 +104,17 @@ class EquipoViewModel(
         initialValue = emptyList()
     )
 
-    /** Actualiza el texto de búsqueda de equipos. */
+    
     fun onSearchQueryChanged(newQuery: String) {
         _searchQuery.value = newQuery
     }
 
-    /** Establece el filtro de clasificación (Primario / Secundario). */
+    
     fun setFiltroClasificacion(clasificacion: ClasificacionEquipo?) {
         _filtroClasificacion.value = clasificacion
     }
 
-    /** Establece el filtro por empresa cliente (P-04). */
+    
     fun setEmpresaCliente(empresa: String?) {
         _empresaClienteFiltro.value = empresa
     }
@@ -133,10 +125,7 @@ class EquipoViewModel(
     private val _historialPruebas = MutableStateFlow<List<Prueba>>(emptyList())
     val historialPruebas: StateFlow<List<Prueba>> = _historialPruebas.asStateFlow()
 
-    /**
-     * Carga el detalle de un equipo específico y su historial de pruebas asociadas.
-     * @param codigo Código único del equipo.
-     */
+    
     fun cargarDetalleEquipo(codigo: String) {
         viewModelScope.launch {
             val equipo = equipoRepository.getEquipoByCodigo(codigo)
@@ -149,86 +138,84 @@ class EquipoViewModel(
         }
     }
 
-    /** Actualiza el código en el formulario de nuevo equipo. */
+    
     fun onCodigoChanged(codigo: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(codigo = codigo, errorValidacion = null)
         verificarPosibleDuplicado()
     }
 
-    /** Actualiza el tag del cliente en el nuevo equipo. */
+    
     fun onTagClienteChanged(tag: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(tagCliente = tag, errorValidacion = null)
         verificarPosibleDuplicado()
     }
 
-    /** Actualiza el tipo de equipo. */
+    
     fun onTipoChanged(tipo: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(tipo = tipo)
     }
 
-    /** Actualiza el cliente del nuevo equipo. */
+    
     fun onClienteNuevoChanged(cliente: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(cliente = cliente, errorValidacion = null)
     }
 
-    /** Actualiza la ubicación o instalación del nuevo equipo. */
+    
     fun onUbicacionNuevaChanged(ubicacion: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(ubicacion = ubicacion, errorValidacion = null)
         verificarPosibleDuplicado()
     }
 
-    /** Actualiza la marca del equipo. */
+    
     fun onMarcaChanged(marca: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(marca = marca)
     }
 
-    /** Actualiza el modelo del equipo. */
+    
     fun onModeloChanged(modelo: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(modelo = modelo)
     }
 
-    /** Actualiza el número de serie del equipo. */
+    
     fun onNumeroSerieChanged(serie: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(numeroSerie = serie, errorValidacion = null)
         verificarPosibleDuplicado()
     }
 
-    /** Actualiza la potencia y tensión del equipo. */
+    
     fun onPotenciaTensionChanged(potencia: String) {
         val soloNumeros = potencia.filter { it.isDigit() }
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(potenciaTension = soloNumeros)
     }
 
-    /** Actualiza el año de fabricación del equipo. */
+    
     fun onAnioChanged(anio: String) {
         val soloNumeros = anio.filter { it.isDigit() }.take(4)
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(anio = soloNumeros, errorValidacion = null)
     }
 
-    /** Actualiza las tensiones nominales. */
+    
     fun onTensionesChanged(tensiones: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(tensiones = tensiones)
     }
 
-    /** Actualiza el tap del equipo. */
+    
     fun onTapChanged(tap: String) {
         val soloNumeros = tap.filter { it.isDigit() }.take(2)
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(tap = soloNumeros)
     }
 
-    /** Actualiza el tipo de conexión. */
+    
     fun onConexionChanged(conexion: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(conexion = conexion)
     }
 
-    /** Actualiza el texto personalizado de conexión si se selecciona "Otro". */
+    
     fun onConexionOtroChanged(otro: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(conexionOtro = otro)
     }
 
-    /**
-     * RT-02: Verifica si ya existe un equipo similar en la misma ubicación y emite advertencia si es duplicado.
-     */
+    
     private fun verificarPosibleDuplicado() {
         val state = _nuevoEquipoState.value
         if (state.ubicacion.isNotBlank() && (state.tagCliente.isNotBlank() || state.numeroSerie.isNotBlank() || state.codigo.isNotBlank())) {
@@ -250,10 +237,7 @@ class EquipoViewModel(
         }
     }
 
-    /**
-     * Valida y guarda un nuevo equipo en el repositorio de equipos.
-     * @param onSuccess Callback que recibe el [Equipo] creado exitosamente.
-     */
+    
     fun guardarEquipoNuevo(onSuccess: (Equipo) -> Unit) {
         val state = _nuevoEquipoState.value
 

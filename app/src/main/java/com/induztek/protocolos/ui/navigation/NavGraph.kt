@@ -1,10 +1,10 @@
-// ============================================================================
-// ARCHIVO : ui/navigation/NavGraph.kt
-// CAPA    : Navegación (legado — mantenido como referencia)
-// RESUMEN : NavGraph original. La aplicación ahora usa navigation/AppNavegacion.kt
-//           como punto de entrada principal, que declara todas las rutas directamente.
-//           Este archivo se mantiene para compatibilidad.
-// ============================================================================
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.ui.navigation
 
@@ -50,7 +50,7 @@ fun NavGraph(
         navController = navController,
         startDestination = Routes.Login.route
     ) {
-        // 1. Login
+        
         composable(Routes.Login.route) {
             LoginScreen(
                 viewModel = loginViewModel,
@@ -65,7 +65,7 @@ fun NavGraph(
             )
         }
 
-        // 1.1 Recuperación
+        
         composable(Routes.OlvideContrasena.route) {
             OlvideContrasenaScreen(
                 viewModel = loginViewModel,
@@ -94,7 +94,7 @@ fun NavGraph(
             )
         }
 
-        // 2. Lista de Equipos (Centro operativo)
+        
         composable(Routes.ListaEquipos.route) {
             ListaEquiposScreen(
                 viewModel = equipoViewModel,
@@ -126,7 +126,7 @@ fun NavGraph(
             )
         }
 
-        // 2.1 Crear Equipo nuevo en terreno (RT-02)
+        
         composable(Routes.CrearEquipo.route) {
             CrearEquipoScreen(
                 viewModel = equipoViewModel,
@@ -137,7 +137,7 @@ fun NavGraph(
             )
         }
 
-        // 2.2 Detalle de Equipo + Historial con alertas (RT-06 / RT-07)
+        
         composable(
             route = Routes.DetalleEquipo.route,
             arguments = listOf(navArgument("codigo") { type = NavType.StringType })
@@ -154,7 +154,7 @@ fun NavGraph(
             )
         }
 
-        // 3. Visitas Técnicas (RT-01, RT-03, RT-08)
+        
         composable(Routes.ListaVisitas.route) {
             ListaVisitasScreen(
                 visitaViewModel = visitaViewModel,
@@ -202,7 +202,7 @@ fun NavGraph(
             )
         }
 
-        // 4. Protocolos
+        
         composable(Routes.ListaProtocolos.route) {
             ListaProtocolosScreen(
                 viewModel = protocoloViewModel,
@@ -230,7 +230,7 @@ fun NavGraph(
             )
         }
 
-        // 4.1 Captura de Prueba (RT-04, RT-05, RT-06, RN-06..RN-09)
+        
         composable(
             route = Routes.CapturaPrueba.route,
             arguments = listOf(navArgument("pruebaId") { type = NavType.StringType })
@@ -244,7 +244,7 @@ fun NavGraph(
             )
         }
 
-        // 5. Acta de Entrega (RT-08)
+        
         composable(
             route = Routes.DetalleActa.route,
             arguments = listOf(navArgument("actaId") { type = NavType.StringType })
@@ -258,7 +258,7 @@ fun NavGraph(
             )
         }
 
-        // 6. Panel de Administración Técnica (RT-11, RF-22)
+        
         composable(Routes.Admin.route) {
             AdminScreen(
                 adminViewModel = adminViewModel,
@@ -267,7 +267,7 @@ fun NavGraph(
             )
         }
 
-        // 7. Perfil del usuario
+        
         composable(Routes.Perfil.route) {
             PerfilScreen(
                 usuario = usuarioActual,

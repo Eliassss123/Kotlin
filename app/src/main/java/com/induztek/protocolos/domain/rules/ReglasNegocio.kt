@@ -1,9 +1,9 @@
-// ============================================================================
-// ARCHIVO : domain/rules/ReglasNegocio.kt
-// CAPA    : Dominio / Reglas de Negocio
-// RESUMEN : Implementación centralizada de las Reglas de Negocio (RN-01 a RN-22)
-//           y requisitos técnicos (RT-01 a RT-11) según síntesis del 08-10-2026.
-// ============================================================================
+
+
+
+
+
+
 
 package com.induztek.protocolos.domain.rules
 
@@ -19,19 +19,19 @@ import kotlin.math.abs
 
 object ReglasNegocio {
 
-    // ========================================================================
-    // RN-05: Pruebas obligatorias por tipo de equipo (No agregar otras como FA-06)
-    // ========================================================================
+    
+    
+    
     fun obtenerPruebasRequeridasPorTipo(tipoEquipoStr: String): List<String> {
         val tipo = TipoEquipo.fromNombre(tipoEquipoStr)
         return tipo.pruebasRequeridas
     }
 
-    // ========================================================================
-    // RT-05, RN-06: Cálculo de Índice de Polarización (IP)
-    // IP = lectura 10 min / lectura 1 min (con 2 decimales fijos)
-    // Criterios: IP >= 2.0 (Aprobado), 1.5 <= IP < 2.0 (Observado), < 1.5 (Rechazado)
-    // ========================================================================
+    
+    
+    
+    
+    
     fun calcularIndicePolarizacion(lectura1min: Double, lectura10min: Double): Pair<Double, ResultadoPrueba> {
         if (lectura1min <= 0.0) return 0.0 to ResultadoPrueba.RECHAZADO
         val ipCalculado = lectura10min / lectura1min
@@ -45,11 +45,11 @@ object ReglasNegocio {
         return ipRedondeado to resultado
     }
 
-    // ========================================================================
-    // RT-05, RN-07: Error % de Relación de Transformación (TTR)
-    // Error % = ((medida - teórica) / teórica) * 100
-    // Criterios: <= 0.5% (Aprobado), 0.5% < Error <= 1.0% (Observado), > 1.0% (Rechazado)
-    // ========================================================================
+    
+    
+    
+    
+    
     fun calcularErrorTTR(relacionTeorica: Double, relacionMedida: Double): Pair<Double, ResultadoPrueba> {
         if (relacionTeorica <= 0.0) return 0.0 to ResultadoPrueba.RECHAZADO
         val errorPorcentaje = abs((relacionMedida - relacionTeorica) / relacionTeorica) * 100.0
@@ -63,10 +63,10 @@ object ReglasNegocio {
         return errorRedondeado to resultado
     }
 
-    // ========================================================================
-    // RT-05, RN-08: Resistencia de Contactos (Interruptores y Celdas MT)
-    // Criterios: <= 50 µΩ (Aprobado), 50 < R <= 100 µΩ (Observado), > 100 µΩ (Rechazado)
-    // ========================================================================
+    
+    
+    
+    
     fun evaluarResistenciaContactos(resistenciaMicroOhm: Double): ResultadoPrueba {
         return when {
             resistenciaMicroOhm <= 50.0 -> ResultadoPrueba.APROBADO
@@ -75,10 +75,10 @@ object ReglasNegocio {
         }
     }
 
-    // ========================================================================
-    // RT-05, RN-08b: Prueba de Operación Relé de Protección (Inyección secundaria)
-    // Criterios error tiempo de disparo: <= 5.0% (Aprobado), 5.0% < Error <= 10.0% (Observado), > 10.0% (Rechazado)
-    // ========================================================================
+    
+    
+    
+    
     fun evaluarOperacionRele(tiempoTeoricoSeg: Double, tiempoMedidoSeg: Double): Pair<Double, ResultadoPrueba> {
         if (tiempoTeoricoSeg <= 0.0) return 0.0 to ResultadoPrueba.RECHAZADO
         val errorPorcentaje = abs((tiempoMedidoSeg - tiempoTeoricoSeg) / tiempoTeoricoSeg) * 100.0
@@ -92,18 +92,18 @@ object ReglasNegocio {
         return errorRedondeado to resultado
     }
 
-    // ========================================================================
-    // RN-08c: Resistencia de Devanados (Sin cálculo automático)
-    // El ingeniero asigna el resultado a mano
-    // ========================================================================
+    
+    
+    
+    
     fun esPruebaConAsignacionManual(tipoPrueba: String): Boolean {
         return tipoPrueba.contains("devanado", ignoreCase = true)
     }
 
-    // ========================================================================
-    // RN-09, RT-06: Variación histórica contra la última prueba del mismo tipo
-    // variacion = ((actual - anterior) / anterior) * 100. Si abs(variacion) > 25%, se destaca.
-    // ========================================================================
+    
+    
+    
+    
     fun calcularVariacionHistorica(valorActual: Double, valorAnterior: Double): Pair<Double, Boolean> {
         if (valorAnterior == 0.0) return 0.0 to false
         val variacion = ((valorActual - valorAnterior) / valorAnterior) * 100.0
@@ -112,21 +112,21 @@ object ReglasNegocio {
         return variacionRedondeada to supera25
     }
 
-    // ========================================================================
-    // RN-10: Resultado Global del Protocolo
-    // peor(resultados) con orden APROBADO < OBSERVADO < RECHAZADO.
-    // Se excluyen las pruebas NO_REALIZADA.
-    // ========================================================================
+    
+    
+    
+    
+    
     fun calcularResultadoGlobal(pruebas: List<Prueba>): ResultadoPrueba {
         val pruebasRealizadas = pruebas.filter { it.estadoPrueba == EstadoPrueba.REALIZADA }
         if (pruebasRealizadas.isEmpty()) return ResultadoPrueba.NO_REALIZADA
         return ResultadoPrueba.peorResultado(pruebasRealizadas.map { it.resultado })
     }
 
-    // ========================================================================
-    // Aclaración 2, RT-08: Validación de Pruebas
-    // Toda prueba debe quedar REALIZADA o NO_REALIZADA con motivo no vacío.
-    // ========================================================================
+    
+    
+    
+    
     fun validarPruebaCompleta(prueba: Prueba): String? {
         if (prueba.estadoPrueba == EstadoPrueba.NO_REALIZADA) {
             if (prueba.motivoNoRealizada.isBlank()) {
@@ -140,26 +140,26 @@ object ReglasNegocio {
         return null
     }
 
-    // ========================================================================
-    // Aclaración 4: Selección de mediciones en modalidad PRUEBAS_Y_MANTENIMIENTO
-    // Si hay medición POSTERIOR, vale la posterior para el cálculo del resultado.
-    // ========================================================================
+    
+    
+    
+    
     fun filtrarMedicionVigente(mediciones: List<Medicion>, campo: String): Medicion? {
         val posteriores = mediciones.filter { it.campo.equals(campo, ignoreCase = true) && it.momento == MomentoMedicion.POSTERIOR_MANTENIMIENTO }
         if (posteriores.isNotEmpty()) return posteriores.last()
         return mediciones.find { it.campo.equals(campo, ignoreCase = true) }
     }
 
-    // ========================================================================
-    // RN-02: Formato de número de protocolo único (PT-2026-0401)
-    // ========================================================================
+    
+    
+    
     fun generarNumeroProtocolo(correlativo: Int, anio: Int = 2026): String {
         return String.format(Locale.US, "PT-%d-%04d", anio, correlativo)
     }
 
-    // ========================================================================
-    // Plantillas de mediciones con campos según Anexo 12 (FT-03)
-    // ========================================================================
+    
+    
+    
     fun generarMedicionesPlantillaPorPrueba(tipoPrueba: String): List<Medicion> {
         return when {
             tipoPrueba.contains("aislación", ignoreCase = true) || tipoPrueba.contains("aislamiento", ignoreCase = true) -> listOf(

@@ -1,11 +1,11 @@
-// ============================================================================
-// ARCHIVO : model/ResultadoPrueba.kt
-// CAPA    : Modelo (dominio)
-// RESUMEN : Resultados de prueba y global según RN-06/07/08/08b y RN-10:
-//           - APROBADO, OBSERVADO, RECHAZADO, NO_APLICA / NO_REALIZADA
-//           - RN-10: peor(resultados) con orden APROBADO < OBSERVADO < RECHAZADO.
-//             Se excluyen las pruebas NO_REALIZADA.
-// ============================================================================
+
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.model
 
@@ -36,7 +36,7 @@ enum class ResultadoPrueba(val label: String, val severidad: Int) {
             } ?: APROBADO
         }
 
-        // RN-10: peor(resultados) excluyendo NO_REALIZADA
+        
         fun peorResultado(resultados: List<ResultadoPrueba>): ResultadoPrueba {
             val validos = resultados.filter { it != NO_REALIZADA }
             if (validos.isEmpty()) return NO_REALIZADA

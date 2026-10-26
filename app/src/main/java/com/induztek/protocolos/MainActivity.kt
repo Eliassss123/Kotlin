@@ -110,8 +110,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    // AppNavegacion es el punto de entrada de la navegación.
-                    // Declara todas las pantallas con sus rutas y constructores.
+                    
+                    
                     AppNavegacion(
                         loginViewModel = loginViewModel,
                         equipoViewModel = equipoViewModel,

@@ -1,9 +1,9 @@
-// ============================================================================
-// ARCHIVO : model/Medicion.kt
-// CAPA    : Modelo (dominio)
-// RESUMEN : Medición individual con valor numérico, unidad explícita normalizada (RT-04),
-//           momento (PREVIA o POSTERIOR_MANTENIMIENTO) e instrumento asociado.
-// ============================================================================
+
+
+
+
+
+
 
 package com.induztek.protocolos.model
 
@@ -17,7 +17,7 @@ data class Medicion(
     val momento: MomentoMedicion = MomentoMedicion.PREVIA,
     val instrumentoInfo: String = ""
 ) {
-    // Texto formateado con valor y unidad
+    
     val valorFormateado: String
         get() = if (valorNumerico != null) {
             val valorTxt = if (valorNumerico % 1.0 == 0.0) {
@@ -30,7 +30,7 @@ data class Medicion(
             "-"
         }
 
-    // Constructor de compatibilidad para lecturas directas o inicialización
+    
     constructor(campo: String, valorTexto: String) : this(
         campo = campo,
         valorNumerico = parseValorNumerico(valorTexto),

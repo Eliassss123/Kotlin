@@ -1,12 +1,12 @@
-// ============================================================================
-// ARCHIVO : model/Acta.kt
-// CAPA    : Modelo (dominio)
-// RESUMEN : Acta de entrega de visita según RT-08, Aclaración 2, 4 y 7:
-//           - Una por visita, agrupa todos los protocolos del equipo visitado
-//           - Pruebas no realizadas con su motivo obligatorio
-//           - Marca "Pendiente de formalización"
-//           - Registro del nombre de quien la recibe en terreno
-// ============================================================================
+
+
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.model
 
@@ -20,7 +20,7 @@ data class Acta(
     val instalacion: String,
     val fechaEmision: String,
     val tecnicoEntrega: String,
-    val recibidoPor: String, // Obligatorio registrar nombre de quien la recibe
+    val recibidoPor: String, 
     val marcaPendienteFormalizacion: Boolean = true,
     val resumenProtocolos: String = "",
     val syncStatus: SyncStatus = SyncStatus.PENDIENTE

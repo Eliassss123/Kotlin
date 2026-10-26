@@ -1,10 +1,10 @@
-// ============================================================================
-// ARCHIVO : ui/protocolos/DetalleProtocoloScreen.kt
-// CAPA    : View (pantalla)
-// RESUMEN : Vista detallada de protocolo con lista de pruebas técnicas,
-//           cálculo global (RN-10), inmutabilidad tras formalizar
-//           y acción de formalización para Ingeniero (P-02) y Jefe Técnico (P-03) (RN-04, RN-16, RT-09).
-// ============================================================================
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.ui.protocolos
 
@@ -96,14 +96,14 @@ fun DetalleProtocoloScreen(
 
     val perfil = usuarioActivo?.getPerfil() ?: PerfilUsuario.TECNICO_TERRENO
     val esCliente = perfil == PerfilUsuario.CLIENTE
-    val puedeFormalizar = perfil.puedeFormalizar // P-02 o P-03
+    val puedeFormalizar = perfil.puedeFormalizar 
 
     var showFormalizarDialog by remember { mutableStateOf(false) }
     var esAprobacionFormalizacion by remember { mutableStateOf(true) }
 
     val context = LocalContext.current
 
-    // Launcher para tomar foto con la CÁMARA
+    
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview()
     ) { bitmap: android.graphics.Bitmap? ->
@@ -114,7 +114,7 @@ fun DetalleProtocoloScreen(
         }
     }
 
-    // Launcher para pedir permiso de cámara en tiempo de ejecución
+    
     val permissionCameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -127,7 +127,7 @@ fun DetalleProtocoloScreen(
         }
     }
 
-    // Launcher para seleccionar imagen de la GALERÍA
+    
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: android.net.Uri? ->
@@ -161,7 +161,7 @@ fun DetalleProtocoloScreen(
                 .padding(16.dp)
         ) {
             protocolo?.let { prot ->
-                // Tarjeta 1: Encabezado y Estado de Formalización
+                
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
@@ -209,7 +209,7 @@ fun DetalleProtocoloScreen(
                             )
                         }
 
-                        // RN-04, RN-16: Datos de Formalización e Inmutabilidad
+                        
                         if (prot.estado == EstadoProtocolo.FORMALIZADO) {
                             Spacer(modifier = Modifier.height(6.dp))
                             Row(
@@ -241,7 +241,7 @@ fun DetalleProtocoloScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Barra de Formalización para P-02 / P-03 (si no está formalizado aún)
+                
                 if (puedeFormalizar && prot.estado != EstadoProtocolo.FORMALIZADO) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -277,7 +277,7 @@ fun DetalleProtocoloScreen(
                     Spacer(modifier = Modifier.height(10.dp))
                 }
 
-                // Tarjeta de Fotos de Evidencia (Opcional)
+                
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
@@ -309,7 +309,7 @@ fun DetalleProtocoloScreen(
                             }
                         }
 
-                        // Botones de Cámara y Galería para el técnico
+                        
                         if (!prot.esInmutable && !esCliente) {
                             Spacer(modifier = Modifier.height(10.dp))
                             Row(
@@ -350,7 +350,7 @@ fun DetalleProtocoloScreen(
                             }
                         }
 
-                        // Carrusel de Fotos
+                        
                         if (prot.fotos.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(10.dp))
                             LazyRow(
@@ -458,7 +458,7 @@ fun DetalleProtocoloScreen(
         }
     }
 
-    // Diálogo de Formalización (RN-04, RN-16, RT-09)
+    
     if (showFormalizarDialog) {
         AlertDialog(
             onDismissRequest = { showFormalizarDialog = false },

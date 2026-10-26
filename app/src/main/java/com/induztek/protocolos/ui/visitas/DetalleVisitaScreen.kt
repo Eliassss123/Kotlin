@@ -1,10 +1,10 @@
-// ============================================================================
-// ARCHIVO : ui/visitas/DetalleVisitaScreen.kt
-// CAPA    : View (pantalla)
-// RESUMEN : Gestión de protocolos de la visita, agregado de equipos (RT-03, RN-05),
-//           bloqueo de duplicados en la misma visita (RN-02, Aclar. 5)
-//           y cierre con emisión de acta oficial (RT-08).
-// ============================================================================
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.ui.visitas
 
@@ -120,7 +120,7 @@ fun DetalleVisitaScreen(
                 .padding(16.dp)
         ) {
             visita?.let { vis ->
-                // Banner de error general
+                
                 if (mensajeError != null) {
                     Card(
                         modifier = Modifier
@@ -146,7 +146,7 @@ fun DetalleVisitaScreen(
                     }
                 }
 
-                // Tarjeta 1: Información de Visita
+                
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
@@ -201,7 +201,7 @@ fun DetalleVisitaScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Botones de acción
+                
                 if (!vis.cerrada) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -282,7 +282,7 @@ fun DetalleVisitaScreen(
         }
     }
 
-    // DIÁLOGO: Agregar Protocolo para un equipo en la visita (RT-03, RN-05)
+    
     if (showAddEquipoDialog) {
         AlertDialog(
             onDismissRequest = { showAddEquipoDialog = false },
@@ -356,7 +356,7 @@ fun DetalleVisitaScreen(
         )
     }
 
-    // DIÁLOGO: Cerrar Visita y Generar Acta (RT-08)
+    
     if (showCerrarVisitaDialog) {
         AlertDialog(
             onDismissRequest = { showCerrarVisitaDialog = false },

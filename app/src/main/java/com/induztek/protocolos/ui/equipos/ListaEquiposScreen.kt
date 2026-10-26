@@ -1,12 +1,12 @@
-// ============================================================================
-// ARCHIVO : ui/equipos/ListaEquiposScreen.kt
-// CAPA    : View (pantalla)
-// RESUMEN : Catálogo de equipos con barra de sesión (P-01 a P-04), filtros por
-//           clasificación Primario/Secundario (Aclar. 1), filtro por empresa para cliente (RT-10)
-//           e indicador de tendencia de empeoramiento (RT-07).
-//           Incluye menú hamburguesa lateral (NavigationDrawer) con acceso a Perfil,
-//           Visitas, Protocolos y Cerrar Sesión.
-// ============================================================================
+
+
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.ui.equipos
 
@@ -111,7 +111,7 @@ fun ListaEquiposScreen(
     val esCliente = perfil == PerfilUsuario.CLIENTE
     val esJefeTecnico = perfil == PerfilUsuario.JEFE_TECNICO
 
-    // Estado del drawer
+    
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -123,14 +123,14 @@ fun ListaEquiposScreen(
         }
     }
 
-    // Menú hamburguesa lateral
+    
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
                 drawerContainerColor = Color.White
             ) {
-                // Header del drawer
+                
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -169,7 +169,7 @@ fun ListaEquiposScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Item: Mi Perfil
+                
                 NavigationDrawerItem(
                     icon = {
                         Icon(Icons.Default.Person, contentDescription = null)
@@ -183,7 +183,7 @@ fun ListaEquiposScreen(
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
 
-                // Item: Equipos
+                
                 NavigationDrawerItem(
                     icon = {
                         Icon(Icons.Default.Home, contentDescription = null)
@@ -196,7 +196,7 @@ fun ListaEquiposScreen(
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
 
-                // Item: Visitas
+                
                 NavigationDrawerItem(
                     icon = {
                         Icon(Icons.Default.Engineering, contentDescription = null)
@@ -210,7 +210,7 @@ fun ListaEquiposScreen(
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
 
-                // Item: Protocolos
+                
                 NavigationDrawerItem(
                     icon = {
                         Icon(Icons.AutoMirrored.Filled.ListAlt, contentDescription = null)
@@ -241,7 +241,7 @@ fun ListaEquiposScreen(
 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-                // Item: Cerrar Sesión
+                
                 NavigationDrawerItem(
                     icon = {
                         Icon(
@@ -327,7 +327,7 @@ fun ListaEquiposScreen(
                     .padding(innerPadding)
                     .padding(16.dp)
             ) {
-                // Banner de Usuario Activo y Rol
+                
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
@@ -370,7 +370,7 @@ fun ListaEquiposScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Accesos directos a Visitas y Protocolos
+                
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -412,7 +412,7 @@ fun ListaEquiposScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Buscador
+                
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { viewModel.onSearchQueryChanged(it) },
@@ -433,7 +433,7 @@ fun ListaEquiposScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Filtros Primario / Secundario (Aclaración 1)
+                
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     item {
                         FilterChip(
@@ -538,7 +538,7 @@ fun EquipoCard(
                     }
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    // RT-07: Indicador de equipo empeorando
+                    
                     if (equipo.empeorando) {
                         Row(
                             modifier = Modifier

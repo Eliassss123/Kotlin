@@ -1,10 +1,10 @@
-// ============================================================================
-// ARCHIVO : ui/visitas/NuevaVisitaScreen.kt
-// CAPA    : View (pantalla)
-// RESUMEN : Registro de visita técnica según RT-01, Aclaración 4 y 7:
-//           - OT, cliente, instalación, modalidad (SOLO_PRUEBAS o PRUEBAS_Y_MANTENIMIENTO)
-//           - Ingeniero a cargo OBLIGATORIO (aunque no asista a terreno)
-// ============================================================================
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.ui.visitas
 

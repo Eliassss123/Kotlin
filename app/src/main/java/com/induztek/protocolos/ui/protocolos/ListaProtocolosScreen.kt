@@ -1,9 +1,9 @@
-// ============================================================================
-// ARCHIVO : ui/protocolos/ListaProtocolosScreen.kt
-// CAPA    : View (pantalla)
-// RESUMEN : Historial de protocolos con visualización adaptada al rol de usuario:
-//           - Para clientes (P-04): filtrado por su empresa (RT-10) y marca "Pendiente de formalización" (RN-19).
-// ============================================================================
+
+
+
+
+
+
 
 package com.induztek.protocolos.ui.protocolos
 

@@ -1,9 +1,9 @@
-// ============================================================================
-// ARCHIVO : ui/equipos/CrearEquipoScreen.kt
-// CAPA    : View (pantalla)
-// RESUMEN : Formulario para crear equipo en terreno con datos de placa y
-//           detección de duplicados en la misma instalación (RT-02).
-// ============================================================================
+
+
+
+
+
+
 
 package com.induztek.protocolos.ui.equipos
 
@@ -101,7 +101,7 @@ fun CrearEquipoScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // Advertencia de duplicado si aplica (RT-02)
+            
             if (state.advertenciaDuplicado != null) {
                 Card(
                     shape = RoundedCornerShape(10.dp),
@@ -124,7 +124,7 @@ fun CrearEquipoScreen(
                 }
             }
 
-            // Datos Principales
+            
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = TarjetaFondo),
@@ -154,7 +154,7 @@ fun CrearEquipoScreen(
                             Text(
                                 text = "Ejemplo de TAG válido: TR-500KVA-01. Si el equipo no posee TAG, complete Marca y N° de Serie obligatoriamente.",
                                 fontSize = 11.sp,
-                                //Aqui cambie el color del texto ejemplo
+                                
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         },
@@ -231,7 +231,7 @@ fun CrearEquipoScreen(
                 }
             }
 
-            // Datos de Placa de Características (FT-03 sec. 2)
+            
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = TarjetaFondo),

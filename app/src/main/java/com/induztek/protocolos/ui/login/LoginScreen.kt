@@ -1,7 +1,7 @@
-// ============================================================================
-// ARCHIVO : ui/login/LoginScreen.kt
-// CAPA    : View (pantalla) - Pantalla de inicio de sesión en modo oscuro.
-// ============================================================================
+
+
+
+
 
 package com.induztek.protocolos.ui.login
 

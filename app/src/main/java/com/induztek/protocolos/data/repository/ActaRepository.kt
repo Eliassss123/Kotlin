@@ -1,8 +1,8 @@
-// ============================================================================
-// ARCHIVO : data/repository/ActaRepository.kt
-// CAPA    : Repositorio (MVVM)
-// RESUMEN : Gestión de actas de entrega de visita (RT-08).
-// ============================================================================
+
+
+
+
+
 
 package com.induztek.protocolos.data.repository
 
@@ -13,47 +13,31 @@ import com.induztek.protocolos.model.SyncStatus
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-/**
- * Repositorio encargado de gestionar la persistencia y recuperación de [Acta].
- * Se comunica con [ActaDao] para realizar operaciones de base de datos y transformar entidades a modelos de dominio.
- */
+
 class ActaRepository(
     private val actaDao: ActaDao
 ) {
-    /** Flujo reactivo con todas las actas registradas en el sistema. */
+    
     val allActas: Flow<List<Acta>> = actaDao.getAllActas().map { entities ->
         entities.map { it.toDomain() }
     }
 
-    /**
-     * Obtiene un acta específica por su identificador único.
-     * @param id ID único del acta.
-     * @return Objeto [Acta] correspondiente o null si no existe.
-     */
+    
     suspend fun getActaById(id: String): Acta? {
         return actaDao.getActaById(id)?.toDomain()
     }
 
-    /**
-     * Obtiene el acta asociada a una visita técnica.
-     * @param visitaId ID de la visita.
-     * @return Objeto [Acta] o null si aún no se ha generado acta para la visita.
-     */
+    
     suspend fun getActaByVisita(visitaId: String): Acta? {
         return actaDao.getActaByVisita(visitaId)?.toDomain()
     }
 
-    /**
-     * Inserta o actualiza un acta en la base de datos local.
-     * @param acta Modelo de dominio [Acta] a guardar.
-     */
+    
     suspend fun insertActa(acta: Acta) {
         actaDao.insertActa(ActaEntity.fromDomain(acta))
     }
 
-    /**
-     * Puebla la base de datos con un acta inicial de ejemplo si la tabla se encuentra vacía.
-     */
+    
     suspend fun seedInitialDataIfEmpty() {
         if (actaDao.getCount() == 0) {
             val initialActas = listOf(

@@ -1,9 +1,9 @@
-// ============================================================================
-// ARCHIVO : data/repository/EquipoRepository.kt
-// CAPA    : Repositorio (MVVM)
-// RESUMEN : Intermediario de equipos con soporte para datos de placa (FT-03 sec. 2),
-//           detección de duplicados (RT-02) y filtros por empresa para cliente (P-04).
-// ============================================================================
+
+
+
+
+
+
 
 package com.induztek.protocolos.data.repository
 
@@ -14,61 +14,43 @@ import com.induztek.protocolos.model.EstadoProtocolo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-/**
- * Repositorio encargado de gestionar la lógica de datos de los equipos eléctricos en terreno.
- * Maneja consultas, filtros por cliente (P-04), validación de duplicados (RT-02) y carga de datos iniciales.
- */
+
 class EquipoRepository(
     private val equipoDao: EquipoDao
 ) {
-    /** Flujo con todos los equipos registrados en el sistema. */
+    
     val allEquipos: Flow<List<Equipo>> = equipoDao.getAllEquipos().map { entities ->
         entities.map { it.toDomain() }
     }
 
-    /**
-     * Obtiene un flujo con los equipos filtrados por empresa cliente.
-     * @param cliente Nombre de la empresa cliente.
-     */
+    
     fun getEquiposByCliente(cliente: String): Flow<List<Equipo>> {
         return equipoDao.getEquiposByCliente(cliente).map { entities ->
             entities.map { it.toDomain() }
         }
     }
 
-    /**
-     * Busca y retorna un equipo por su código único.
-     * @param codigo Código único del equipo.
-     */
+    
     suspend fun getEquipoByCodigo(codigo: String): Equipo? {
         return equipoDao.getEquipoByCodigo(codigo)?.toDomain()
     }
 
-    /**
-     * Busca y retorna un equipo por su ID interno.
-     * @param id ID único del equipo.
-     */
+    
     suspend fun getEquipoById(id: String): Equipo? {
         return equipoDao.getEquipoById(id)?.toDomain()
     }
 
-    /**
-     * RT-02: Detecta posibles duplicados en terreno (mismo TAG o número de serie en la misma instalación).
-     */
+    
     suspend fun buscarPosibleDuplicado(ubicacion: String, tag: String, numeroSerie: String, codigo: String): Equipo? {
         return equipoDao.buscarPosibleDuplicado(ubicacion, tag, numeroSerie, codigo)?.toDomain()
     }
 
-    /**
-     * Inserta o actualiza un equipo en la base de datos local.
-     */
+    
     suspend fun insertEquipo(equipo: Equipo) {
         equipoDao.insertEquipo(EquipoEntity.fromDomain(equipo))
     }
 
-    /**
-     * Puebla la base de datos con equipos iniciales de demostración si la tabla está vacía.
-     */
+    
     suspend fun seedInitialDataIfEmpty() {
         if (equipoDao.getCount() == 0) {
             val initialEquipos = listOf(

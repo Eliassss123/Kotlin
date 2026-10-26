@@ -1,12 +1,12 @@
-// ============================================================================
-// ARCHIVO : model/Prueba.kt
-// CAPA    : Modelo (dominio)
-// RESUMEN : Ensayo o prueba individual según RN-05, RN-06/07/08/08b/08c, RN-09, RN-11 y Aclaración 2:
-//           - Estado REALIZADA o NO_REALIZADA (con motivo no vacío obligatorio)
-//           - Resultado Aprobado, Observado, Rechazado (calculado o asignado a mano en devanados)
-//           - Trazabilidad de instrumento (serie y calibración)
-//           - Variación histórica con respecto a la prueba anterior del mismo tipo (>25% destacada)
-// ============================================================================
+
+
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.model
 
@@ -35,7 +35,7 @@ data class Prueba(
     val variacionHistoricaPorcentaje: Double? = null,
     val superaVariacion25: Boolean = false
 ) {
-    // Compatibilidad con vistas previas
+    
     val estado: EstadoProtocolo
         get() = when (resultado) {
             ResultadoPrueba.APROBADO -> EstadoProtocolo.FORMALIZADO

@@ -66,7 +66,7 @@ fun DetalleActaScreen(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                // Tarjeta 1: Encabezado del Acta y Marca de Formalización (RN-19)
+                
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
@@ -123,7 +123,7 @@ fun DetalleActaScreen(
                     }
                 }
 
-                // Tarjeta 2: Recepción y Entrega en Terreno
+                
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
@@ -156,7 +156,7 @@ fun DetalleActaScreen(
                     }
                 }
 
-                // Tarjeta 3: Resumen de Protocolos y Pruebas
+                
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
@@ -195,7 +195,7 @@ fun DetalleActaScreen(
                     }
                 }
 
-                // Tarjeta 4: Resumen de Pruebas No Realizadas
+                
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),

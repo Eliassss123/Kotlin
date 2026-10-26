@@ -1,8 +1,8 @@
-// ============================================================================
-// ARCHIVO : ui/login/NuevaContrasenaScreen.kt
-// CAPA    : View (pantalla)
-// RESUMEN : PASO 3 de recuperar contraseña: se define la contraseña nueva y su confirmación.
-// ============================================================================
+
+
+
+
+
 
 package com.induztek.protocolos.ui.login
 
@@ -69,19 +69,19 @@ fun NuevaContrasenaScreen(
     val confirmarContrasena by viewModel.confirmarContrasena.collectAsState()
     val recuperacionState by viewModel.recuperacionState.collectAsState()
 
-    // Dos estados LOCALES (solo visuales) para mostrar u ocultar cada campo por separado.
+    
     var isPassVisible by remember { mutableStateOf(false) }
     var isConfirmPassVisible by remember { mutableStateOf(false) }
 
-    // Cálculos para decidir cuándo mostrar errores.
+    
     val isNuevaValid = nuevaContrasena.isEmpty() || viewModel.validarContrasena(nuevaContrasena)
     val areMatching = confirmarContrasena.isEmpty() || nuevaContrasena == confirmarContrasena
-    // Se habilita solo si ambas contraseñas son válidas e iguales.
+    
     val canSubmit = viewModel.validarContrasena(nuevaContrasena) &&
             viewModel.validarContrasena(confirmarContrasena) &&
             nuevaContrasena == confirmarContrasena
 
-    // Cuando el ViewModel reporta éxito, avisa a NavGraph para volver al login.
+    
     LaunchedEffect(recuperacionState) {
         if (recuperacionState is RecuperacionUiState.Success) {
             onContrasenaActualizada()
@@ -142,8 +142,8 @@ fun NuevaContrasenaScreen(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
-                    // OJO: este texto está DESACTUALIZADO. La validación real (LoginViewModel.validarContrasena)
-                    //      exige 8 caracteres, mayúscula, minúscula, número y símbolo.
+                    
+                    
                     text = "Crea tu nueva contraseña de al menos 6 caracteres.",
                     fontSize = 13.sp,
                     color = Color.Gray,
@@ -152,8 +152,8 @@ fun NuevaContrasenaScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Campo 1: contraseña nueva.
-                // Campo Nueva Contraseña
+                
+                
                 OutlinedTextField(
                     value = nuevaContrasena,
                     onValueChange = { viewModel.onNuevaContrasenaChanged(it) },
@@ -173,7 +173,7 @@ fun NuevaContrasenaScreen(
                     supportingText = {
                         if (!isNuevaValid) {
                             Text(
-                                // OJO: mismo texto desactualizado (la regla real es más estricta).
+                                
                                 text = "La contraseña debe tener al menos 6 caracteres",
                                 color = MaterialTheme.colorScheme.error,
                                 fontSize = 12.sp
@@ -203,8 +203,8 @@ fun NuevaContrasenaScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Campo 2: repetir la contraseña. Muestra error si no coinciden (areMatching).
-                // Campo Confirmar Contraseña
+                
+                
                 OutlinedTextField(
                     value = confirmarContrasena,
                     onValueChange = { viewModel.onConfirmarContrasenaChanged(it) },
@@ -264,7 +264,7 @@ fun NuevaContrasenaScreen(
                 }
 
                 Button(
-                    // Pide al ViewModel guardar la nueva contraseña.
+                    
                     onClick = { viewModel.actualizarContrasena(nuevaContrasena) },
                     enabled = canSubmit && recuperacionState !is RecuperacionUiState.Loading,
                     modifier = Modifier

@@ -1,14 +1,14 @@
-// ============================================================================
-// ARCHIVO : model/Protocolo.kt
-// CAPA    : Modelo (dominio)
-// RESUMEN : Protocolo de pruebas según RN-02, RN-04, RN-10, RN-16, RN-17, RT-03, RT-05 y RT-09:
-//           - ID único (formato tipo PT-2026-0401 sin colisiones)
-//           - Único por (visita, equipo)
-//           - Estado: Borrador, Observado, Registrado en terreno, Formalizado
-//           - Resultado global: peor(resultados) excluyendo pruebas no realizadas
-//           - Descripción de mantenimiento si aplica la modalidad
-//           - Inmutable tras formalización por Ingeniero o Jefe Técnico
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.model
 

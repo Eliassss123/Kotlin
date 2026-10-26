@@ -1,12 +1,12 @@
-// ============================================================================
-// ARCHIVO : viewmodel/VisitaViewModel.kt
-// CAPA    : ViewModel (MVVM)
-// RESUMEN : Gestión del flujo de visitas técnicas en terreno (RT-01, RT-03, RT-08):
-//           - Creación de visita con ingeniero a cargo obligatorio
-//           - Generación automática de protocolos y pruebas según tipo de equipo (RN-05)
-//           - Bloqueo de duplicados de equipo en la misma visita (RN-02, Aclar. 5)
-//           - Cierre de visita con validación estricta y generación de acta con receptor.
-// ============================================================================
+
+
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.viewmodel
 
@@ -39,9 +39,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.UUID
 
-/**
- * Estado para la creación de una nueva visita técnica en terreno.
- */
+
 data class NuevaVisitaState(
     val ordenTrabajo: String = "OT-2026-085",
     val cliente: String = "Planta Lampa",
@@ -54,10 +52,7 @@ data class NuevaVisitaState(
     val errorValidacion: String? = null
 )
 
-/**
- * ViewModel que gestiona el ciclo de visitas técnicas, apertura, adición de equipos con generación automática
- * de protocolos (RT-03, RN-05) y cierre de visita con emisión de acta (RT-08).
- */
+
 class VisitaViewModel(
     private val visitaRepository: VisitaRepository,
     private val protocoloRepository: ProtocoloRepository,
@@ -90,7 +85,7 @@ class VisitaViewModel(
         }
     }
 
-    /** Flujo con todas las visitas registradas. */
+    
     val todasLasVisitas: StateFlow<List<Visita>> = visitaRepository.allVisitas
         .stateIn(
             scope = viewModelScope,
@@ -134,10 +129,7 @@ class VisitaViewModel(
         _mensajeError.value = null
     }
 
-    /**
-     * RT-01: Crea una nueva visita técnica exigiendo obligatoriamente el ingeniero a cargo (Aclaración 4 y 7).
-     * @param onSuccess Callback que recibe el ID de la visita creada.
-     */
+    
     fun crearVisita(onSuccess: (String) -> Unit) {
         val state = _nuevaVisitaState.value
         if (state.ordenTrabajo.isBlank()) {
@@ -180,9 +172,7 @@ class VisitaViewModel(
         }
     }
 
-    /**
-     * Carga el detalle de una visita y sus protocolos asociados.
-     */
+    
     fun cargarDetalleVisita(visitaId: String) {
         viewModelScope.launch {
             val v = visitaRepository.getVisitaById(visitaId)
@@ -195,9 +185,7 @@ class VisitaViewModel(
         }
     }
 
-    /**
-     * Carga un acta generada por ID.
-     */
+    
     fun cargarActa(actaId: String) {
         viewModelScope.launch {
             val acta = actaRepository.getActaById(actaId)
@@ -208,10 +196,7 @@ class VisitaViewModel(
         }
     }
 
-    /**
-     * RT-03, RN-05: Agrega un equipo a la visita, generando automáticamente sus pruebas técnicas requeridas
-     * y validando unicidad (RN-02).
-     */
+    
     fun agregarEquipoAVisita(equipo: Equipo, tecnicoUsuario: String, onProtocoloCreado: (String) -> Unit) {
         val visita = _visitaSeleccionada.value ?: return
 
@@ -285,9 +270,7 @@ class VisitaViewModel(
         }
     }
 
-    /**
-     * RT-08: Cierra la visita técnica tras validar que no existan pruebas incompletas y genera un Acta única de entrega.
-     */
+    
     fun cerrarVisitaYGenerarActa(
         recibidoPor: String,
         onSuccess: (Acta) -> Unit,

@@ -1,10 +1,10 @@
-// ============================================================================
-// ARCHIVO : viewmodel/ProtocoloViewModel.kt
-// CAPA    : ViewModel (MVVM)
-// RESUMEN : Gestión completa del protocolo, captura de mediciones (RT-04),
-//           cálculos automáticos (RT-05), trazabilidad de instrumentos (RN-11),
-//           comparación histórica (RN-09, RT-06) y formalización (RN-04, RN-16, RT-09).
-// ============================================================================
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.viewmodel
 
@@ -32,9 +32,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-/**
- * Estado temporal para la edición o captura de una prueba técnica dentro de un protocolo.
- */
+
 data class EdicionPruebaState(
     val pruebaId: String = "",
     val tipoPrueba: String = "",
@@ -52,10 +50,7 @@ data class EdicionPruebaState(
     val observaciones: String = ""
 )
 
-/**
- * ViewModel que gestiona la captura y edición de protocolos, cálculos automáticos (RT-05),
- * validación de instrumentos (RN-11), comparación histórica (RN-09) y formalización (RN-04).
- */
+
 class ProtocoloViewModel(
     private val protocoloRepository: ProtocoloRepository,
     private val pruebaRepository: PruebaRepository,
@@ -90,9 +85,7 @@ class ProtocoloViewModel(
         }
     }
 
-    /**
-     * Lista reactiva de protocolos con soporte para filtrado por empresa cliente (P-04, RT-10).
-     */
+    
     val protocolos: StateFlow<List<Protocolo>> = combine(
         protocoloRepository.allProtocolos,
         _empresaClienteFiltro
@@ -115,9 +108,7 @@ class ProtocoloViewModel(
         _empresaClienteFiltro.value = empresa
     }
 
-    /**
-     * Carga un protocolo específico y sus pruebas asociadas por ID.
-     */
+    
     fun cargarProtocolo(id: String) {
         viewModelScope.launch {
             val prot = protocoloRepository.getProtocoloById(id)
@@ -130,9 +121,7 @@ class ProtocoloViewModel(
         }
     }
 
-    /**
-     * Prepara el estado de edición de una prueba buscando por su ID.
-     */
+    
     fun iniciarEdicionPrueba(pruebaId: String) {
         viewModelScope.launch {
             val p = pruebaRepository.getPruebaById(pruebaId)
@@ -142,9 +131,7 @@ class ProtocoloViewModel(
         }
     }
 
-    /**
-     * Prepara el estado de edición de una [Prueba] calculando variaciones históricas y plantillas.
-     */
+    
     fun iniciarEdicionPrueba(prueba: Prueba) {
         viewModelScope.launch {
             val esManual = ReglasNegocio.esPruebaConAsignacionManual(prueba.tipoPrueba)
@@ -208,9 +195,7 @@ class ProtocoloViewModel(
         _edicionPruebaState.value = _edicionPruebaState.value?.copy(resultadoManual = res)
     }
 
-    /**
-     * Actualiza una medición específica y dispara el recálculo automático inmediato (RT-05).
-     */
+    
     fun actualizarMedicion(index: Int, nuevoValorNum: Double?, nuevaUnidad: String, momento: MomentoMedicion) {
         val current = _edicionPruebaState.value ?: return
         val lista = current.mediciones.toMutableList()
@@ -240,9 +225,7 @@ class ProtocoloViewModel(
         }
     }
 
-    /**
-     * RT-05: Realiza cálculos automáticos de resultados (IP, TTR, Resistencia de Contactos, etc.) según reglas de negocio.
-     */
+    
     private fun recalcularResultadoPrueba() {
         val state = _edicionPruebaState.value ?: return
         if (state.estadoPrueba == EstadoPrueba.NO_REALIZADA) {
@@ -304,9 +287,7 @@ class ProtocoloViewModel(
         _edicionPruebaState.value = state.copy(resultadoCalculado = nuevoResultado)
     }
 
-    /**
-     * Guarda la edición de la prueba y recalcula el resultado global del protocolo (RN-10).
-     */
+    
     fun guardarEdicionPrueba(onSuccess: () -> Unit, onError: (String) -> Unit) {
         val state = _edicionPruebaState.value ?: return
         val prot = _selectedProtocolo.value ?: return
@@ -363,9 +344,7 @@ class ProtocoloViewModel(
         }
     }
 
-    /**
-     * RN-04, RN-16, RT-09: Formaliza el protocolo mediante aprobación o observación por Ingeniero / Jefe Técnico.
-     */
+    
     fun formalizarProtocolo(usuarioFormalizador: String, esAprobacion: Boolean, onSuccess: () -> Unit) {
         val prot = _selectedProtocolo.value ?: return
         viewModelScope.launch {
@@ -376,9 +355,7 @@ class ProtocoloViewModel(
         }
     }
 
-    /**
-     * Agrega una foto de evidencia al protocolo.
-     */
+    
     fun agregarFotoAProtocolo(path: String) {
         val prot = _selectedProtocolo.value ?: return
         if (path.isBlank()) return
@@ -391,9 +368,7 @@ class ProtocoloViewModel(
         }
     }
 
-    /**
-     * Elimina una foto de evidencia del protocolo.
-     */
+    
     fun eliminarFotoDeProtocolo(index: Int) {
         val prot = _selectedProtocolo.value ?: return
         val lista = prot.fotos.toMutableList()

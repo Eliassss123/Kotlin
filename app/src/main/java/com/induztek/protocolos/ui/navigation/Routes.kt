@@ -1,8 +1,8 @@
-// ============================================================================
-// ARCHIVO : ui/navigation/Routes.kt
-// CAPA    : Navegación
-// RESUMEN : Mapa de rutas de navegación de la aplicación Induztek.
-// ============================================================================
+
+
+
+
+
 
 package com.induztek.protocolos.ui.navigation
 

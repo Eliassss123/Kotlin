@@ -1,12 +1,12 @@
-// ============================================================================
-// ARCHIVO : data/local/ProtocoloEntity.kt
-// CAPA    : Datos locales (Room)
-// RESUMEN : Tabla 'protocolos' según RN-02, RN-04, RN-10, RN-16, RN-17, RT-03, RT-05 y RT-09:
-//           - Vinculación a Visita y Equipo
-//           - Resultado global calculado
-//           - Descripción de mantenimiento si aplica
-//           - Trazabilidad de formalización e inmutabilidad
-// ============================================================================
+
+
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.data.local
 
@@ -21,10 +21,7 @@ import com.induztek.protocolos.model.Prueba
 import com.induztek.protocolos.model.ResultadoPrueba
 import com.induztek.protocolos.model.SyncStatus
 
-/**
- * Entidad de Room que representa la tabla 'protocolos' en la base de datos local.
- * Almacena la estructura completa de un protocolo de pruebas con serialización JSON para pruebas, mediciones y fotos.
- */
+
 @Entity(tableName = "protocolos")
 data class ProtocoloEntity(
     @PrimaryKey val id: String,
@@ -52,9 +49,7 @@ data class ProtocoloEntity(
     val medicionesJson: String = "[]",
     val fotosJson: String = "[]"
 ) {
-    /**
-     * Convierte la entidad [ProtocoloEntity] al modelo de dominio [Protocolo], deserializando JSONs de pruebas, mediciones y fotos.
-     */
+    
     fun toDomain(): Protocolo {
         val listMedType = object : TypeToken<List<Medicion>>() {}.type
         val listPruType = object : TypeToken<List<Prueba>>() {}.type
@@ -104,9 +99,7 @@ data class ProtocoloEntity(
     }
 
     companion object {
-        /**
-         * Crea una instancia de [ProtocoloEntity] a partir del modelo de dominio [Protocolo], serializando listas a JSON.
-         */
+        
         fun fromDomain(protocolo: Protocolo): ProtocoloEntity {
             return ProtocoloEntity(
                 id = protocolo.id,

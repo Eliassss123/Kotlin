@@ -1,8 +1,8 @@
-// ============================================================================
-// ARCHIVO : ui/login/VerificarCodigoScreen.kt
-// CAPA    : View (pantalla)
-// RESUMEN : PASO 2 de recuperar contraseña: se escribe el código de 6 dígitos. Estructura igual a LoginScreen.
-// ============================================================================
+
+
+
+
+
 
 package com.induztek.protocolos.ui.login
 
@@ -54,7 +54,7 @@ import com.induztek.protocolos.ui.theme.NaranjaSeguridad
 import com.induztek.protocolos.viewmodel.LoginViewModel
 import com.induztek.protocolos.viewmodel.RecuperacionUiState
 
-// Comparte el mismo LoginViewModel.
+
 @Composable
 fun VerificarCodigoScreen(
     viewModel: LoginViewModel,
@@ -67,11 +67,11 @@ fun VerificarCodigoScreen(
     val mostrarDialog by viewModel.mostrarDialogCodigo.collectAsState()
     val codigoGenerado by viewModel.codigoGenerado.collectAsState()
 
-    // El botón solo se habilita con exactamente 6 dígitos.
+    
     val canSubmit = codigoIngresado.length == 6
 
-    // Cuando el ViewModel confirma el código (CodigoVerificado), esta pantalla avisa a NavGraph para pasar a 'Nueva
-    //   contraseña'.
+    
+    
     LaunchedEffect(recuperacionState) {
         if (recuperacionState is RecuperacionUiState.CodigoVerificado) {
             onCodigoVerificado()
@@ -142,7 +142,7 @@ fun VerificarCodigoScreen(
 
                 OutlinedTextField(
                     value = codigoIngresado,
-                    // Limita la entrada: solo acepta el texto nuevo si tiene 6 caracteres o menos.
+                    
                     onValueChange = {
                         if (it.length <= 6) {
                             viewModel.onCodigoIngresadoChanged(it)
@@ -166,7 +166,7 @@ fun VerificarCodigoScreen(
                         unfocusedLabelColor = Color.Gray
                     ),
                     keyboardOptions = KeyboardOptions(
-                        // Abre el teclado numérico.
+                        
                         keyboardType = KeyboardType.Number,
                         imeAction = ImeAction.Done
                     )
@@ -185,7 +185,7 @@ fun VerificarCodigoScreen(
                 }
 
                 Button(
-                    // Pide al ViewModel verificar el código.
+                    
                     onClick = { viewModel.verificarCodigo(codigoIngresado) },
                     enabled = canSubmit && recuperacionState !is RecuperacionUiState.Loading,
                     modifier = Modifier
@@ -214,7 +214,7 @@ fun VerificarCodigoScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // TextButton = botón sin fondo (solo texto). Reenvía un código nuevo.
+                
                 TextButton(
                     onClick = { viewModel.solicitarCodigo(correo) }
                 ) {
@@ -229,8 +229,8 @@ fun VerificarCodigoScreen(
         }
     }
 
-    // Diálogo que aparece al reenviar: muestra el nuevo código (simulación).
-    // Modal Dialog for Local Simulation when Resending Code
+    
+    
     if (mostrarDialog && codigoGenerado != null) {
         AlertDialog(
             onDismissRequest = { viewModel.cerrarDialogCodigo() },

@@ -1,8 +1,8 @@
-// ============================================================================
-// ARCHIVO : ui/components/InduztekTopBar.kt
-// CAPA    : View - componente reutilizable
-// RESUMEN : la barra azul superior (título y flecha "volver"). Todas las pantallas internas la reutilizan.
-// ============================================================================
+
+
+
+
+
 
 package com.induztek.protocolos.ui.components
 
@@ -21,20 +21,20 @@ import com.induztek.protocolos.ui.theme.AzulPetroleo
 
 import androidx.compose.foundation.layout.RowScope
 
-// @OptIn: acepto usar una API de Material 3 que Google marcó como 'experimental'.
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-// Parámetros con valor por defecto: canNavigateBack = false (sin flecha) y onNavigateBack = {} (no hace nada).
+
 fun InduztekTopBar(
     titulo: String,
     canNavigateBack: Boolean = false,
     onNavigateBack: () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {}
 ) {
-    // TopAppBar = barra superior de Material.
+    
     TopAppBar(
         actions = actions,
-        // Las llaves { } reciben otro Composable (el contenido del título).
+        
         title = {
             Text(
                 text = titulo,
@@ -42,7 +42,7 @@ fun InduztekTopBar(
                 color = Color.White
             )
         },
-        // Zona de la izquierda: solo muestra la flecha si canNavigateBack es true.
+        
         navigationIcon = {
             if (canNavigateBack) {
                 IconButton(onClick = onNavigateBack) {
@@ -54,7 +54,7 @@ fun InduztekTopBar(
                 }
             }
         },
-        // Color de fondo de la barra.
+        
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = AzulPetroleo
         )

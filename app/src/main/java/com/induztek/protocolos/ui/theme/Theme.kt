@@ -1,9 +1,9 @@
-// ============================================================================
-// ARCHIVO : ui/theme/Theme.kt
-// CAPA    : Tema visual
-// RESUMEN : Tema en tonos oscuros (Dark Mode) para Induztek, garantizando alto contraste
-//           y legibilidad óptima para el usuario.
-// ============================================================================
+
+
+
+
+
+
 
 package com.induztek.protocolos.ui.theme
 
@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// Paleta en tonos oscuros de alto contraste
+
 private val DarkColorScheme = darkColorScheme(
     primary = AzulPetroleo,
     onPrimary = Color.White,
@@ -37,7 +37,7 @@ private val DarkColorScheme = darkColorScheme(
 
 @Composable
 fun InduztekTheme(
-    // Activamos por defecto el tema oscuro en tonos oscuros como lo solicitó el usuario
+    
     darkTheme: Boolean = true,
     content: @Composable () -> Unit
 ) {

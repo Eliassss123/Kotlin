@@ -1,11 +1,11 @@
-// ============================================================================
-// ARCHIVO : ui/perfil/PerfilScreen.kt
-// CAPA    : View (pantalla)
-// RESUMEN : Muestra los datos del usuario activo, permite agregar/modificar/quitar
-//           foto de perfil (vía Cámara o Galería), distinguir claramente si es
-//           Trabajador de Induztek o Cliente Externo, editar biografía personal
-//           y cerrar sesión.
-// ============================================================================
+
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.ui.perfil
 
@@ -98,19 +98,19 @@ fun PerfilScreen(
     val perfil = usuario?.getPerfil()
     val esTrabajador = perfil?.esTrabajadorInduztek ?: true
 
-    // Estado local para la foto en memoria
+    
     var bitmapFoto by remember(usuario?.fotoPerfil) {
         mutableStateOf(ImageStorageHelper.cargarBitmap(usuario?.fotoPerfil))
     }
 
-    // Estados para diálogos
+    
     var mostrarDialogOpcionesFoto by remember { mutableStateOf(false) }
     var mostrarDialogEditarBio by remember { mutableStateOf(false) }
     var biografiaTexto by remember(usuario?.biografia) {
         mutableStateOf(usuario?.biografia ?: "")
     }
 
-    // Launcher para tomar foto con la CÁMARA
+    
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview()
     ) { bitmap: Bitmap? ->
@@ -122,7 +122,7 @@ fun PerfilScreen(
         }
     }
 
-    // Launcher para pedir permiso de cámara en tiempo de ejecución (evita crash SecurityException)
+    
     val permissionCameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -137,7 +137,7 @@ fun PerfilScreen(
         }
     }
 
-    // Launcher para seleccionar imagen de la GALERÍA
+    
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -184,7 +184,7 @@ fun PerfilScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Encabezado con avatar interactivo
+            
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -196,7 +196,7 @@ fun PerfilScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Avatar con opción de clic para agregar/modificar/quitar foto
+                    
                     Box(
                         modifier = Modifier
                             .size(105.dp)
@@ -231,7 +231,7 @@ fun PerfilScreen(
                             }
                         }
 
-                        // Badge flotante para indicar que es editable
+                        
                         Box(
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
@@ -264,7 +264,7 @@ fun PerfilScreen(
                         fontWeight = FontWeight.SemiBold
                     )
 
-                    // Distinción visual: ¿Trabajador Induztek o Cliente Externo?
+                    
                     Box(
                         modifier = Modifier
                             .background(
@@ -290,7 +290,7 @@ fun PerfilScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Tarjeta de Biografía y Rol Profesional
+            
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -374,7 +374,7 @@ fun PerfilScreen(
 
 
 
-            // Tarjeta de información de cuenta
+            
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -387,14 +387,14 @@ fun PerfilScreen(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    //Texto
+                    
                     Text(
                         text = "Información de cuenta",
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
                         color = AzulPetroleo
                     )
-                //Estetica
+                
                     FilaInfoPerfil(
                         icono = Icons.Default.Email,
                         etiqueta = "Correo",
@@ -423,7 +423,7 @@ fun PerfilScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Tarjeta de permisos del rol
+            
             if (perfil != null) {
                 Card(
                     modifier = Modifier
@@ -461,7 +461,7 @@ fun PerfilScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Botón de Cerrar Sesión
+            
             Button(
                 onClick = onCerrarSesion,
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)),
@@ -480,7 +480,7 @@ fun PerfilScreen(
         }
     }
 
-    // DIÁLOGO: OPCIONES DE FOTO DE PERFIL (Cámara, Galería, Quitar)
+    
     if (mostrarDialogOpcionesFoto) {
         AlertDialog(
             onDismissRequest = { mostrarDialogOpcionesFoto = false },
@@ -563,7 +563,7 @@ fun PerfilScreen(
         )
     }
 
-    // DIÁLOGO: EDITAR BIOGRAFÍA
+    
     if (mostrarDialogEditarBio) {
         AlertDialog(
             onDismissRequest = { mostrarDialogEditarBio = false },

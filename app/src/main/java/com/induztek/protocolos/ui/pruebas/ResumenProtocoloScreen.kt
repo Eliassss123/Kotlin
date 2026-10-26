@@ -1,9 +1,9 @@
-// ============================================================================
-// ARCHIVO : ui/pruebas/ResumenProtocoloScreen.kt
-// CAPA    : View (pantalla)
-// RESUMEN : revisión completa de la prueba y generación de Acta de Respaldo en Terreno
-//           (solución al problema PB-01 de Anexo 3: cliente se va con respaldo escrito).
-// ============================================================================
+
+
+
+
+
+
 
 package com.induztek.protocolos.ui.pruebas
 
@@ -86,7 +86,7 @@ fun ResumenProtocoloScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // TARJETA 1: Encabezado corporativo Induztek SpA y Datos Generales
+            
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -150,7 +150,7 @@ fun ResumenProtocoloScreen(
                 }
             }
 
-            // TARJETA 2: Trazabilidad de Instrumento y Calibración (PB-06)
+            
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -193,7 +193,7 @@ fun ResumenProtocoloScreen(
                 }
             }
 
-            // TARJETA 3: Mediciones Registradas
+            
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -230,7 +230,7 @@ fun ResumenProtocoloScreen(
                 }
             }
 
-            // TARJETA DE EVIDENCIA FOTOGRÁFICA (Opcional, si existen fotos)
+            
             if (state.fotos.isNotEmpty()) {
                 Card(
                     shape = RoundedCornerShape(12.dp),
@@ -270,7 +270,7 @@ fun ResumenProtocoloScreen(
                 }
             }
 
-            // TARJETA 4: Solución PB-01: Acta de Entrega Inmediata al Cliente
+            
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9)),

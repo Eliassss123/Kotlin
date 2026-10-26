@@ -87,7 +87,7 @@ fun AdminScreen(
 
             when (selectedTab) {
                 0 -> {
-                    // Gestión de Instrumentos y Calibraciones (RN-11, RT-11)
+                    
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
@@ -183,7 +183,7 @@ fun AdminScreen(
                     }
                 }
                 1 -> {
-                    // Gestión de Personal (RF-22)
+                    
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()

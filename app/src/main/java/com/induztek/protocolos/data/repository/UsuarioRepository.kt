@@ -1,9 +1,9 @@
-// ============================================================================
-// ARCHIVO : data/repository/UsuarioRepository.kt
-// CAPA    : Repositorio (MVVM)
-// RESUMEN : Gestión de usuarios, perfiles (P-01 a P-04), activación/desactivación (RF-22)
-//           y códigos de recuperación de contraseña.
-// ============================================================================
+
+
+
+
+
+
 
 package com.induztek.protocolos.data.repository
 
@@ -13,90 +13,65 @@ import com.induztek.protocolos.data.local.UsuarioEntity
 import com.induztek.protocolos.model.CodigoRecuperacion
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Repositorio encargado de gestionar la autenticación, perfiles de usuario (P-01 a P-04), estado activo (RF-22)
- * y códigos de recuperación de contraseña.
- */
+
 class UsuarioRepository(
     private val usuarioDao: UsuarioDao,
     private val codigoRecuperacionDao: CodigoRecuperacionDao
 ) {
-    /** Flujo con todos los usuarios registrados. */
+    
     val allUsuarios: Flow<List<UsuarioEntity>> = usuarioDao.getAllUsuarios()
 
-    /**
-     * Busca un usuario por correo electrónico.
-     */
+    
     suspend fun buscarPorCorreo(correo: String): UsuarioEntity? {
         return usuarioDao.buscarPorCorreo(correo.trim())
     }
 
-    /**
-     * Busca un usuario por su ID único.
-     */
+    
     suspend fun buscarPorId(id: String): UsuarioEntity? {
         return usuarioDao.buscarPorId(id)
     }
 
-    /**
-     * Actualiza la contraseña de un usuario.
-     */
+    
     suspend fun actualizarContrasena(correo: String, nuevaContrasena: String): Boolean {
         return usuarioDao.actualizarContrasena(correo.trim(), nuevaContrasena) > 0
     }
 
-    /**
-     * RF-22: Activa o desactiva un usuario del personal.
-     */
+    
     suspend fun setActivo(id: String, activo: Boolean): Boolean {
         return usuarioDao.setActivo(id, activo) > 0
     }
 
-    /**
-     * Inserta un nuevo usuario en la base de datos.
-     */
+    
     suspend fun insertarUsuario(usuario: UsuarioEntity) {
         usuarioDao.insertarUsuario(usuario)
     }
 
-    /**
-     * Guarda un código de recuperación de contraseña.
-     */
+    
     suspend fun guardarCodigoRecuperacion(codigo: CodigoRecuperacion) {
         codigoRecuperacionDao.insertarCodigo(codigo)
     }
 
-    /**
-     * Obtiene el último código de recuperación asociado a un correo.
-     */
+    
     suspend fun obtenerUltimoCodigo(correo: String): CodigoRecuperacion? {
         return codigoRecuperacionDao.obtenerUltimoCodigo(correo.trim())
     }
 
-    /**
-     * Marca un código de recuperación como utilizado.
-     */
+    
     suspend fun marcarCodigoComoUsado(id: String) {
         codigoRecuperacionDao.marcarComoUsado(id)
     }
 
-    /**
-     * Actualiza la foto de perfil del usuario.
-     */
+    
     suspend fun actualizarFotoPerfil(id: String, fotoPath: String?): Boolean {
         return usuarioDao.actualizarFotoPerfil(id, fotoPath) > 0
     }
 
-    /**
-     * Actualiza la biografía del usuario.
-     */
+    
     suspend fun actualizarBiografia(id: String, biografia: String?): Boolean {
         return usuarioDao.actualizarBiografia(id, biografia) > 0
     }
 
-    /**
-     * Puebla la base de datos con los perfiles iniciales de demostración (P-01 a P-04) si está vacía.
-     */
+    
     suspend fun seedInitialDataIfEmpty() {
         if (usuarioDao.getCount() == 0) {
             val initialUsers = listOf(

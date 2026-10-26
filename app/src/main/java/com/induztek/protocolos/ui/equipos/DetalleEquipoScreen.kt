@@ -1,10 +1,10 @@
-// ============================================================================
-// ARCHIVO : ui/equipos/DetalleEquipoScreen.kt
-// CAPA    : View (pantalla)
-// RESUMEN : Ficha técnica con datos de placa completos (FT-03 sec. 2),
-//           indicador de evolución histórica / tendencia de empeoramiento (RT-07)
-//           y listado de pruebas anteriores.
-// ============================================================================
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.ui.equipos
 
@@ -87,7 +87,7 @@ fun DetalleEquipoScreen(
                 .padding(16.dp)
         ) {
             equipo?.let { eq ->
-                // Tarjeta 1: Ficha Técnica y Datos de Placa
+                
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
@@ -135,7 +135,7 @@ fun DetalleEquipoScreen(
                             color = TextoSecundario
                         )
 
-                        // RT-07: Alerta si el equipo viene empeorando
+                        
                         if (eq.empeorando) {
                             Spacer(modifier = Modifier.height(8.dp))
                             Row(
@@ -156,7 +156,7 @@ fun DetalleEquipoScreen(
                             }
                         }
 
-                        // Datos de Placa de Características (FT-03 sec. 2)
+                        
                         Spacer(modifier = Modifier.height(10.dp))
                         HorizontalDivider(color = Color(0xFFEEEEEE))
                         Spacer(modifier = Modifier.height(8.dp))
@@ -270,7 +270,7 @@ fun PruebaHistorialItem(prueba: Prueba) {
                 color = TextoSecundario
             )
 
-            // RN-09, RT-06: Destacar variación histórica si supera 25%
+            
             if (prueba.variacionHistoricaPorcentaje != null && prueba.variacionHistoricaPorcentaje != 0.0) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {

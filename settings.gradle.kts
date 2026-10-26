@@ -10,7 +10,7 @@ try {
     val envMap = envField.get(null) as? MutableMap<Any, Any>
     envMap?.remove("ANDROID_PREFS_ROOT")
 } catch (e: Throwable) {
-    // Ignore if reflection is restricted
+    
 }
 
 pluginManagement {

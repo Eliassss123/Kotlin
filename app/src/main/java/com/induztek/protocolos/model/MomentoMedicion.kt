@@ -1,10 +1,10 @@
-// ============================================================================
-// ARCHIVO : model/MomentoMedicion.kt
-// CAPA    : Modelo (dominio)
-// RESUMEN : Momento de medición según Aclaración 4:
-//           - PREVIA o POSTERIOR_MANTENIMIENTO.
-//           - Regla: "Si hay posterior, vale la posterior para el cálculo del resultado."
-// ============================================================================
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.model
 

@@ -1,9 +1,9 @@
-// ============================================================================
-// ARCHIVO : model/SyncStatus.kt
-// CAPA    : Modelo (dominio)
-// RESUMEN : Estado de sincronización de cola local según página 6:
-//           - PENDIENTE, ENVIADO, ERROR; reintentos idempotentes.
-// ============================================================================
+
+
+
+
+
+
 
 package com.induztek.protocolos.model
 

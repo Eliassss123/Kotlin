@@ -1,9 +1,9 @@
-// ============================================================================
-// ARCHIVO : data/local/EquipoEntity.kt
-// CAPA    : Datos locales (Room)
-// RESUMEN : Tabla 'equipos' ampliada con datos de placa de características (FT-03 sec. 2)
-//           y campos para validación de duplicados en terreno (RT-02).
-// ============================================================================
+
+
+
+
+
+
 
 package com.induztek.protocolos.data.local
 
@@ -12,10 +12,7 @@ import androidx.room.PrimaryKey
 import com.induztek.protocolos.model.Equipo
 import com.induztek.protocolos.model.EstadoProtocolo
 
-/**
- * Entidad de Room que representa la tabla 'equipos' en la base de datos local.
- * Almacena especificaciones técnicas de placa, ubicación, cliente y estado del último protocolo.
- */
+
 @Entity(tableName = "equipos")
 data class EquipoEntity(
     @PrimaryKey val id: String,
@@ -34,9 +31,7 @@ data class EquipoEntity(
     val conexion: String = "Dyn11",
     val ultimoEstado: String
 ) {
-    /**
-     * Convierte la entidad de base de datos [EquipoEntity] al modelo de dominio [Equipo].
-     */
+    
     fun toDomain(): Equipo {
         return Equipo(
             id = id,
@@ -58,9 +53,7 @@ data class EquipoEntity(
     }
 
     companion object {
-        /**
-         * Crea una instancia de [EquipoEntity] a partir del modelo de dominio [Equipo].
-         */
+        
         fun fromDomain(equipo: Equipo): EquipoEntity {
             return EquipoEntity(
                 id = equipo.id,

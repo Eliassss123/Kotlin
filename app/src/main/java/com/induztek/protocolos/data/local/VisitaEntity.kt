@@ -1,10 +1,10 @@
-// ============================================================================
-// ARCHIVO : data/local/VisitaEntity.kt
-// CAPA    : Datos locales (Room)
-// RESUMEN : Tabla 'visitas' según RT-01, Aclaraciones 4 y 7:
-//           - OT, fecha, hora inicio, cliente, instalación, modalidad, ingeniero a cargo obligatorio,
-//             técnicos, condiciones ambientales, estado de cierre y sync_status.
-// ============================================================================
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.data.local
 
@@ -14,10 +14,7 @@ import com.induztek.protocolos.model.ModalidadVisita
 import com.induztek.protocolos.model.SyncStatus
 import com.induztek.protocolos.model.Visita
 
-/**
- * Entidad de Room que representa la tabla 'visitas' en la base de datos local.
- * Almacena los datos de la visita en terreno, orden de trabajo, ingeniero a cargo y estado de cierre.
- */
+
 @Entity(tableName = "visitas")
 data class VisitaEntity(
     @PrimaryKey val id: String,
@@ -34,9 +31,7 @@ data class VisitaEntity(
     val cerrada: Boolean,
     val syncStatus: String
 ) {
-    /**
-     * Convierte la entidad [VisitaEntity] al modelo de dominio [Visita].
-     */
+    
     fun toDomain(): Visita {
         return Visita(
             id = id,
@@ -56,9 +51,7 @@ data class VisitaEntity(
     }
 
     companion object {
-        /**
-         * Crea una instancia de [VisitaEntity] a partir del modelo de dominio [Visita].
-         */
+        
         fun fromDomain(visita: Visita): VisitaEntity {
             return VisitaEntity(
                 id = visita.id,
