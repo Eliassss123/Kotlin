@@ -1,7 +1,7 @@
-// ============================================================================
-// ARCHIVO : ui/login/LoginScreen.kt
-// CAPA    : View (pantalla) - Pantalla de inicio de sesión en modo oscuro.
-// ============================================================================
+
+
+
+
 
 package com.induztek.protocolos.ui.login
 
@@ -36,6 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -64,7 +65,8 @@ import com.induztek.protocolos.viewmodel.LoginViewModel
 fun LoginScreen(
     viewModel: LoginViewModel,
     onLoginSuccess: () -> Unit,
-    onOlvideContrasenaClick: () -> Unit
+    onOlvideContrasenaClick: () -> Unit,
+    onRegistroClick: () -> Unit
 ) {
     val email by viewModel.email.collectAsState()
     val password by viewModel.password.collectAsState()
@@ -269,6 +271,15 @@ fun LoginScreen(
                             color = Color.White
                         )
                     }
+                }
+                TextButton(
+                    onClick = {
+                        viewModel.resetRegistroState()
+                        onRegistroClick()
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("¿No tienes cuenta? Regístrate", color = AzulPetroleoLight)
                 }
             }
         }

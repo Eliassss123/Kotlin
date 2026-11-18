@@ -1,13 +1,13 @@
-// ============================================================================
-// ARCHIVO : ui/pruebas/NuevaPruebaScreen.kt
-// CAPA    : View (pantalla)
-// RESUMEN : formulario en terreno adaptado a los Anexos 1, 2 y 3:
-//           1) Datos de OT y equipo (Paso 1 y 4)
-//           2) Trazabilidad de instrumento y calibración vigente (PB-06)
-//           3) Condiciones ambientales (Temperatura y Humedad)
-//           4) Carga rápida de plantillas de medición para técnico con guantes (P-01, PB-07)
-//           5) Estado y observaciones
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.ui.pruebas
 
@@ -95,6 +95,7 @@ fun NuevaPruebaScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val equiposDisponibles by viewModel.equiposDisponibles.collectAsState()
+    val remoteError by viewModel.remoteError.collectAsState()
 
     var dropdownEquipoExpanded by remember { mutableStateOf(false) }
     var dropdownTipoExpanded by remember { mutableStateOf(false) }
@@ -144,7 +145,10 @@ fun NuevaPruebaScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // TARJETA 1: Orden de Trabajo y Equipo
+            remoteError?.let { message ->
+                Text(text = message, color = Color.Red, fontWeight = FontWeight.SemiBold)
+            }
+
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -171,7 +175,7 @@ fun NuevaPruebaScreen(
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    // Dropdown Selección Equipo
+
                     ExposedDropdownMenuBox(
                         expanded = dropdownEquipoExpanded,
                         onExpandedChange = { dropdownEquipoExpanded = !dropdownEquipoExpanded }
@@ -205,7 +209,7 @@ fun NuevaPruebaScreen(
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    // Dropdown Tipo de Prueba
+
                     ExposedDropdownMenuBox(
                         expanded = dropdownTipoExpanded,
                         onExpandedChange = { dropdownTipoExpanded = !dropdownTipoExpanded }
@@ -269,7 +273,7 @@ fun NuevaPruebaScreen(
                 }
             }
 
-            // TARJETA 2: Instrumento de Medición y Ambiente (PB-06, Paso 4)
+
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -350,7 +354,7 @@ fun NuevaPruebaScreen(
                 }
             }
 
-            // TARJETA 3: Lista Dinámica de Mediciones + Botón Plantilla Rápida
+
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -368,7 +372,7 @@ fun NuevaPruebaScreen(
                             fontWeight = FontWeight.Bold,
                             color = AzulPetroleo
                         )
-                        // Botón de plantilla rápida para que el técnico con guantes no tipee
+
                         OutlinedButton(
                             onClick = { viewModel.cargarPlantillaRecomendada() }
                         ) {
@@ -455,7 +459,7 @@ fun NuevaPruebaScreen(
                 }
             }
 
-            // TARJETA 4: Estado y observaciones
+
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -503,7 +507,7 @@ fun NuevaPruebaScreen(
                 }
             }
 
-            // TARJETA 5: Fotos de Evidencia (Opcional)
+
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -529,7 +533,7 @@ fun NuevaPruebaScreen(
 
                     val context = LocalContext.current
 
-                    // Launcher para tomar foto con la CÁMARA
+
                     val cameraLauncher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.TakePicturePreview()
                     ) { bitmap: android.graphics.Bitmap? ->
@@ -540,7 +544,7 @@ fun NuevaPruebaScreen(
                         }
                     }
 
-                    // Launcher para permiso de cámara
+
                     val permissionCameraLauncher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.RequestPermission()
                     ) { isGranted ->
@@ -553,7 +557,7 @@ fun NuevaPruebaScreen(
                         }
                     }
 
-                    // Launcher para seleccionar imagen de la GALERÍA
+
                     val galleryLauncher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.GetContent()
                     ) { uri: android.net.Uri? ->
@@ -605,7 +609,7 @@ fun NuevaPruebaScreen(
                         }
                     }
 
-                    // Previsualización de imágenes adjuntadas
+
                     if (state.fotos.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(14.dp))
                         Text(
@@ -645,7 +649,7 @@ fun NuevaPruebaScreen(
                                             Text("Archivo", fontSize = 10.sp, color = Color.Gray)
                                         }
                                     }
-                                    // Botón para eliminar foto
+
                                     IconButton(
                                         onClick = { viewModel.eliminarFoto(index) },
                                         modifier = Modifier
@@ -667,7 +671,7 @@ fun NuevaPruebaScreen(
                 }
             }
 
-            // Botón Continuar a Resumen
+
             Button(
                 onClick = onIrAResumen,
                 enabled = state.equipoCodigo.isNotBlank() && state.mediciones.isNotEmpty(),

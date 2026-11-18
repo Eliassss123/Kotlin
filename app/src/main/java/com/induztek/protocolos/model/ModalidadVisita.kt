@@ -1,10 +1,10 @@
-// ============================================================================
-// ARCHIVO : model/ModalidadVisita.kt
-// CAPA    : Modelo (dominio)
-// RESUMEN : Modalidades de visita según Aclaración 4 y 7:
-//           - SOLO_PRUEBAS
-//           - PRUEBAS_Y_MANTENIMIENTO (descripción breve obligatoria por equipo, mediciones previa y posterior)
-// ============================================================================
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.model
 

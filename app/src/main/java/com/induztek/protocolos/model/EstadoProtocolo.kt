@@ -1,13 +1,13 @@
-// ============================================================================
-// ARCHIVO : model/EstadoProtocolo.kt
-// CAPA    : Modelo (dominio)
-// RESUMEN : Estados del protocolo según RN-02, RN-16, RN-17 y RN-19:
-//           - Borrador (editable solo por técnico creador)
-//           - Observado (editable por técnico para subsanar observaciones)
-//           - Registrado en terreno (emitido con acta en terreno)
-//           - Formalizado (aprobado por ingeniero/jefe técnico, inmutable)
-//           Regla RN-19: para el cliente, todo lo no formalizado se muestra como "Pendiente de formalización".
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.model
 

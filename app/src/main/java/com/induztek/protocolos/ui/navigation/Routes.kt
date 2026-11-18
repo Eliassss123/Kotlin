@@ -1,13 +1,14 @@
-// ============================================================================
-// ARCHIVO : ui/navigation/Routes.kt
-// CAPA    : Navegación
-// RESUMEN : Mapa de rutas de navegación de la aplicación Induztek.
-// ============================================================================
+
+
+
+
+
 
 package com.induztek.protocolos.ui.navigation
 
 sealed class Routes(val route: String) {
     object Login : Routes("login")
+    object Registro : Routes("registro")
     object OlvideContrasena : Routes("olvide_contrasena")
     object VerificarCodigo : Routes("verificar_codigo")
     object NuevaContrasena : Routes("nueva_contrasena")

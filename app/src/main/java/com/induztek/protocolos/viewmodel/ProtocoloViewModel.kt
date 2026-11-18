@@ -1,10 +1,10 @@
-// ============================================================================
-// ARCHIVO : viewmodel/ProtocoloViewModel.kt
-// CAPA    : ViewModel (MVVM)
-// RESUMEN : Gestión completa del protocolo, captura de mediciones (RT-04),
-//           cálculos automáticos (RT-05), trazabilidad de instrumentos (RN-11),
-//           comparación histórica (RN-09, RT-06) y formalización (RN-04, RN-16, RT-09).
-// ============================================================================
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.viewmodel
 
@@ -24,17 +24,15 @@ import com.induztek.protocolos.model.MomentoMedicion
 import com.induztek.protocolos.model.Protocolo
 import com.induztek.protocolos.model.Prueba
 import com.induztek.protocolos.model.ResultadoPrueba
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
-/**
- * Estado temporal para la edición o captura de una prueba técnica dentro de un protocolo.
- */
+
 data class EdicionPruebaState(
     val pruebaId: String = "",
     val tipoPrueba: String = "",
@@ -52,10 +50,7 @@ data class EdicionPruebaState(
     val observaciones: String = ""
 )
 
-/**
- * ViewModel que gestiona la captura y edición de protocolos, cálculos automáticos (RT-05),
- * validación de instrumentos (RN-11), comparación histórica (RN-09) y formalización (RN-04).
- */
+
 class ProtocoloViewModel(
     private val protocoloRepository: ProtocoloRepository,
     private val pruebaRepository: PruebaRepository,
@@ -77,22 +72,32 @@ class ProtocoloViewModel(
 
     private val _edicionPruebaState = MutableStateFlow<EdicionPruebaState?>(null)
     val edicionPruebaState: StateFlow<EdicionPruebaState?> = _edicionPruebaState.asStateFlow()
+    private val _remoteError = MutableStateFlow<String?>(null)
+    val remoteError: StateFlow<String?> = _remoteError.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            protocoloRepository.seedInitialDataIfEmpty()
-            pruebaRepository.seedInitialDataIfEmpty()
-            instrumentoRepository.seedInitialDataIfEmpty()
-
+        launchCatching(onError = { _remoteError.value = it }) {
             instrumentoRepository.instrumentosActivos.collect { list ->
                 _instrumentosDisponibles.value = list
             }
         }
     }
 
-    /**
-     * Lista reactiva de protocolos con soporte para filtrado por empresa cliente (P-04, RT-10).
-     */
+    fun refresh() {
+        launchCatching(onError = { _remoteError.value = it }) {
+            try {
+                protocoloRepository.refresh()
+                pruebaRepository.refresh()
+                instrumentoRepository.refresh()
+                _remoteError.value = null
+            } catch (exception: Exception) {
+                if (exception is CancellationException) throw exception
+                _remoteError.value = exception.localizedMessage ?: "No fue posible cargar los protocolos"
+            }
+        }
+    }
+
+
     val protocolos: StateFlow<List<Protocolo>> = combine(
         protocoloRepository.allProtocolos,
         _empresaClienteFiltro
@@ -115,11 +120,9 @@ class ProtocoloViewModel(
         _empresaClienteFiltro.value = empresa
     }
 
-    /**
-     * Carga un protocolo específico y sus pruebas asociadas por ID.
-     */
+
     fun cargarProtocolo(id: String) {
-        viewModelScope.launch {
+        launchCatching(onError = { _remoteError.value = it }) {
             val prot = protocoloRepository.getProtocoloById(id)
             _selectedProtocolo.value = prot
             if (prot != null) {
@@ -130,11 +133,9 @@ class ProtocoloViewModel(
         }
     }
 
-    /**
-     * Prepara el estado de edición de una prueba buscando por su ID.
-     */
+
     fun iniciarEdicionPrueba(pruebaId: String) {
-        viewModelScope.launch {
+        launchCatching(onError = { _remoteError.value = it }) {
             val p = pruebaRepository.getPruebaById(pruebaId)
             if (p != null) {
                 iniciarEdicionPrueba(p)
@@ -142,11 +143,9 @@ class ProtocoloViewModel(
         }
     }
 
-    /**
-     * Prepara el estado de edición de una [Prueba] calculando variaciones históricas y plantillas.
-     */
+
     fun iniciarEdicionPrueba(prueba: Prueba) {
-        viewModelScope.launch {
+        launchCatching(onError = { _remoteError.value = it }) {
             val esManual = ReglasNegocio.esPruebaConAsignacionManual(prueba.tipoPrueba)
             val inst = _instrumentosDisponibles.value.find { it.modelo.contains(prueba.instrumento) || prueba.instrumento.contains(it.modelo) }
                 ?: _instrumentosDisponibles.value.firstOrNull()
@@ -208,9 +207,7 @@ class ProtocoloViewModel(
         _edicionPruebaState.value = _edicionPruebaState.value?.copy(resultadoManual = res)
     }
 
-    /**
-     * Actualiza una medición específica y dispara el recálculo automático inmediato (RT-05).
-     */
+
     fun actualizarMedicion(index: Int, nuevoValorNum: Double?, nuevaUnidad: String, momento: MomentoMedicion) {
         val current = _edicionPruebaState.value ?: return
         val lista = current.mediciones.toMutableList()
@@ -240,9 +237,7 @@ class ProtocoloViewModel(
         }
     }
 
-    /**
-     * RT-05: Realiza cálculos automáticos de resultados (IP, TTR, Resistencia de Contactos, etc.) según reglas de negocio.
-     */
+
     private fun recalcularResultadoPrueba() {
         val state = _edicionPruebaState.value ?: return
         if (state.estadoPrueba == EstadoPrueba.NO_REALIZADA) {
@@ -304,9 +299,7 @@ class ProtocoloViewModel(
         _edicionPruebaState.value = state.copy(resultadoCalculado = nuevoResultado)
     }
 
-    /**
-     * Guarda la edición de la prueba y recalcula el resultado global del protocolo (RN-10).
-     */
+
     fun guardarEdicionPrueba(onSuccess: () -> Unit, onError: (String) -> Unit) {
         val state = _edicionPruebaState.value ?: return
         val prot = _selectedProtocolo.value ?: return
@@ -316,7 +309,7 @@ class ProtocoloViewModel(
             return
         }
 
-        viewModelScope.launch {
+        launchCatching(onError = { _remoteError.value = it }) {
             val inst = state.instrumentoSeleccionado
             val pruebaActualizada = Prueba(
                 id = state.pruebaId,
@@ -363,12 +356,10 @@ class ProtocoloViewModel(
         }
     }
 
-    /**
-     * RN-04, RN-16, RT-09: Formaliza el protocolo mediante aprobación o observación por Ingeniero / Jefe Técnico.
-     */
+
     fun formalizarProtocolo(usuarioFormalizador: String, esAprobacion: Boolean, onSuccess: () -> Unit) {
         val prot = _selectedProtocolo.value ?: return
-        viewModelScope.launch {
+        launchCatching(onError = { _remoteError.value = it }) {
             val nuevoEstado = if (esAprobacion) EstadoProtocolo.FORMALIZADO else EstadoProtocolo.OBSERVADO
             protocoloRepository.formalizarProtocolo(prot.id, usuarioFormalizador, nuevoEstado)
             cargarProtocolo(prot.id)
@@ -376,9 +367,7 @@ class ProtocoloViewModel(
         }
     }
 
-    /**
-     * Agrega una foto de evidencia al protocolo.
-     */
+
     fun agregarFotoAProtocolo(path: String) {
         val prot = _selectedProtocolo.value ?: return
         if (path.isBlank()) return
@@ -386,14 +375,12 @@ class ProtocoloViewModel(
         lista.add(path)
         val actualizado = prot.copy(fotos = lista)
         _selectedProtocolo.value = actualizado
-        viewModelScope.launch {
+        launchCatching(onError = { _remoteError.value = it }) {
             protocoloRepository.insertProtocolo(actualizado)
         }
     }
 
-    /**
-     * Elimina una foto de evidencia del protocolo.
-     */
+
     fun eliminarFotoDeProtocolo(index: Int) {
         val prot = _selectedProtocolo.value ?: return
         val lista = prot.fotos.toMutableList()
@@ -402,7 +389,7 @@ class ProtocoloViewModel(
             com.induztek.protocolos.util.ImageStorageHelper.eliminarArchivo(path)
             val actualizado = prot.copy(fotos = lista)
             _selectedProtocolo.value = actualizado
-            viewModelScope.launch {
+            launchCatching(onError = { _remoteError.value = it }) {
                 protocoloRepository.insertProtocolo(actualizado)
             }
         }

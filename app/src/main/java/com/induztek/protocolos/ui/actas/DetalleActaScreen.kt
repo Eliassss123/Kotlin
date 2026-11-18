@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.induztek.protocolos.data.local.UsuarioEntity
+import com.induztek.protocolos.model.UserProfile
 import com.induztek.protocolos.ui.components.InduztekTopBar
 import com.induztek.protocolos.ui.theme.AzulPetroleo
 import com.induztek.protocolos.ui.theme.FondoApp
@@ -27,7 +27,7 @@ import com.induztek.protocolos.viewmodel.VisitaViewModel
 fun DetalleActaScreen(
     actaId: String,
     visitaViewModel: VisitaViewModel,
-    usuarioActual: UsuarioEntity? = null,
+    usuarioActual: UserProfile? = null,
     onNavigateBack: () -> Unit
 ) {
     val actaState by visitaViewModel.actaGenerada.collectAsState()
@@ -66,7 +66,7 @@ fun DetalleActaScreen(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                // Tarjeta 1: Encabezado del Acta y Marca de Formalización (RN-19)
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
@@ -123,7 +123,7 @@ fun DetalleActaScreen(
                     }
                 }
 
-                // Tarjeta 2: Recepción y Entrega en Terreno
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
@@ -156,7 +156,7 @@ fun DetalleActaScreen(
                     }
                 }
 
-                // Tarjeta 3: Resumen de Protocolos y Pruebas
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
@@ -195,7 +195,7 @@ fun DetalleActaScreen(
                     }
                 }
 
-                // Tarjeta 4: Resumen de Pruebas No Realizadas
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),

@@ -1,12 +1,12 @@
-// ============================================================================
-// ARCHIVO : viewmodel/VisitaViewModel.kt
-// CAPA    : ViewModel (MVVM)
-// RESUMEN : Gestión del flujo de visitas técnicas en terreno (RT-01, RT-03, RT-08):
-//           - Creación de visita con ingeniero a cargo obligatorio
-//           - Generación automática de protocolos y pruebas según tipo de equipo (RN-05)
-//           - Bloqueo de duplicados de equipo en la misma visita (RN-02, Aclar. 5)
-//           - Cierre de visita con validación estricta y generación de acta con receptor.
-// ============================================================================
+
+
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.viewmodel
 
@@ -28,20 +28,18 @@ import com.induztek.protocolos.model.Prueba
 import com.induztek.protocolos.model.ResultadoPrueba
 import com.induztek.protocolos.model.SyncStatus
 import com.induztek.protocolos.model.Visita
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
 
-/**
- * Estado para la creación de una nueva visita técnica en terreno.
- */
+
 data class NuevaVisitaState(
     val ordenTrabajo: String = "OT-2026-085",
     val cliente: String = "Planta Lampa",
@@ -54,10 +52,7 @@ data class NuevaVisitaState(
     val errorValidacion: String? = null
 )
 
-/**
- * ViewModel que gestiona el ciclo de visitas técnicas, apertura, adición de equipos con generación automática
- * de protocolos (RT-03, RN-05) y cierre de visita con emisión de acta (RT-08).
- */
+
 class VisitaViewModel(
     private val visitaRepository: VisitaRepository,
     private val protocoloRepository: ProtocoloRepository,
@@ -81,16 +76,20 @@ class VisitaViewModel(
     private val _mensajeError = MutableStateFlow<String?>(null)
     val mensajeError: StateFlow<String?> = _mensajeError.asStateFlow()
 
-    init {
-        viewModelScope.launch {
-            visitaRepository.seedInitialDataIfEmpty()
-            actaRepository.seedInitialDataIfEmpty()
-            protocoloRepository.seedInitialDataIfEmpty()
-            pruebaRepository.seedInitialDataIfEmpty()
+    fun refresh() {
+        launchCatching(onError = { _mensajeError.value = it }) {
+            try {
+                visitaRepository.refresh()
+                actaRepository.refresh()
+                _mensajeError.value = null
+            } catch (exception: Exception) {
+                if (exception is CancellationException) throw exception
+                _mensajeError.value = exception.localizedMessage ?: "No fue posible cargar las visitas"
+            }
         }
     }
 
-    /** Flujo con todas las visitas registradas. */
+
     val todasLasVisitas: StateFlow<List<Visita>> = visitaRepository.allVisitas
         .stateIn(
             scope = viewModelScope,
@@ -134,10 +133,7 @@ class VisitaViewModel(
         _mensajeError.value = null
     }
 
-    /**
-     * RT-01: Crea una nueva visita técnica exigiendo obligatoriamente el ingeniero a cargo (Aclaración 4 y 7).
-     * @param onSuccess Callback que recibe el ID de la visita creada.
-     */
+
     fun crearVisita(onSuccess: (String) -> Unit) {
         val state = _nuevaVisitaState.value
         if (state.ordenTrabajo.isBlank()) {
@@ -153,7 +149,7 @@ class VisitaViewModel(
             return
         }
 
-        viewModelScope.launch {
+        launchCatching(onError = { _mensajeError.value = it }) {
             val sdfFecha = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             val sdfHora = SimpleDateFormat("HH:mm", Locale.getDefault())
             val hoy = Date()
@@ -180,11 +176,9 @@ class VisitaViewModel(
         }
     }
 
-    /**
-     * Carga el detalle de una visita y sus protocolos asociados.
-     */
+
     fun cargarDetalleVisita(visitaId: String) {
-        viewModelScope.launch {
+        launchCatching(onError = { _mensajeError.value = it }) {
             val v = visitaRepository.getVisitaById(visitaId)
             _visitaSeleccionada.value = v
             if (v != null) {
@@ -195,11 +189,9 @@ class VisitaViewModel(
         }
     }
 
-    /**
-     * Carga un acta generada por ID.
-     */
+
     fun cargarActa(actaId: String) {
-        viewModelScope.launch {
+        launchCatching(onError = { _mensajeError.value = it }) {
             val acta = actaRepository.getActaById(actaId)
             _actaGenerada.value = acta
             if (acta != null) {
@@ -208,18 +200,15 @@ class VisitaViewModel(
         }
     }
 
-    /**
-     * RT-03, RN-05: Agrega un equipo a la visita, generando automáticamente sus pruebas técnicas requeridas
-     * y validando unicidad (RN-02).
-     */
+
     fun agregarEquipoAVisita(equipo: Equipo, tecnicoUsuario: String, onProtocoloCreado: (String) -> Unit) {
         val visita = _visitaSeleccionada.value ?: return
 
-        viewModelScope.launch {
+        launchCatching(onError = { _mensajeError.value = it }) {
             val yaExiste = protocoloRepository.existeProtocoloParaEquipoEnVisita(visita.id, equipo.codigo)
             if (yaExiste) {
                 _mensajeError.value = "Ya existe un protocolo registrado para el equipo ${equipo.codigo} en esta visita (RN-02)."
-                return@launch
+                return@launchCatching
             }
 
             val timestamp = System.currentTimeMillis()
@@ -285,9 +274,7 @@ class VisitaViewModel(
         }
     }
 
-    /**
-     * RT-08: Cierra la visita técnica tras validar que no existan pruebas incompletas y genera un Acta única de entrega.
-     */
+
     fun cerrarVisitaYGenerarActa(
         recibidoPor: String,
         onSuccess: (Acta) -> Unit,
@@ -303,11 +290,11 @@ class VisitaViewModel(
             return
         }
 
-        viewModelScope.launch {
+        launchCatching(onError = { _mensajeError.value = it }) {
             val protocolos = _protocolosVisita.value
             if (protocolos.isEmpty()) {
                 onError("No se puede cerrar la visita sin al menos un protocolo registrado.")
-                return@launch
+                return@launchCatching
             }
 
             for (prot in protocolos) {
@@ -315,7 +302,7 @@ class VisitaViewModel(
                     val errorPrueba = ReglasNegocio.validarPruebaCompleta(prueba)
                     if (errorPrueba != null) {
                         onError("Error en protocolo ${prot.codigoProtocolo}: $errorPrueba")
-                        return@launch
+                        return@launchCatching
                     }
                 }
             }

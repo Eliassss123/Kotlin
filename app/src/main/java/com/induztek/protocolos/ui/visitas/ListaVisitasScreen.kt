@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.induztek.protocolos.data.local.UsuarioEntity
+import com.induztek.protocolos.model.UserProfile
 import com.induztek.protocolos.model.PerfilUsuario
 import com.induztek.protocolos.model.Visita
 import com.induztek.protocolos.ui.components.InduztekTopBar
@@ -31,12 +31,13 @@ import com.induztek.protocolos.viewmodel.VisitaViewModel
 @Composable
 fun ListaVisitasScreen(
     visitaViewModel: VisitaViewModel,
-    usuarioActual: UsuarioEntity? = null,
+    usuarioActual: UserProfile? = null,
     onNavigateBack: () -> Unit,
     onVisitaClick: (String) -> Unit,
     onNuevaVisitaClick: () -> Unit
 ) {
     val visitas by visitaViewModel.todasLasVisitas.collectAsState()
+    val mensajeError by visitaViewModel.mensajeError.collectAsState()
     val puedeCrear = usuarioActual == null || usuarioActual.getPerfil() != PerfilUsuario.CLIENTE
 
     Scaffold(
@@ -66,6 +67,13 @@ fun ListaVisitasScreen(
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
+            mensajeError?.let { message ->
+                Text(
+                    text = message,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
             if (visitas.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),

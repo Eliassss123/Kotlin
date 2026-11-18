@@ -1,169 +1,59 @@
-// ============================================================================
-// ARCHIVO : data/repository/EquipoRepository.kt
-// CAPA    : Repositorio (MVVM)
-// RESUMEN : Intermediario de equipos con soporte para datos de placa (FT-03 sec. 2),
-//           detección de duplicados (RT-02) y filtros por empresa para cliente (P-04).
-// ============================================================================
-
 package com.induztek.protocolos.data.repository
 
-import com.induztek.protocolos.data.local.EquipoDao
-import com.induztek.protocolos.data.local.EquipoEntity
+import com.induztek.protocolos.data.remote.CatalogApi
+import com.induztek.protocolos.data.remote.requireBody
+import com.induztek.protocolos.data.remote.toDomain
+import com.induztek.protocolos.data.remote.toRequest
 import com.induztek.protocolos.model.Equipo
-import com.induztek.protocolos.model.EstadoProtocolo
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 
-/**
- * Repositorio encargado de gestionar la lógica de datos de los equipos eléctricos en terreno.
- * Maneja consultas, filtros por cliente (P-04), validación de duplicados (RT-02) y carga de datos iniciales.
- */
-class EquipoRepository(
-    private val equipoDao: EquipoDao
-) {
-    /** Flujo con todos los equipos registrados en el sistema. */
-    val allEquipos: Flow<List<Equipo>> = equipoDao.getAllEquipos().map { entities ->
-        entities.map { it.toDomain() }
+class EquipoRepository(private val api: CatalogApi) {
+    private val _allEquipos = MutableStateFlow<List<Equipo>>(emptyList())
+    val allEquipos: StateFlow<List<Equipo>> = _allEquipos.asStateFlow()
+
+    suspend fun refresh(cliente: String? = null) {
+        _allEquipos.value = api.getEquipos(cliente).requireBody().map { it.toDomain() }
     }
 
-    /**
-     * Obtiene un flujo con los equipos filtrados por empresa cliente.
-     * @param cliente Nombre de la empresa cliente.
-     */
-    fun getEquiposByCliente(cliente: String): Flow<List<Equipo>> {
-        return equipoDao.getEquiposByCliente(cliente).map { entities ->
-            entities.map { it.toDomain() }
+    fun getEquiposByCliente(cliente: String) = allEquipos.map { equipos ->
+        equipos.filter { it.cliente.equals(cliente, ignoreCase = true) }
+    }
+
+    suspend fun getEquipoByCodigo(codigo: String): Equipo? =
+        api.getEquipoByCodigo(codigo).let { response ->
+            if (response.code() == 404) null else response.requireBody().toDomain()
         }
-    }
 
-    /**
-     * Busca y retorna un equipo por su código único.
-     * @param codigo Código único del equipo.
-     */
-    suspend fun getEquipoByCodigo(codigo: String): Equipo? {
-        return equipoDao.getEquipoByCodigo(codigo)?.toDomain()
-    }
-
-    /**
-     * Busca y retorna un equipo por su ID interno.
-     * @param id ID único del equipo.
-     */
     suspend fun getEquipoById(id: String): Equipo? {
-        return equipoDao.getEquipoById(id)?.toDomain()
-    }
-
-    /**
-     * RT-02: Detecta posibles duplicados en terreno (mismo TAG o número de serie en la misma instalación).
-     */
-    suspend fun buscarPosibleDuplicado(ubicacion: String, tag: String, numeroSerie: String, codigo: String): Equipo? {
-        return equipoDao.buscarPosibleDuplicado(ubicacion, tag, numeroSerie, codigo)?.toDomain()
-    }
-
-    /**
-     * Inserta o actualiza un equipo en la base de datos local.
-     */
-    suspend fun insertEquipo(equipo: Equipo) {
-        equipoDao.insertEquipo(EquipoEntity.fromDomain(equipo))
-    }
-
-    /**
-     * Puebla la base de datos con equipos iniciales de demostración si la tabla está vacía.
-     */
-    suspend fun seedInitialDataIfEmpty() {
-        if (equipoDao.getCount() == 0) {
-            val initialEquipos = listOf(
-                Equipo(
-                    id = "EQ-001",
-                    codigo = "TR-500KVA-01",
-                    tagCliente = "TAG-TR-01",
-                    tipo = "Transformador de Poder",
-                    cliente = "Planta Lampa",
-                    ubicacion = "Subestación Principal Norte - Celda 01",
-                    marca = "WEG / Tusán",
-                    modelo = "TP-500-23",
-                    numeroSerie = "SN-2018-9942",
-                    potenciaTension = "500 kVA / 23 kV - 380 V",
-                    anio = "2018",
-                    tensiones = "23000 / 380 V",
-                    tap = "3",
-                    conexion = "Dyn11",
-                    ultimoEstado = EstadoProtocolo.FORMALIZADO,
-                    empeorando = false
-                ),
-                Equipo(
-                    id = "EQ-002",
-                    codigo = "REL-SEL751-02",
-                    tagCliente = "TAG-REL-51P",
-                    tipo = "Relé de Protección",
-                    cliente = "Planta Lampa",
-                    ubicacion = "Sala Eléctrica Planta Lampa - Alimentador 12kV",
-                    marca = "Schweitzer (SEL)",
-                    modelo = "SEL-751A",
-                    numeroSerie = "SEL-2022-771",
-                    potenciaTension = "Alimentación 125 VDC",
-                    anio = "2022",
-                    tensiones = "125 VDC / 5A Sec",
-                    tap = "N/A",
-                    conexion = "Secundaria",
-                    ultimoEstado = EstadoProtocolo.REGISTRADO_TERRENO,
-                    empeorando = false
-                ),
-                Equipo(
-                    id = "EQ-003",
-                    codigo = "CEL-MT24-03",
-                    tagCliente = "TAG-CEL-03",
-                    tipo = "Celda de Media Tensión",
-                    cliente = "Agroindustria Rancagua",
-                    ubicacion = "Subestación Distribución Sur",
-                    marca = "Schneider Electric",
-                    modelo = "SM6-24kV",
-                    numeroSerie = "SCH-MT-2019-11",
-                    potenciaTension = "24 kV / 630 A / 16 kA",
-                    anio = "2019",
-                    tensiones = "24 kV",
-                    tap = "N/A",
-                    conexion = "Barras 3P",
-                    ultimoEstado = EstadoProtocolo.OBSERVADO,
-                    empeorando = true
-                ),
-                Equipo(
-                    id = "EQ-004",
-                    codigo = "INT-VAC24-04",
-                    tagCliente = "TAG-INT-01",
-                    tipo = "Interruptor de Poder",
-                    cliente = "Centro de Datos Titanium",
-                    ubicacion = "Sala UPS Principal - Acometida 1",
-                    marca = "Eaton",
-                    modelo = "VCP-W 24kV",
-                    numeroSerie = "ETN-2021-508",
-                    potenciaTension = "24 kV / 1250 A / 25 kA",
-                    anio = "2021",
-                    tensiones = "24 kV",
-                    tap = "N/A",
-                    conexion = "Extraíble",
-                    ultimoEstado = EstadoProtocolo.FORMALIZADO,
-                    empeorando = false
-                ),
-                Equipo(
-                    id = "EQ-005",
-                    codigo = "CAB-XLPE-05",
-                    tagCliente = "TAG-CAB-MT1",
-                    tipo = "Cable de Poder",
-                    cliente = "Clínica Providencia",
-                    ubicacion = "Túnel de Cables Subterráneo Acometida B",
-                    marca = "Nexans",
-                    modelo = "XLPE 15/25 kV 3x120 mm²",
-                    numeroSerie = "NX-2020-L800",
-                    potenciaTension = "25 kV / 120 mm² Cu",
-                    anio = "2020",
-                    tensiones = "15/25 kV",
-                    tap = "N/A",
-                    conexion = "Terminales termocontraíbles",
-                    ultimoEstado = EstadoProtocolo.REGISTRADO_TERRENO,
-                    empeorando = false
-                )
-            )
-            equipoDao.insertAll(initialEquipos.map { EquipoEntity.fromDomain(it) })
+        val cached = _allEquipos.value.firstOrNull { it.id == id }
+        return cached ?: run {
+            refresh()
+            _allEquipos.value.firstOrNull { it.id == id }
         }
     }
+
+    suspend fun buscarPosibleDuplicado(
+        ubicacion: String,
+        tag: String,
+        numeroSerie: String,
+        codigo: String
+    ): Equipo? {
+        val result = api.buscarDuplicado(ubicacion, tag, numeroSerie, codigo).requireBody()
+        return result.equipment?.let { api.getEquipoByCodigo(it.codigo).requireBody().toDomain() }
+    }
+
+    suspend fun insertEquipo(equipo: Equipo) {
+        val exists = _allEquipos.value.any { it.codigo == equipo.codigo }
+        if (exists) {
+            api.actualizarEquipo(equipo.codigo, equipo.toRequest()).requireBody()
+        } else {
+            api.crearEquipo(equipo.toRequest()).requireBody()
+        }
+        refresh()
+    }
+
+    suspend fun seedInitialDataIfEmpty() = refresh()
 }

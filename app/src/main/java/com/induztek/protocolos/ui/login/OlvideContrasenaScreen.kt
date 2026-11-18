@@ -1,10 +1,10 @@
-// ============================================================================
-// ARCHIVO : ui/login/OlvideContrasenaScreen.kt
-// CAPA    : View (pantalla)
-// RESUMEN : PASO 1 de recuperar contraseña: se escribe el correo y se "envía" un código.
-//           Misma estructura que LoginScreen (Box > Card > Column); ver ese archivo para la explicación de cada
-//             elemento.
-// ============================================================================
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.ui.login
 
@@ -25,7 +25,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.LockReset
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -39,6 +38,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -57,24 +57,26 @@ import com.induztek.protocolos.ui.theme.NaranjaSeguridad
 import com.induztek.protocolos.viewmodel.LoginViewModel
 import com.induztek.protocolos.viewmodel.RecuperacionUiState
 
-// Pantalla que comparte el mismo LoginViewModel que Login (así los datos del flujo se conservan entre pantallas).
+
 @Composable
 fun OlvideContrasenaScreen(
     viewModel: LoginViewModel,
     onCodigoEnviado: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
-    // Estados observados del ViewModel (ver LoginScreen para 'collectAsState').
+
     val correo by viewModel.correoRecuperacion.collectAsState()
     val recuperacionState by viewModel.recuperacionState.collectAsState()
-    val mostrarDialog by viewModel.mostrarDialogCodigo.collectAsState()
-    val codigoGenerado by viewModel.codigoGenerado.collectAsState()
+
+    LaunchedEffect(recuperacionState) {
+        if (recuperacionState is RecuperacionUiState.CodigoEnviado) onCodigoEnviado()
+    }
 
     val isEmailValid = correo.isEmpty() || viewModel.validarCorreo(correo)
-    // Solo se puede enviar si el correo tiene formato válido.
+
     val canSubmit = correo.isNotEmpty() && viewModel.validarCorreo(correo)
 
-    // Fondo azul + tarjeta centrada, igual que en el login.
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -96,12 +98,12 @@ fun OlvideContrasenaScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                // Row = fila horizontal. Aquí solo contiene la flecha de volver.
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // IconButton = botón con ícono. onNavigateBack lo entrega NavGraph (hace popBackStack).
+
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -139,7 +141,7 @@ fun OlvideContrasenaScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Campo de correo (patrón value + onValueChange).
+
                 OutlinedTextField(
                     value = correo,
                     onValueChange = { viewModel.onCorreoRecuperacionChanged(it) },
@@ -179,7 +181,7 @@ fun OlvideContrasenaScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Si el ViewModel reportó un error (p. ej. correo no registrado) se muestra en rojo.
+
                 if (recuperacionState is RecuperacionUiState.Error) {
                     Text(
                         text = (recuperacionState as RecuperacionUiState.Error).message,
@@ -191,7 +193,7 @@ fun OlvideContrasenaScreen(
                 }
 
                 Button(
-                    // Pide al ViewModel que genere el código para ese correo.
+
                     onClick = { viewModel.solicitarCodigo(correo) },
                     enabled = canSubmit && recuperacionState !is RecuperacionUiState.Loading,
                     modifier = Modifier
@@ -221,52 +223,4 @@ fun OlvideContrasenaScreen(
         }
     }
 
-    // El diálogo se dibuja FUERA de la tarjeta, pero solo si el ViewModel lo ordena (mostrarDialog es true).
-    // Modal Dialog for Local Simulation of Verification Code
-    if (mostrarDialog && codigoGenerado != null) {
-        // AlertDialog = ventana emergente. title / text = contenido; confirmButton = botón de acción.
-        // Como no hay servidor de correo, el código se muestra aquí en pantalla (simulación).
-        AlertDialog(
-            // Qué hacer si el usuario toca fuera del diálogo: se cierra y se avanza a la pantalla de verificación.
-            onDismissRequest = {
-                viewModel.cerrarDialogCodigo()
-                onCodigoEnviado()
-            },
-            title = {
-                Text(
-                    text = "Código de Recuperación",
-                    fontWeight = FontWeight.Bold,
-                    color = AzulPetroleo
-                )
-            },
-            text = {
-                Column {
-                    Text(
-                        // '$codigoGenerado' dentro del texto inserta el valor de la variable (string template).
-                        text = "Simulación: no se envía correo real. Tu código es: $codigoGenerado",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.Black
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Usa este código en la siguiente pantalla para restablecer tu contraseña.",
-                        fontSize = 12.sp,
-                        color = Color.Gray
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        viewModel.cerrarDialogCodigo()
-                        onCodigoEnviado()
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = AzulPetroleo)
-                ) {
-                    Text("CONTINUAR", color = Color.White)
-                }
-            }
-        )
-    }
 }

@@ -20,8 +20,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.induztek.protocolos.data.local.UsuarioEntity
 import com.induztek.protocolos.model.Instrumento
+import com.induztek.protocolos.model.UserProfile
 import com.induztek.protocolos.ui.components.InduztekTopBar
 import com.induztek.protocolos.ui.theme.AzulPetroleo
 import com.induztek.protocolos.ui.theme.FondoApp
@@ -33,7 +33,7 @@ import com.induztek.protocolos.viewmodel.AdminViewModel
 @Composable
 fun AdminScreen(
     adminViewModel: AdminViewModel,
-    usuarioActual: UsuarioEntity? = null,
+    usuarioActual: UserProfile? = null,
     onNavigateBack: () -> Unit
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -42,8 +42,13 @@ fun AdminScreen(
     val instrumentos by adminViewModel.instrumentos.collectAsState()
     val personal by adminViewModel.personal.collectAsState()
     val nuevoState by adminViewModel.nuevoInstrumentoState.collectAsState()
+    val error by adminViewModel.error.collectAsState()
 
     var showDialogNuevoInstrumento by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        adminViewModel.refresh()
+    }
 
     Scaffold(
         topBar = {
@@ -71,6 +76,13 @@ fun AdminScreen(
                 .padding(padding)
                 .background(FondoApp)
         ) {
+            error?.let { message ->
+                Text(
+                    text = message,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
             TabRow(
                 selectedTabIndex = selectedTab,
                 containerColor = Color.White,
@@ -87,7 +99,7 @@ fun AdminScreen(
 
             when (selectedTab) {
                 0 -> {
-                    // Gestión de Instrumentos y Calibraciones (RN-11, RT-11)
+
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
@@ -183,7 +195,7 @@ fun AdminScreen(
                     }
                 }
                 1 -> {
-                    // Gestión de Personal (RF-22)
+
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()

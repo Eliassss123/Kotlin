@@ -1,18 +1,9 @@
-// ============================================================================
-// ARCHIVO : test/.../AnexosDominioTest.kt
-// CAPA    : Pruebas unitarias
-// RESUMEN : valida el cumplimiento de las reglas de negocio de los Anexos 1, 2 y 3:
-//           - Perfiles P-01 a P-04 y sus permisos (Anexo 2)
-//           - Restricción del cliente: solo lectura (P-04)
-//           - Catálogo de equipos y trazabilidad de placa (Anexo 1 y 3)
-// ============================================================================
-
 package com.induztek.protocolos
 
-import com.induztek.protocolos.data.local.UsuarioEntity
 import com.induztek.protocolos.model.Equipo
 import com.induztek.protocolos.model.EstadoProtocolo
 import com.induztek.protocolos.model.PerfilUsuario
+import com.induztek.protocolos.model.UserProfile
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -23,25 +14,21 @@ class AnexosDominioTest {
 
     @Test
     fun testPerfilesUsuario_permisosCorrectosSegunAnexo2() {
-        // P-01 Técnico de terreno: registra pruebas, no formaliza
         val tecnico = PerfilUsuario.TECNICO_TERRENO
         assertTrue("P-01 debe poder registrar pruebas", tecnico.puedeRegistrarPruebas)
         assertFalse("P-01 no formaliza protocolos", tecnico.puedeFormalizar)
         assertEquals("P-01", tecnico.codigo)
 
-        // P-02 Ingeniero de pruebas: registra y formaliza
         val ingeniero = PerfilUsuario.INGENIERO_PRUEBAS
         assertTrue("P-02 debe poder registrar pruebas", ingeniero.puedeRegistrarPruebas)
         assertTrue("P-02 debe poder formalizar protocolos", ingeniero.puedeFormalizar)
         assertEquals("P-02", ingeniero.codigo)
 
-        // P-03 Jefe técnico: supervisión global y formalización
         val jefeTecnico = PerfilUsuario.JEFE_TECNICO
         assertTrue("P-03 debe poder registrar pruebas", jefeTecnico.puedeRegistrarPruebas)
         assertTrue("P-03 formaliza y supervisa protocolos", jefeTecnico.puedeFormalizar)
         assertEquals("P-03", jefeTecnico.codigo)
 
-        // P-04 Usuario cliente: SOLO CONSULTA (no registra ni formaliza)
         val cliente = PerfilUsuario.CLIENTE
         assertFalse("P-04 Cliente NO debe registrar pruebas", cliente.puedeRegistrarPruebas)
         assertFalse("P-04 Cliente NO debe formalizar protocolos", cliente.puedeFormalizar)
@@ -49,11 +36,10 @@ class AnexosDominioTest {
     }
 
     @Test
-    fun testUsuarioEntity_mapeoPerfil() {
-        val userCliente = UsuarioEntity(
+    fun testUserProfile_mapeoPerfil() {
+        val userCliente = UserProfile(
             id = "USR-004",
             correo = "cliente@plantalampa.cl",
-            contrasena = "Cliente2026!",
             nombre = "Mario Gómez",
             perfilCodigo = "P-04",
             empresaCliente = "Planta Lampa"
@@ -63,10 +49,9 @@ class AnexosDominioTest {
         assertEquals("Planta Lampa", userCliente.empresaCliente)
         assertFalse(userCliente.getPerfil().puedeRegistrarPruebas)
 
-        val userTecnico = UsuarioEntity(
+        val userTecnico = UserProfile(
             id = "USR-001",
             correo = "tecnico@induztek.cl",
-            contrasena = "Tecnico2026!",
             nombre = "Juan Pérez",
             perfilCodigo = "P-01"
         )

@@ -1,10 +1,10 @@
-// ============================================================================
-// ARCHIVO : ui/visitas/NuevaVisitaScreen.kt
-// CAPA    : View (pantalla)
-// RESUMEN : Registro de visita técnica según RT-01, Aclaración 4 y 7:
-//           - OT, cliente, instalación, modalidad (SOLO_PRUEBAS o PRUEBAS_Y_MANTENIMIENTO)
-//           - Ingeniero a cargo OBLIGATORIO (aunque no asista a terreno)
-// ============================================================================
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.ui.visitas
 
@@ -49,7 +49,7 @@ import com.induztek.protocolos.viewmodel.VisitaViewModel
 @Composable
 fun NuevaVisitaScreen(
     visitaViewModel: VisitaViewModel,
-    usuarioActual: com.induztek.protocolos.data.local.UsuarioEntity? = null,
+    usuarioActual: com.induztek.protocolos.model.UserProfile? = null,
     onNavigateBack: () -> Unit,
     onVisitaCreada: (String) -> Unit
 ) {

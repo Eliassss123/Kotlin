@@ -1,14 +1,14 @@
-// ============================================================================
-// ARCHIVO : ui/protocolos/CapturaPruebaScreen.kt
-// CAPA    : View (pantalla)
-// RESUMEN : Formulario técnico de captura de mediciones según RT-04, RT-05, RN-06/07/08/08b/08c,
-//           RN-09, RN-11 y Aclaraciones 2 y 4:
-//           - Selector REALIZADA / NO REALIZADA con motivo obligatorio
-//           - Campos numéricos con selector de unidad estricto (no texto libre)
-//           - Trazabilidad de instrumento con advertencia de calibración vencida
-//           - Mediciones PREVIA y POSTERIOR_MANTENIMIENTO
-//           - Cálculos automáticos y comparación histórica (>25% resaltado)
-// ============================================================================
+
+
+
+
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.ui.protocolos
 
@@ -68,7 +68,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.induztek.protocolos.data.local.UsuarioEntity
+import com.induztek.protocolos.model.UserProfile
 import com.induztek.protocolos.model.EstadoPrueba
 import com.induztek.protocolos.model.Medicion
 import com.induztek.protocolos.model.MomentoMedicion
@@ -86,7 +86,7 @@ import com.induztek.protocolos.viewmodel.ProtocoloViewModel
 fun CapturaPruebaScreen(
     pruebaId: String = "",
     protocoloViewModel: ProtocoloViewModel,
-    usuarioActual: UsuarioEntity? = null,
+    usuarioActual: UserProfile? = null,
     onNavigateBack: () -> Unit
 ) {
     val viewModel = protocoloViewModel
@@ -97,6 +97,7 @@ fun CapturaPruebaScreen(
     }
     val state by viewModel.edicionPruebaState.collectAsState()
     val instrumentosDisponibles by viewModel.instrumentosDisponibles.collectAsState()
+    val remoteError by viewModel.remoteError.collectAsState()
 
     var dropdownInstrumentoExpanded by remember { mutableStateOf(false) }
     var mensajeErrorLocal by remember { mutableStateOf<String?>(null) }
@@ -135,8 +136,12 @@ fun CapturaPruebaScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
+            remoteError?.let { message ->
+                Text(text = message, color = Color.Red, fontWeight = FontWeight.SemiBold)
+            }
+
             state?.let { s ->
-                // TARJETA 1: Estado de Ejecución (Aclaración 2)
+
                 Card(
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -172,7 +177,7 @@ fun CapturaPruebaScreen(
                             }
                         }
 
-                        // Motivo obligatorio si NO REALIZADA
+
                         if (s.estadoPrueba == EstadoPrueba.NO_REALIZADA) {
                             Spacer(modifier = Modifier.height(8.dp))
                             OutlinedTextField(
@@ -191,7 +196,7 @@ fun CapturaPruebaScreen(
                 }
 
                 if (s.estadoPrueba == EstadoPrueba.REALIZADA) {
-                    // TARJETA 2: Instrumento de Medición y Calibración (RN-11)
+
                     Card(
                         shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -252,7 +257,7 @@ fun CapturaPruebaScreen(
 
                             Spacer(modifier = Modifier.height(6.dp))
 
-                            // Advertencia o validación de calibración
+
                             if (s.advertenciaCalibracionVencida) {
                                 Row(
                                     modifier = Modifier
@@ -284,7 +289,7 @@ fun CapturaPruebaScreen(
                         }
                     }
 
-                    // TARJETA 3: Captura de Mediciones y Unidades (RT-04, RT-05)
+
                     Card(
                         shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -333,7 +338,7 @@ fun CapturaPruebaScreen(
                                             fontWeight = FontWeight.Bold,
                                             color = AzulPetroleo
                                         )
-                                        // Selector de momento PREVIA / POSTERIOR (Aclaración 4)
+
                                         Text(
                                             text = if (momentoActual == MomentoMedicion.POSTERIOR_MANTENIMIENTO) "Posterior Mantenimiento" else "Previa",
                                             fontSize = 11.sp,
@@ -359,7 +364,7 @@ fun CapturaPruebaScreen(
                                         modifier = Modifier.fillMaxWidth(),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        // Campo de valor numérico con soporte para coma/punto
+
                                         OutlinedTextField(
                                             value = valorTexto,
                                             onValueChange = { nuevo ->
@@ -376,7 +381,7 @@ fun CapturaPruebaScreen(
 
                                         Spacer(modifier = Modifier.width(8.dp))
 
-                                        // Selector de unidad obligatorio
+
                                         ExposedDropdownMenuBox(
                                             expanded = dropdownUnidadExpanded,
                                             onExpandedChange = { dropdownUnidadExpanded = !dropdownUnidadExpanded },
@@ -417,7 +422,7 @@ fun CapturaPruebaScreen(
                         }
                     }
 
-                    // TARJETA 4: Asignación Manual si es Devanados (RN-08c) o Resultado
+
                     if (s.esAsignacionManual) {
                         Card(
                             shape = RoundedCornerShape(12.dp),
@@ -458,7 +463,7 @@ fun CapturaPruebaScreen(
                         }
                     }
 
-                    // TARJETA 5: Comparación Histórica (RN-09, RT-06)
+
                     Card(
                         shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -512,7 +517,7 @@ fun CapturaPruebaScreen(
                         }
                     }
 
-                    // Observaciones
+
                     OutlinedTextField(
                         value = s.observaciones,
                         onValueChange = { viewModel.onObservacionesPruebaChanged(it) },

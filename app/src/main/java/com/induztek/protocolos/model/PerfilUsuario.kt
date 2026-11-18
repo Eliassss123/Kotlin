@@ -1,12 +1,12 @@
-// ============================================================================
-// ARCHIVO : model/PerfilUsuario.kt
-// CAPA    : Modelo (dominio)
-// RESUMEN : perfiles de usuario y matriz de permisos según Anexo 7 y Síntesis Técnica:
-//           P-01: Técnico de terreno (Registrar equipos, protocolos, mediciones; cerrar visita; entregar acta)
-//           P-02: Ingeniero de pruebas (Todo lo de P-01 + interpretar, observar y formalizar)
-//           P-03: Jefe técnico (Formalizar + administrar instrumentos, calibraciones, cuentas cliente y personal)
-//           P-04: Usuario cliente (Solo consulta de actas, protocolos e historial de su empresa)
-// ============================================================================
+
+
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.model
 

@@ -1,10 +1,10 @@
-// ============================================================================
-// ARCHIVO : model/TipoEquipo.kt
-// CAPA    : Modelo (dominio)
-// RESUMEN : Tipos de equipo según Aclaración 1 y RN-05:
-//           - Transformador, Interruptor, Celda MT, Cable de poder, Relé de protección
-//           - Clasificación: PRIMARIO o SECUNDARIO (Relé = secundario; resto = primario)
-// ============================================================================
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.model
 

@@ -1,11 +1,11 @@
-// ============================================================================
-// ARCHIVO : ui/components/EstadoChip.kt
-// CAPA    : View - componente reutilizable
-// RESUMEN : Chips de estado y resultados con colores corporativos Induztek:
-//           - Estados de protocolo: Formalizado (Verde), Registrado en terreno (Ámbar),
-//             Observado (Naranja/Rojo), Borrador (Gris), Pendiente de formalización (Azul/Gris).
-//           - Resultados de prueba: Aprobado (Verde), Observado (Ámbar), Rechazado (Rojo), No Realizada (Gris).
-// ============================================================================
+
+
+
+
+
+
+
+
 
 package com.induztek.protocolos.ui.components
 

@@ -1,157 +1,101 @@
-// ============================================================================
-// ARCHIVO : data/repository/UsuarioRepository.kt
-// CAPA    : Repositorio (MVVM)
-// RESUMEN : Gestión de usuarios, perfiles (P-01 a P-04), activación/desactivación (RF-22)
-//           y códigos de recuperación de contraseña.
-// ============================================================================
-
 package com.induztek.protocolos.data.repository
 
-import com.induztek.protocolos.data.local.CodigoRecuperacionDao
-import com.induztek.protocolos.data.local.UsuarioDao
-import com.induztek.protocolos.data.local.UsuarioEntity
-import com.induztek.protocolos.model.CodigoRecuperacion
-import kotlinx.coroutines.flow.Flow
+import com.induztek.protocolos.data.remote.ActiveRequest
+import com.induztek.protocolos.data.remote.AuthApi
+import com.induztek.protocolos.data.remote.LoginRequest
+import com.induztek.protocolos.data.remote.RecoveryRequest
+import com.induztek.protocolos.data.remote.RegisterRequest
+import com.induztek.protocolos.data.remote.ResetPasswordRequest
+import com.induztek.protocolos.data.remote.UserProfileUpdateRequest
+import com.induztek.protocolos.data.remote.VerifyResetCodeRequest
+import com.induztek.protocolos.data.remote.requireBody
+import com.induztek.protocolos.data.remote.requireSuccess
+import com.induztek.protocolos.data.remote.toProfile
+import com.induztek.protocolos.model.UserProfile
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
-/**
- * Repositorio encargado de gestionar la autenticación, perfiles de usuario (P-01 a P-04), estado activo (RF-22)
- * y códigos de recuperación de contraseña.
- */
+data class LoginSession(val token: String, val profile: UserProfile)
+
 class UsuarioRepository(
-    private val usuarioDao: UsuarioDao,
-    private val codigoRecuperacionDao: CodigoRecuperacionDao
+    private val api: AuthApi,
+    private val mediaRepository: MediaRepository
 ) {
-    /** Flujo con todos los usuarios registrados. */
-    val allUsuarios: Flow<List<UsuarioEntity>> = usuarioDao.getAllUsuarios()
+    private val _allUsuarios = MutableStateFlow<List<UserProfile>>(emptyList())
+    val allUsuarios: StateFlow<List<UserProfile>> = _allUsuarios.asStateFlow()
 
-    /**
-     * Busca un usuario por correo electrónico.
-     */
-    suspend fun buscarPorCorreo(correo: String): UsuarioEntity? {
-        return usuarioDao.buscarPorCorreo(correo.trim())
-    }
-
-    /**
-     * Busca un usuario por su ID único.
-     */
-    suspend fun buscarPorId(id: String): UsuarioEntity? {
-        return usuarioDao.buscarPorId(id)
-    }
-
-    /**
-     * Actualiza la contraseña de un usuario.
-     */
-    suspend fun actualizarContrasena(correo: String, nuevaContrasena: String): Boolean {
-        return usuarioDao.actualizarContrasena(correo.trim(), nuevaContrasena) > 0
-    }
-
-    /**
-     * RF-22: Activa o desactiva un usuario del personal.
-     */
-    suspend fun setActivo(id: String, activo: Boolean): Boolean {
-        return usuarioDao.setActivo(id, activo) > 0
-    }
-
-    /**
-     * Inserta un nuevo usuario en la base de datos.
-     */
-    suspend fun insertarUsuario(usuario: UsuarioEntity) {
-        usuarioDao.insertarUsuario(usuario)
-    }
-
-    /**
-     * Guarda un código de recuperación de contraseña.
-     */
-    suspend fun guardarCodigoRecuperacion(codigo: CodigoRecuperacion) {
-        codigoRecuperacionDao.insertarCodigo(codigo)
-    }
-
-    /**
-     * Obtiene el último código de recuperación asociado a un correo.
-     */
-    suspend fun obtenerUltimoCodigo(correo: String): CodigoRecuperacion? {
-        return codigoRecuperacionDao.obtenerUltimoCodigo(correo.trim())
-    }
-
-    /**
-     * Marca un código de recuperación como utilizado.
-     */
-    suspend fun marcarCodigoComoUsado(id: String) {
-        codigoRecuperacionDao.marcarComoUsado(id)
-    }
-
-    /**
-     * Actualiza la foto de perfil del usuario.
-     */
-    suspend fun actualizarFotoPerfil(id: String, fotoPath: String?): Boolean {
-        return usuarioDao.actualizarFotoPerfil(id, fotoPath) > 0
-    }
-
-    /**
-     * Actualiza la biografía del usuario.
-     */
-    suspend fun actualizarBiografia(id: String, biografia: String?): Boolean {
-        return usuarioDao.actualizarBiografia(id, biografia) > 0
-    }
-
-    /**
-     * Puebla la base de datos con los perfiles iniciales de demostración (P-01 a P-04) si está vacía.
-     */
-    suspend fun seedInitialDataIfEmpty() {
-        if (usuarioDao.getCount() == 0) {
-            val initialUsers = listOf(
-                UsuarioEntity(
-                    id = "USR-001",
-                    correo = "tecnico@induztek.cl",
-                    contrasena = "Tecnico2026!",
-                    nombre = "Juan Pérez",
-                    perfilCodigo = "P-01",
-                    empresaCliente = null,
-                    activo = true,
-                    biografia = "Técnico de terreno especialista en pruebas de aislamiento y rigidez dieléctrica en transformadores y celdas de media tensión."
-                ),
-                UsuarioEntity(
-                    id = "USR-002",
-                    correo = "ingeniero@induztek.cl",
-                    contrasena = "Ingeniero2026!",
-                    nombre = "Carlos Mendoza",
-                    perfilCodigo = "P-02",
-                    empresaCliente = null,
-                    activo = true,
-                    biografia = "Ingeniero de pruebas eléctricas. Encargado de interpretar diagnósticos, formalizar protocolos de prueba y emitir observaciones técnicas."
-                ),
-                UsuarioEntity(
-                    id = "USR-003",
-                    correo = "jefetecnico@induztek.cl",
-                    contrasena = "Jefe2026!",
-                    nombre = "Roberto Silva",
-                    perfilCodigo = "P-03",
-                    empresaCliente = null,
-                    activo = true,
-                    biografia = "Jefe Técnico en Induztek. Responsable de la asignación de personal, control metrológico de instrumentos y formalización final de actas."
-                ),
-                UsuarioEntity(
-                    id = "USR-004",
-                    correo = "cliente@plantalampa.cl",
-                    contrasena = "Cliente2026!",
-                    nombre = "Mario Gómez (Jefe Mantención)",
-                    perfilCodigo = "P-04",
-                    empresaCliente = "Planta Lampa",
-                    activo = true,
-                    biografia = "Jefe de Mantención Eléctrica en Planta Lampa. Contraparte técnica para recepción, auditoría y consulta de protocolos de prueba."
-                ),
-                UsuarioEntity(
-                    id = "USR-005",
-                    correo = "admin@induztek.cl",
-                    contrasena = "Admin2026!",
-                    nombre = "Administrador Induztek",
-                    perfilCodigo = "P-03",
-                    empresaCliente = null,
-                    activo = true,
-                    biografia = "Administrador general del sistema Induztek."
-                )
+    suspend fun login(email: String, password: String): LoginSession {
+        val result = api.login(LoginRequest(email, password)).requireBody()
+        return LoginSession(
+            result.token,
+            UserProfile(
+                id = result.id,
+                correo = result.email,
+                nombre = result.usuario,
+                perfilCodigo = result.perfilCodigo,
+                empresaCliente = result.empresaCliente,
+                activo = result.activo
             )
-            usuarioDao.insertarUsuarios(initialUsers)
-        }
+        )
+    }
+
+    suspend fun register(name: String, email: String, password: String, termsAccepted: Boolean): UserProfile =
+        api.register(
+            RegisterRequest(
+                email = email,
+                password = password,
+                name = name,
+                termsAccepted = termsAccepted
+            )
+        ).requireBody().toProfile()
+
+    suspend fun getCurrentUser(): UserProfile = api.getCurrentUser().requireBody().toProfile()
+
+    suspend fun seedInitialDataIfEmpty() {
+        refresh()
+    }
+
+    suspend fun refresh() {
+        _allUsuarios.value = api.getUsers().requireBody().map { it.toProfile() }
+    }
+
+    suspend fun actualizarFotoPerfil(id: String, fotoPath: String?) {
+        val current = getCurrentUser()
+        require(current.id == id) { "The active account changed while updating its profile" }
+        updateProfile(
+            photoUrl = mediaRepository.uploadIfLocal(fotoPath),
+            biography = current.biografia
+        )
+    }
+
+    suspend fun actualizarBiografia(id: String, biografia: String?) {
+        val current = getCurrentUser()
+        require(current.id == id) { "The active account changed while updating its profile" }
+        updateProfile(photoUrl = current.fotoPerfil, biography = biografia)
+    }
+
+    private suspend fun updateProfile(photoUrl: String?, biography: String?) {
+        val response = api.updateProfile(
+            UserProfileUpdateRequest(photoUrl = photoUrl, biography = biography)
+        ).requireBody().toProfile()
+        _allUsuarios.value = _allUsuarios.value.map { if (it.id == response.id) response else it }
+    }
+
+    suspend fun setActivo(id: String, activo: Boolean) {
+        val updated = api.setUserActive(id, ActiveRequest(active = activo)).requireBody().toProfile()
+        _allUsuarios.value = _allUsuarios.value.map { if (it.id == updated.id) updated else it }
+    }
+
+    suspend fun solicitarRecuperacion(email: String) {
+        api.requestPasswordRecovery(RecoveryRequest(email)).requireBody()
+    }
+
+    suspend fun verificarCodigo(email: String, code: String) {
+        api.verifyRecoveryCode(VerifyResetCodeRequest(email, code)).requireSuccess()
+    }
+
+    suspend fun actualizarContrasena(email: String, code: String, nueva: String) {
+        api.resetPassword(ResetPasswordRequest(email, code, nueva)).requireBody()
     }
 }
