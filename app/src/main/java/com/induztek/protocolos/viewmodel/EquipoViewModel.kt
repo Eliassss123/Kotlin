@@ -16,13 +16,13 @@ import com.induztek.protocolos.model.Equipo
 import com.induztek.protocolos.model.EstadoProtocolo
 import com.induztek.protocolos.model.Prueba
 import com.induztek.protocolos.model.TipoEquipo
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import java.util.UUID
 
 
@@ -62,15 +62,22 @@ class EquipoViewModel(
 
     private val _nuevoEquipoState = MutableStateFlow(NuevoEquipoState())
     val nuevoEquipoState: StateFlow<NuevoEquipoState> = _nuevoEquipoState.asStateFlow()
+    private val _remoteError = MutableStateFlow<String?>(null)
+    val remoteError: StateFlow<String?> = _remoteError.asStateFlow()
 
-    init {
-        viewModelScope.launch {
-            equipoRepository.seedInitialDataIfEmpty()
-            pruebaRepository.seedInitialDataIfEmpty()
+    fun refresh() {
+        launchCatching(onError = { _remoteError.value = it }) {
+            try {
+                equipoRepository.refresh()
+                _remoteError.value = null
+            } catch (exception: Exception) {
+                if (exception is CancellationException) throw exception
+                _remoteError.value = exception.localizedMessage ?: "No fue posible cargar los equipos"
+            }
         }
     }
 
-    
+
     val equipos: StateFlow<List<Equipo>> = combine(
         equipoRepository.allEquipos,
         _searchQuery,
@@ -104,17 +111,17 @@ class EquipoViewModel(
         initialValue = emptyList()
     )
 
-    
+
     fun onSearchQueryChanged(newQuery: String) {
         _searchQuery.value = newQuery
     }
 
-    
+
     fun setFiltroClasificacion(clasificacion: ClasificacionEquipo?) {
         _filtroClasificacion.value = clasificacion
     }
 
-    
+
     fun setEmpresaCliente(empresa: String?) {
         _empresaClienteFiltro.value = empresa
     }
@@ -125,9 +132,9 @@ class EquipoViewModel(
     private val _historialPruebas = MutableStateFlow<List<Prueba>>(emptyList())
     val historialPruebas: StateFlow<List<Prueba>> = _historialPruebas.asStateFlow()
 
-    
+
     fun cargarDetalleEquipo(codigo: String) {
-        viewModelScope.launch {
+        launchCatching(onError = { _remoteError.value = it }) {
             val equipo = equipoRepository.getEquipoByCodigo(codigo)
             _selectedEquipo.value = equipo
             if (equipo != null) {
@@ -138,88 +145,88 @@ class EquipoViewModel(
         }
     }
 
-    
+
     fun onCodigoChanged(codigo: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(codigo = codigo, errorValidacion = null)
         verificarPosibleDuplicado()
     }
 
-    
+
     fun onTagClienteChanged(tag: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(tagCliente = tag, errorValidacion = null)
         verificarPosibleDuplicado()
     }
 
-    
+
     fun onTipoChanged(tipo: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(tipo = tipo)
     }
 
-    
+
     fun onClienteNuevoChanged(cliente: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(cliente = cliente, errorValidacion = null)
     }
 
-    
+
     fun onUbicacionNuevaChanged(ubicacion: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(ubicacion = ubicacion, errorValidacion = null)
         verificarPosibleDuplicado()
     }
 
-    
+
     fun onMarcaChanged(marca: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(marca = marca)
     }
 
-    
+
     fun onModeloChanged(modelo: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(modelo = modelo)
     }
 
-    
+
     fun onNumeroSerieChanged(serie: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(numeroSerie = serie, errorValidacion = null)
         verificarPosibleDuplicado()
     }
 
-    
+
     fun onPotenciaTensionChanged(potencia: String) {
         val soloNumeros = potencia.filter { it.isDigit() }
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(potenciaTension = soloNumeros)
     }
 
-    
+
     fun onAnioChanged(anio: String) {
         val soloNumeros = anio.filter { it.isDigit() }.take(4)
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(anio = soloNumeros, errorValidacion = null)
     }
 
-    
+
     fun onTensionesChanged(tensiones: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(tensiones = tensiones)
     }
 
-    
+
     fun onTapChanged(tap: String) {
         val soloNumeros = tap.filter { it.isDigit() }.take(2)
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(tap = soloNumeros)
     }
 
-    
+
     fun onConexionChanged(conexion: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(conexion = conexion)
     }
 
-    
+
     fun onConexionOtroChanged(otro: String) {
         _nuevoEquipoState.value = _nuevoEquipoState.value.copy(conexionOtro = otro)
     }
 
-    
+
     private fun verificarPosibleDuplicado() {
         val state = _nuevoEquipoState.value
         if (state.ubicacion.isNotBlank() && (state.tagCliente.isNotBlank() || state.numeroSerie.isNotBlank() || state.codigo.isNotBlank())) {
-            viewModelScope.launch {
+            launchCatching(onError = { _remoteError.value = it }) {
                 val duplicado = equipoRepository.buscarPosibleDuplicado(
                     ubicacion = state.ubicacion.trim(),
                     tag = state.tagCliente.trim(),
@@ -237,7 +244,7 @@ class EquipoViewModel(
         }
     }
 
-    
+
     fun guardarEquipoNuevo(onSuccess: (Equipo) -> Unit) {
         val state = _nuevoEquipoState.value
 
@@ -282,7 +289,7 @@ class EquipoViewModel(
             state.conexion.trim()
         }
 
-        viewModelScope.launch {
+        launchCatching(onError = { _remoteError.value = it }) {
             val nuevoEquipo = Equipo(
                 id = "EQ-" + UUID.randomUUID().toString().take(8).uppercase(),
                 codigo = codigoFinal,

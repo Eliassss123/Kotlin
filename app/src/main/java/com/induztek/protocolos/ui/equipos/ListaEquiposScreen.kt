@@ -54,6 +54,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.OutlinedButton
@@ -106,12 +107,13 @@ fun ListaEquiposScreen(
     val searchQuery by viewModel.searchQuery.collectAsState()
     val filtroClasificacion by viewModel.filtroClasificacion.collectAsState()
     val usuarioActivo by loginViewModel.usuarioActivo.collectAsState()
+    val remoteError by viewModel.remoteError.collectAsState()
 
     val perfil = usuarioActivo?.getPerfil() ?: PerfilUsuario.TECNICO_TERRENO
     val esCliente = perfil == PerfilUsuario.CLIENTE
     val esJefeTecnico = perfil == PerfilUsuario.JEFE_TECNICO
 
-    
+
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -123,14 +125,14 @@ fun ListaEquiposScreen(
         }
     }
 
-    
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
                 drawerContainerColor = Color.White
             ) {
-                
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -169,7 +171,7 @@ fun ListaEquiposScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                
+
                 NavigationDrawerItem(
                     icon = {
                         Icon(Icons.Default.Person, contentDescription = null)
@@ -183,7 +185,7 @@ fun ListaEquiposScreen(
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
 
-                
+
                 NavigationDrawerItem(
                     icon = {
                         Icon(Icons.Default.Home, contentDescription = null)
@@ -196,7 +198,7 @@ fun ListaEquiposScreen(
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
 
-                
+
                 NavigationDrawerItem(
                     icon = {
                         Icon(Icons.Default.Engineering, contentDescription = null)
@@ -210,7 +212,7 @@ fun ListaEquiposScreen(
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
 
-                
+
                 NavigationDrawerItem(
                     icon = {
                         Icon(Icons.AutoMirrored.Filled.ListAlt, contentDescription = null)
@@ -241,7 +243,7 @@ fun ListaEquiposScreen(
 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-                
+
                 NavigationDrawerItem(
                     icon = {
                         Icon(
@@ -327,7 +329,14 @@ fun ListaEquiposScreen(
                     .padding(innerPadding)
                     .padding(16.dp)
             ) {
-                
+                remoteError?.let { message ->
+                    Text(
+                        text = message,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
@@ -370,7 +379,7 @@ fun ListaEquiposScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -412,7 +421,7 @@ fun ListaEquiposScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                
+
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { viewModel.onSearchQueryChanged(it) },
@@ -433,7 +442,7 @@ fun ListaEquiposScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                
+
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     item {
                         FilterChip(
@@ -538,7 +547,7 @@ fun EquipoCard(
                     }
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    
+
                     if (equipo.empeorando) {
                         Row(
                             modifier = Modifier

@@ -20,7 +20,7 @@ data class Acta(
     val instalacion: String,
     val fechaEmision: String,
     val tecnicoEntrega: String,
-    val recibidoPor: String, 
+    val recibidoPor: String,
     val marcaPendienteFormalizacion: Boolean = true,
     val resumenProtocolos: String = "",
     val syncStatus: SyncStatus = SyncStatus.PENDIENTE

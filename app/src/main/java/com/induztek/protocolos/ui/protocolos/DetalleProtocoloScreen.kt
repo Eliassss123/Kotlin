@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import com.induztek.protocolos.util.NotificationHelper
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -96,14 +97,14 @@ fun DetalleProtocoloScreen(
 
     val perfil = usuarioActivo?.getPerfil() ?: PerfilUsuario.TECNICO_TERRENO
     val esCliente = perfil == PerfilUsuario.CLIENTE
-    val puedeFormalizar = perfil.puedeFormalizar 
+    val puedeFormalizar = perfil.puedeFormalizar
 
     var showFormalizarDialog by remember { mutableStateOf(false) }
     var esAprobacionFormalizacion by remember { mutableStateOf(true) }
 
     val context = LocalContext.current
 
-    
+
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview()
     ) { bitmap: android.graphics.Bitmap? ->
@@ -114,7 +115,7 @@ fun DetalleProtocoloScreen(
         }
     }
 
-    
+
     val permissionCameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -127,7 +128,7 @@ fun DetalleProtocoloScreen(
         }
     }
 
-    
+
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: android.net.Uri? ->
@@ -161,7 +162,7 @@ fun DetalleProtocoloScreen(
                 .padding(16.dp)
         ) {
             protocolo?.let { prot ->
-                
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
@@ -209,7 +210,7 @@ fun DetalleProtocoloScreen(
                             )
                         }
 
-                        
+
                         if (prot.estado == EstadoProtocolo.FORMALIZADO) {
                             Spacer(modifier = Modifier.height(6.dp))
                             Row(
@@ -241,7 +242,7 @@ fun DetalleProtocoloScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                
+
                 if (puedeFormalizar && prot.estado != EstadoProtocolo.FORMALIZADO) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -277,7 +278,7 @@ fun DetalleProtocoloScreen(
                     Spacer(modifier = Modifier.height(10.dp))
                 }
 
-                
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
@@ -309,7 +310,7 @@ fun DetalleProtocoloScreen(
                             }
                         }
 
-                        
+
                         if (!prot.esInmutable && !esCliente) {
                             Spacer(modifier = Modifier.height(10.dp))
                             Row(
@@ -350,7 +351,7 @@ fun DetalleProtocoloScreen(
                             }
                         }
 
-                        
+
                         if (prot.fotos.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(10.dp))
                             LazyRow(
@@ -458,7 +459,7 @@ fun DetalleProtocoloScreen(
         }
     }
 
-    
+
     if (showFormalizarDialog) {
         AlertDialog(
             onDismissRequest = { showFormalizarDialog = false },
@@ -488,7 +489,16 @@ fun DetalleProtocoloScreen(
                         viewModel.formalizarProtocolo(
                             usuarioFormalizador = nombreFormalizador,
                             esAprobacion = esAprobacionFormalizacion,
-                            onSuccess = { showFormalizarDialog = false }
+                            onSuccess = {
+                                if (esAprobacionFormalizacion) {
+                                    NotificationHelper.mostrarNotificacionProtocoloFormalizado(
+                                        context = context,
+                                        codigoProtocolo = protocolo?.codigoProtocolo ?: idProtocolo,
+                                        equipo = protocolo?.equipoCodigo ?: "Equipo"
+                                    )
+                                }
+                                showFormalizarDialog = false
+                            }
                         )
                     },
                     colors = ButtonDefaults.buttonColors(

@@ -1,9 +1,9 @@
 package com.induztek.protocolos
 
-import com.induztek.protocolos.data.local.UsuarioEntity
 import com.induztek.protocolos.model.Equipo
 import com.induztek.protocolos.model.EstadoProtocolo
 import com.induztek.protocolos.model.PerfilUsuario
+import com.induztek.protocolos.model.UserProfile
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -36,11 +36,10 @@ class AnexosDominioTest {
     }
 
     @Test
-    fun testUsuarioEntity_mapeoPerfil() {
-        val userCliente = UsuarioEntity(
+    fun testUserProfile_mapeoPerfil() {
+        val userCliente = UserProfile(
             id = "USR-004",
             correo = "cliente@plantalampa.cl",
-            contrasena = "Cliente2026!",
             nombre = "Mario Gómez",
             perfilCodigo = "P-04",
             empresaCliente = "Planta Lampa"
@@ -50,10 +49,9 @@ class AnexosDominioTest {
         assertEquals("Planta Lampa", userCliente.empresaCliente)
         assertFalse(userCliente.getPerfil().puedeRegistrarPruebas)
 
-        val userTecnico = UsuarioEntity(
+        val userTecnico = UserProfile(
             id = "USR-001",
             correo = "tecnico@induztek.cl",
-            contrasena = "Tecnico2026!",
             nombre = "Juan Pérez",
             perfilCodigo = "P-01"
         )

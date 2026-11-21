@@ -25,6 +25,7 @@ import com.induztek.protocolos.ui.equipos.ListaEquiposScreen
 import com.induztek.protocolos.ui.login.LoginScreen
 import com.induztek.protocolos.ui.login.NuevaContrasenaScreen
 import com.induztek.protocolos.ui.login.OlvideContrasenaScreen
+import com.induztek.protocolos.ui.login.RegistroScreen
 import com.induztek.protocolos.ui.login.VerificarCodigoScreen
 import com.induztek.protocolos.ui.navigation.Routes
 import com.induztek.protocolos.ui.perfil.PerfilScreen
@@ -54,38 +55,52 @@ fun AppNavegacion(
     visitaViewModel: VisitaViewModel,
     adminViewModel: AdminViewModel
 ) {
-    
+
     val navController = rememberNavController()
 
-    
-    val usuarioActual by loginViewModel.usuarioActivo.collectAsState()
 
-    
-    
+    val usuarioActual by loginViewModel.usuarioActivo.collectAsState()
+    val profileError by loginViewModel.profileError.collectAsState()
+
+
+
     NavHost(
         navController = navController,
-        startDestination = Routes.Login.route   
+        startDestination = Routes.Login.route
     ) {
 
-        
-        
+
+
         composable(route = Routes.Login.route) {
             LoginScreen(
                 viewModel = loginViewModel,
                 onLoginSuccess = {
-                    
+                    equipoViewModel.refresh()
+                    protocoloViewModel.refresh()
+                    visitaViewModel.refresh()
                     navController.navigate(Routes.ListaEquipos.route) {
                         popUpTo(Routes.Login.route) { inclusive = true }
                     }
                 },
                 onOlvideContrasenaClick = {
                     navController.navigate(Routes.OlvideContrasena.route)
+                },
+                onRegistroClick = {
+                    navController.navigate(Routes.Registro.route)
                 }
             )
         }
 
-        
-        
+        composable(route = Routes.Registro.route) {
+            RegistroScreen(
+                viewModel = loginViewModel,
+                onRegistered = { navController.popBackStack() },
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+
+
         composable(route = Routes.OlvideContrasena.route) {
             OlvideContrasenaScreen(
                 viewModel = loginViewModel,
@@ -96,8 +111,8 @@ fun AppNavegacion(
             )
         }
 
-        
-        
+
+
         composable(route = Routes.VerificarCodigo.route) {
             VerificarCodigoScreen(
                 viewModel = loginViewModel,
@@ -108,8 +123,8 @@ fun AppNavegacion(
             )
         }
 
-        
-        
+
+
         composable(route = Routes.NuevaContrasena.route) {
             NuevaContrasenaScreen(
                 viewModel = loginViewModel,
@@ -122,8 +137,8 @@ fun AppNavegacion(
             )
         }
 
-        
-        
+
+
         composable(route = Routes.ListaEquipos.route) {
             ListaEquiposScreen(
                 viewModel = equipoViewModel,
@@ -155,8 +170,8 @@ fun AppNavegacion(
             )
         }
 
-        
-        
+
+
         composable(route = Routes.CrearEquipo.route) {
             CrearEquipoScreen(
                 viewModel = equipoViewModel,
@@ -165,8 +180,8 @@ fun AppNavegacion(
             )
         }
 
-        
-        
+
+
         composable(
             route = Routes.DetalleEquipo.route,
             arguments = listOf(navArgument("codigo") { type = NavType.StringType })
@@ -183,8 +198,8 @@ fun AppNavegacion(
             )
         }
 
-        
-        
+
+
         composable(route = Routes.ListaVisitas.route) {
             ListaVisitasScreen(
                 visitaViewModel = visitaViewModel,
@@ -199,8 +214,8 @@ fun AppNavegacion(
             )
         }
 
-        
-        
+
+
         composable(route = Routes.NuevaVisita.route) {
             NuevaVisitaScreen(
                 visitaViewModel = visitaViewModel,
@@ -214,8 +229,8 @@ fun AppNavegacion(
             )
         }
 
-        
-        
+
+
         composable(
             route = Routes.DetalleVisita.route,
             arguments = listOf(navArgument("visitaId") { type = NavType.StringType })
@@ -236,8 +251,8 @@ fun AppNavegacion(
             )
         }
 
-        
-        
+
+
         composable(route = Routes.ListaProtocolos.route) {
             ListaProtocolosScreen(
                 viewModel = protocoloViewModel,
@@ -249,8 +264,8 @@ fun AppNavegacion(
             )
         }
 
-        
-        
+
+
         composable(
             route = Routes.DetalleProtocolo.route,
             arguments = listOf(navArgument("id") { type = NavType.StringType })
@@ -267,8 +282,8 @@ fun AppNavegacion(
             )
         }
 
-        
-        
+
+
         composable(
             route = Routes.CapturaPrueba.route,
             arguments = listOf(navArgument("pruebaId") { type = NavType.StringType })
@@ -282,8 +297,8 @@ fun AppNavegacion(
             )
         }
 
-        
-        
+
+
         composable(
             route = Routes.DetalleActa.route,
             arguments = listOf(navArgument("actaId") { type = NavType.StringType })
@@ -297,8 +312,8 @@ fun AppNavegacion(
             )
         }
 
-        
-        
+
+
         composable(route = Routes.Admin.route) {
             AdminScreen(
                 adminViewModel = adminViewModel,
@@ -307,11 +322,12 @@ fun AppNavegacion(
             )
         }
 
-        
-        
+
+
         composable(route = Routes.Perfil.route) {
             PerfilScreen(
                 usuario = usuarioActual,
+                profileError = profileError,
                 onVolver = { navController.popBackStack() },
                 onActualizarFoto = { path ->
                     loginViewModel.actualizarFotoPerfil(path)

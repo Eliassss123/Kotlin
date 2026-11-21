@@ -1,0 +1,83 @@
+server:
+  port: ${SERVER_PORT:8080}
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: operations-equipment-tests
+          uri: lb://operations-service
+          predicates:
+            - Path=/api/equipos/*/pruebas
+        - id: identity-service
+          uri: lb://identity-service
+          predicates:
+            - Path=/api/auth/**,/api/usuarios/**,/api/imagenes/**
+        - id: roles-service
+          uri: lb://roles-service
+          predicates:
+            - Path=/api/roles/**
+        - id: catalog-service
+          uri: lb://catalog-service
+          predicates:
+            - Path=/api/equipos/**,/api/instrumentos/**
+        - id: operations-service
+          uri: lb://operations-service
+          predicates:
+            - Path=/api/visitas/**,/api/protocolos/**,/api/pruebas/**,/api/actas/**
+        - id: identity-openapi
+          uri: lb://identity-service
+          predicates:
+            - Path=/identity/v3/api-docs
+          filters:
+            - SetPath=/v3/api-docs
+        - id: roles-openapi
+          uri: lb://roles-service
+          predicates:
+            - Path=/roles/v3/api-docs
+          filters:
+            - SetPath=/v3/api-docs
+        - id: catalog-openapi
+          uri: lb://catalog-service
+          predicates:
+            - Path=/catalog/v3/api-docs
+          filters:
+            - SetPath=/v3/api-docs
+        - id: operations-openapi
+          uri: lb://operations-service
+          predicates:
+            - Path=/operations/v3/api-docs
+          filters:
+            - SetPath=/v3/api-docs
+        - id: notifications-openapi
+          uri: lb://notifications-service
+          predicates:
+            - Path=/notifications/v3/api-docs
+          filters:
+            - SetPath=/v3/api-docs
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://service-registry:8761/eureka/}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: Identidad y usuarios
+        url: /identity/v3/api-docs
+      - name: Roles
+        url: /roles/v3/api-docs
+      - name: Catálogo
+        url: /catalog/v3/api-docs
+      - name: Operaciones
+        url: /operations/v3/api-docs
+      - name: Notificaciones
+        url: /notifications/v3/api-docs
+  api-docs:
+    enabled: true

@@ -95,6 +95,7 @@ fun NuevaPruebaScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val equiposDisponibles by viewModel.equiposDisponibles.collectAsState()
+    val remoteError by viewModel.remoteError.collectAsState()
 
     var dropdownEquipoExpanded by remember { mutableStateOf(false) }
     var dropdownTipoExpanded by remember { mutableStateOf(false) }
@@ -144,7 +145,10 @@ fun NuevaPruebaScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            
+            remoteError?.let { message ->
+                Text(text = message, color = Color.Red, fontWeight = FontWeight.SemiBold)
+            }
+
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -171,7 +175,7 @@ fun NuevaPruebaScreen(
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    
+
                     ExposedDropdownMenuBox(
                         expanded = dropdownEquipoExpanded,
                         onExpandedChange = { dropdownEquipoExpanded = !dropdownEquipoExpanded }
@@ -205,7 +209,7 @@ fun NuevaPruebaScreen(
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    
+
                     ExposedDropdownMenuBox(
                         expanded = dropdownTipoExpanded,
                         onExpandedChange = { dropdownTipoExpanded = !dropdownTipoExpanded }
@@ -269,7 +273,7 @@ fun NuevaPruebaScreen(
                 }
             }
 
-            
+
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -350,7 +354,7 @@ fun NuevaPruebaScreen(
                 }
             }
 
-            
+
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -368,7 +372,7 @@ fun NuevaPruebaScreen(
                             fontWeight = FontWeight.Bold,
                             color = AzulPetroleo
                         )
-                        
+
                         OutlinedButton(
                             onClick = { viewModel.cargarPlantillaRecomendada() }
                         ) {
@@ -455,7 +459,7 @@ fun NuevaPruebaScreen(
                 }
             }
 
-            
+
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -503,7 +507,7 @@ fun NuevaPruebaScreen(
                 }
             }
 
-            
+
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -529,7 +533,7 @@ fun NuevaPruebaScreen(
 
                     val context = LocalContext.current
 
-                    
+
                     val cameraLauncher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.TakePicturePreview()
                     ) { bitmap: android.graphics.Bitmap? ->
@@ -540,7 +544,7 @@ fun NuevaPruebaScreen(
                         }
                     }
 
-                    
+
                     val permissionCameraLauncher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.RequestPermission()
                     ) { isGranted ->
@@ -553,7 +557,7 @@ fun NuevaPruebaScreen(
                         }
                     }
 
-                    
+
                     val galleryLauncher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.GetContent()
                     ) { uri: android.net.Uri? ->
@@ -605,7 +609,7 @@ fun NuevaPruebaScreen(
                         }
                     }
 
-                    
+
                     if (state.fotos.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(14.dp))
                         Text(
@@ -645,7 +649,7 @@ fun NuevaPruebaScreen(
                                             Text("Archivo", fontSize = 10.sp, color = Color.Gray)
                                         }
                                     }
-                                    
+
                                     IconButton(
                                         onClick = { viewModel.eliminarFoto(index) },
                                         modifier = Modifier
@@ -667,7 +671,7 @@ fun NuevaPruebaScreen(
                 }
             }
 
-            
+
             Button(
                 onClick = onIrAResumen,
                 enabled = state.equipoCodigo.isNotBlank() && state.mediciones.isNotEmpty(),

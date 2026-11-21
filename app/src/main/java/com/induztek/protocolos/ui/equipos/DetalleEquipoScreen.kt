@@ -57,7 +57,7 @@ fun DetalleEquipoScreen(
     equipoId: String = "",
     codigoEquipo: String = equipoId,
     viewModel: EquipoViewModel,
-    usuarioActual: com.induztek.protocolos.data.local.UsuarioEntity? = null,
+    usuarioActual: com.induztek.protocolos.model.UserProfile? = null,
     esCliente: Boolean = usuarioActual?.getPerfil() == com.induztek.protocolos.model.PerfilUsuario.CLIENTE,
     onNavigateBack: () -> Unit,
     onIniciarVisitaClick: () -> Unit = {}
@@ -87,7 +87,7 @@ fun DetalleEquipoScreen(
                 .padding(16.dp)
         ) {
             equipo?.let { eq ->
-                
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
@@ -135,7 +135,7 @@ fun DetalleEquipoScreen(
                             color = TextoSecundario
                         )
 
-                        
+
                         if (eq.empeorando) {
                             Spacer(modifier = Modifier.height(8.dp))
                             Row(
@@ -156,7 +156,7 @@ fun DetalleEquipoScreen(
                             }
                         }
 
-                        
+
                         Spacer(modifier = Modifier.height(10.dp))
                         HorizontalDivider(color = Color(0xFFEEEEEE))
                         Spacer(modifier = Modifier.height(8.dp))
@@ -270,7 +270,7 @@ fun PruebaHistorialItem(prueba: Prueba) {
                 color = TextoSecundario
             )
 
-            
+
             if (prueba.variacionHistoricaPorcentaje != null && prueba.variacionHistoricaPorcentaje != 0.0) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {

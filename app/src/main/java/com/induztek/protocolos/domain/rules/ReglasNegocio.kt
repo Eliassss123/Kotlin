@@ -19,19 +19,19 @@ import kotlin.math.abs
 
 object ReglasNegocio {
 
-    
-    
-    
+
+
+
     fun obtenerPruebasRequeridasPorTipo(tipoEquipoStr: String): List<String> {
         val tipo = TipoEquipo.fromNombre(tipoEquipoStr)
         return tipo.pruebasRequeridas
     }
 
-    
-    
-    
-    
-    
+
+
+
+
+
     fun calcularIndicePolarizacion(lectura1min: Double, lectura10min: Double): Pair<Double, ResultadoPrueba> {
         if (lectura1min <= 0.0) return 0.0 to ResultadoPrueba.RECHAZADO
         val ipCalculado = lectura10min / lectura1min
@@ -45,11 +45,11 @@ object ReglasNegocio {
         return ipRedondeado to resultado
     }
 
-    
-    
-    
-    
-    
+
+
+
+
+
     fun calcularErrorTTR(relacionTeorica: Double, relacionMedida: Double): Pair<Double, ResultadoPrueba> {
         if (relacionTeorica <= 0.0) return 0.0 to ResultadoPrueba.RECHAZADO
         val errorPorcentaje = abs((relacionMedida - relacionTeorica) / relacionTeorica) * 100.0
@@ -63,10 +63,10 @@ object ReglasNegocio {
         return errorRedondeado to resultado
     }
 
-    
-    
-    
-    
+
+
+
+
     fun evaluarResistenciaContactos(resistenciaMicroOhm: Double): ResultadoPrueba {
         return when {
             resistenciaMicroOhm <= 50.0 -> ResultadoPrueba.APROBADO
@@ -75,10 +75,10 @@ object ReglasNegocio {
         }
     }
 
-    
-    
-    
-    
+
+
+
+
     fun evaluarOperacionRele(tiempoTeoricoSeg: Double, tiempoMedidoSeg: Double): Pair<Double, ResultadoPrueba> {
         if (tiempoTeoricoSeg <= 0.0) return 0.0 to ResultadoPrueba.RECHAZADO
         val errorPorcentaje = abs((tiempoMedidoSeg - tiempoTeoricoSeg) / tiempoTeoricoSeg) * 100.0
@@ -92,18 +92,18 @@ object ReglasNegocio {
         return errorRedondeado to resultado
     }
 
-    
-    
-    
-    
+
+
+
+
     fun esPruebaConAsignacionManual(tipoPrueba: String): Boolean {
         return tipoPrueba.contains("devanado", ignoreCase = true)
     }
 
-    
-    
-    
-    
+
+
+
+
     fun calcularVariacionHistorica(valorActual: Double, valorAnterior: Double): Pair<Double, Boolean> {
         if (valorAnterior == 0.0) return 0.0 to false
         val variacion = ((valorActual - valorAnterior) / valorAnterior) * 100.0
@@ -112,21 +112,21 @@ object ReglasNegocio {
         return variacionRedondeada to supera25
     }
 
-    
-    
-    
-    
-    
+
+
+
+
+
     fun calcularResultadoGlobal(pruebas: List<Prueba>): ResultadoPrueba {
         val pruebasRealizadas = pruebas.filter { it.estadoPrueba == EstadoPrueba.REALIZADA }
         if (pruebasRealizadas.isEmpty()) return ResultadoPrueba.NO_REALIZADA
         return ResultadoPrueba.peorResultado(pruebasRealizadas.map { it.resultado })
     }
 
-    
-    
-    
-    
+
+
+
+
     fun validarPruebaCompleta(prueba: Prueba): String? {
         if (prueba.estadoPrueba == EstadoPrueba.NO_REALIZADA) {
             if (prueba.motivoNoRealizada.isBlank()) {
@@ -140,26 +140,26 @@ object ReglasNegocio {
         return null
     }
 
-    
-    
-    
-    
+
+
+
+
     fun filtrarMedicionVigente(mediciones: List<Medicion>, campo: String): Medicion? {
         val posteriores = mediciones.filter { it.campo.equals(campo, ignoreCase = true) && it.momento == MomentoMedicion.POSTERIOR_MANTENIMIENTO }
         if (posteriores.isNotEmpty()) return posteriores.last()
         return mediciones.find { it.campo.equals(campo, ignoreCase = true) }
     }
 
-    
-    
-    
+
+
+
     fun generarNumeroProtocolo(correlativo: Int, anio: Int = 2026): String {
         return String.format(Locale.US, "PT-%d-%04d", anio, correlativo)
     }
 
-    
-    
-    
+
+
+
     fun generarMedicionesPlantillaPorPrueba(tipoPrueba: String): List<Medicion> {
         return when {
             tipoPrueba.contains("aislación", ignoreCase = true) || tipoPrueba.contains("aislamiento", ignoreCase = true) -> listOf(

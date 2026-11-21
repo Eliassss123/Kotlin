@@ -37,7 +37,7 @@ private val DarkColorScheme = darkColorScheme(
 
 @Composable
 fun InduztekTheme(
-    
+
     darkTheme: Boolean = true,
     content: @Composable () -> Unit
 ) {

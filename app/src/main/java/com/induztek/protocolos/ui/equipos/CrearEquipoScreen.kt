@@ -101,7 +101,7 @@ fun CrearEquipoScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            
+
             if (state.advertenciaDuplicado != null) {
                 Card(
                     shape = RoundedCornerShape(10.dp),
@@ -124,7 +124,7 @@ fun CrearEquipoScreen(
                 }
             }
 
-            
+
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = TarjetaFondo),
@@ -154,7 +154,7 @@ fun CrearEquipoScreen(
                             Text(
                                 text = "Ejemplo de TAG válido: TR-500KVA-01. Si el equipo no posee TAG, complete Marca y N° de Serie obligatoriamente.",
                                 fontSize = 11.sp,
-                                
+
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         },
@@ -231,7 +231,7 @@ fun CrearEquipoScreen(
                 }
             }
 
-            
+
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = TarjetaFondo),

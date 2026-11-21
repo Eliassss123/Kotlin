@@ -19,7 +19,7 @@ data class Instrumento(
     val marca: String,
     val modelo: String,
     val numeroSerie: String,
-    val vencimientoCalibracion: String, 
+    val vencimientoCalibracion: String,
     val activo: Boolean = true
 ) {
     val descripcionCompleta: String
@@ -32,7 +32,7 @@ data class Instrumento(
             val hoy = Date()
             !fechaVenc.before(hoy)
         } catch (e: Exception) {
-            true 
+            true
         }
     }
 }

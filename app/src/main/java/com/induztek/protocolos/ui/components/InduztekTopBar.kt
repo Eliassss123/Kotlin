@@ -31,10 +31,10 @@ fun InduztekTopBar(
     onNavigateBack: () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {}
 ) {
-    
+
     TopAppBar(
         actions = actions,
-        
+
         title = {
             Text(
                 text = titulo,
@@ -42,7 +42,7 @@ fun InduztekTopBar(
                 color = Color.White
             )
         },
-        
+
         navigationIcon = {
             if (canNavigateBack) {
                 IconButton(onClick = onNavigateBack) {
@@ -54,7 +54,7 @@ fun InduztekTopBar(
                 }
             }
         },
-        
+
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = AzulPetroleo
         )

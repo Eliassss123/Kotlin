@@ -1,61 +1,34 @@
-
-
-
-
-
-
 package com.induztek.protocolos.data.repository
 
-import com.induztek.protocolos.data.local.ActaDao
-import com.induztek.protocolos.data.local.ActaEntity
+import com.induztek.protocolos.data.remote.OperationsApi
+import com.induztek.protocolos.data.remote.requireBody
+import com.induztek.protocolos.data.remote.toDomain
+import com.induztek.protocolos.data.remote.toDto
 import com.induztek.protocolos.model.Acta
-import com.induztek.protocolos.model.SyncStatus
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
+class ActaRepository(private val api: OperationsApi) {
+    private val _allActas = MutableStateFlow<List<Acta>>(emptyList())
+    val allActas: StateFlow<List<Acta>> = _allActas.asStateFlow()
 
-class ActaRepository(
-    private val actaDao: ActaDao
-) {
-    
-    val allActas: Flow<List<Acta>> = actaDao.getAllActas().map { entities ->
-        entities.map { it.toDomain() }
+    suspend fun refresh() {
+        _allActas.value = api.getActas().requireBody().map { it.toDomain() }
     }
 
-    
-    suspend fun getActaById(id: String): Acta? {
-        return actaDao.getActaById(id)?.toDomain()
-    }
-
-    
-    suspend fun getActaByVisita(visitaId: String): Acta? {
-        return actaDao.getActaByVisita(visitaId)?.toDomain()
-    }
-
-    
-    suspend fun insertActa(acta: Acta) {
-        actaDao.insertActa(ActaEntity.fromDomain(acta))
-    }
-
-    
-    suspend fun seedInitialDataIfEmpty() {
-        if (actaDao.getCount() == 0) {
-            val initialActas = listOf(
-                Acta(
-                    id = "ACTA-2026-079",
-                    visitaId = "VIS-2026-002",
-                    ordenTrabajo = "OT-2026-079",
-                    cliente = "Agroindustria Rancagua",
-                    instalacion = "Subestación Distribución Sur",
-                    fechaEmision = "2026-09-20 16:45",
-                    tecnicoEntrega = "Juan Pérez (Técnico de Terreno)",
-                    recibidoPor = "Guillermo Fuentes (Jefe Mantención Agroindustria)",
-                    marcaPendienteFormalizacion = true,
-                    resumenProtocolos = "Protocolo PT-2026-0003 (Celda MT CEL-MT24-03): Resultado OBSERVADO. Resistencia de contactos en fase S sobre límite.",
-                    syncStatus = SyncStatus.ENVIADO
-                )
-            )
-            actaDao.insertAll(initialActas.map { ActaEntity.fromDomain(it) })
+    suspend fun getActaById(id: String): Acta? =
+        api.getActa(id).let { response ->
+            if (response.code() == 404) null else response.requireBody().toDomain()
         }
+
+    suspend fun getActaByVisita(visitaId: String): Acta? =
+        api.getActas(visitaId).requireBody().firstOrNull()?.toDomain()
+
+    suspend fun insertActa(acta: Acta) {
+        api.crearActa(acta.toDto()).requireBody()
+        refresh()
     }
+
+    suspend fun seedInitialDataIfEmpty() = refresh()
 }

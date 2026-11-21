@@ -76,7 +76,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.induztek.protocolos.data.local.UsuarioEntity
+import coil3.compose.AsyncImage
+import com.induztek.protocolos.model.UserProfile
 import com.induztek.protocolos.ui.theme.AzulPetroleo
 import com.induztek.protocolos.ui.theme.AzulPetroleoLight
 import com.induztek.protocolos.ui.theme.FondoApp
@@ -88,7 +89,8 @@ import com.induztek.protocolos.util.ImageStorageHelper
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PerfilScreen(
-    usuario: UsuarioEntity?,
+    usuario: UserProfile?,
+    profileError: String? = null,
     onVolver: () -> Unit,
     onActualizarFoto: (String?) -> Unit = {},
     onActualizarBiografia: (String?) -> Unit = {},
@@ -98,19 +100,22 @@ fun PerfilScreen(
     val perfil = usuario?.getPerfil()
     val esTrabajador = perfil?.esTrabajadorInduztek ?: true
 
-    
+
     var bitmapFoto by remember(usuario?.fotoPerfil) {
-        mutableStateOf(ImageStorageHelper.cargarBitmap(usuario?.fotoPerfil))
+        mutableStateOf(
+            usuario?.fotoPerfil?.takeUnless { it.startsWith("http://") || it.startsWith("https://") }
+                ?.let(ImageStorageHelper::cargarBitmap)
+        )
     }
 
-    
+
     var mostrarDialogOpcionesFoto by remember { mutableStateOf(false) }
     var mostrarDialogEditarBio by remember { mutableStateOf(false) }
     var biografiaTexto by remember(usuario?.biografia) {
         mutableStateOf(usuario?.biografia ?: "")
     }
 
-    
+
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview()
     ) { bitmap: Bitmap? ->
@@ -122,7 +127,7 @@ fun PerfilScreen(
         }
     }
 
-    
+
     val permissionCameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -137,7 +142,7 @@ fun PerfilScreen(
         }
     }
 
-    
+
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -184,7 +189,14 @@ fun PerfilScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            
+            profileError?.let { message ->
+                Text(
+                    text = message,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -196,14 +208,26 @@ fun PerfilScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    
+
                     Box(
                         modifier = Modifier
                             .size(105.dp)
                             .clickable { mostrarDialogOpcionesFoto = true },
                         contentAlignment = Alignment.Center
                     ) {
-                        if (bitmapFoto != null) {
+                        if (usuario?.fotoPerfil?.startsWith("http://") == true ||
+                            usuario?.fotoPerfil?.startsWith("https://") == true
+                        ) {
+                            AsyncImage(
+                                model = usuario.fotoPerfil,
+                                contentDescription = "Foto de perfil",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(95.dp)
+                                    .clip(CircleShape)
+                                    .border(3.dp, Color.White, CircleShape)
+                            )
+                        } else if (bitmapFoto != null) {
                             Image(
                                 bitmap = bitmapFoto!!.asImageBitmap(),
                                 contentDescription = "Foto de perfil",
@@ -231,7 +255,7 @@ fun PerfilScreen(
                             }
                         }
 
-                        
+
                         Box(
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
@@ -264,7 +288,7 @@ fun PerfilScreen(
                         fontWeight = FontWeight.SemiBold
                     )
 
-                    
+
                     Box(
                         modifier = Modifier
                             .background(
@@ -290,7 +314,7 @@ fun PerfilScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            
+
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -374,7 +398,7 @@ fun PerfilScreen(
 
 
 
-            
+
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -387,14 +411,14 @@ fun PerfilScreen(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    
+
                     Text(
                         text = "Información de cuenta",
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
                         color = AzulPetroleo
                     )
-                
+
                     FilaInfoPerfil(
                         icono = Icons.Default.Email,
                         etiqueta = "Correo",
@@ -423,7 +447,7 @@ fun PerfilScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            
+
             if (perfil != null) {
                 Card(
                     modifier = Modifier
@@ -461,7 +485,7 @@ fun PerfilScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            
+
             Button(
                 onClick = onCerrarSesion,
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)),
@@ -480,7 +504,7 @@ fun PerfilScreen(
         }
     }
 
-    
+
     if (mostrarDialogOpcionesFoto) {
         AlertDialog(
             onDismissRequest = { mostrarDialogOpcionesFoto = false },
@@ -563,7 +587,7 @@ fun PerfilScreen(
         )
     }
 
-    
+
     if (mostrarDialogEditarBio) {
         AlertDialog(
             onDismissRequest = { mostrarDialogEditarBio = false },

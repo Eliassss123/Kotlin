@@ -86,7 +86,7 @@ fun ResumenProtocoloScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            
+
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -150,7 +150,7 @@ fun ResumenProtocoloScreen(
                 }
             }
 
-            
+
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -193,7 +193,7 @@ fun ResumenProtocoloScreen(
                 }
             }
 
-            
+
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -230,7 +230,7 @@ fun ResumenProtocoloScreen(
                 }
             }
 
-            
+
             if (state.fotos.isNotEmpty()) {
                 Card(
                     shape = RoundedCornerShape(12.dp),
@@ -270,7 +270,7 @@ fun ResumenProtocoloScreen(
                 }
             }
 
-            
+
             Card(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9)),

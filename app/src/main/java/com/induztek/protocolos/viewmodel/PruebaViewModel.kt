@@ -11,7 +11,6 @@
 package com.induztek.protocolos.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.induztek.protocolos.data.repository.EquipoRepository
 import com.induztek.protocolos.data.repository.ProtocoloRepository
 import com.induztek.protocolos.data.repository.PruebaRepository
@@ -23,7 +22,6 @@ import com.induztek.protocolos.model.Prueba
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -63,12 +61,14 @@ class PruebaViewModel(
 
     private val _equiposDisponibles = MutableStateFlow<List<Equipo>>(emptyList())
     val equiposDisponibles: StateFlow<List<Equipo>> = _equiposDisponibles.asStateFlow()
+    private val _remoteError = MutableStateFlow<String?>(null)
+    val remoteError: StateFlow<String?> = _remoteError.asStateFlow()
 
     init {
         val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
         _uiState.value = _uiState.value.copy(fechaHora = formatter.format(Date()))
 
-        viewModelScope.launch {
+        launchCatching(onError = { _remoteError.value = it }) {
             equipoRepository.allEquipos.collect { list ->
                 _equiposDisponibles.value = list
                 if (list.isNotEmpty() && _uiState.value.equipoCodigo.isBlank()) {
@@ -78,13 +78,13 @@ class PruebaViewModel(
         }
     }
 
-    
+
     fun setUsuarioSesion(nombre: String, correo: String, rol: String) {
         val labelTecnico = "$nombre ($rol - $correo)"
         _uiState.value = _uiState.value.copy(tecnico = labelTecnico)
     }
 
-    
+
     fun setEquipo(equipo: Equipo) {
         _uiState.value = _uiState.value.copy(
             equipoCodigo = equipo.codigo,
@@ -94,7 +94,7 @@ class PruebaViewModel(
 
     fun onEquipoCodigoChanged(codigo: String) {
         _uiState.value = _uiState.value.copy(equipoCodigo = codigo)
-        viewModelScope.launch {
+        launchCatching(onError = { _remoteError.value = it }) {
             val eq = equipoRepository.getEquipoByCodigo(codigo)
             if (eq != null) {
                 _uiState.value = _uiState.value.copy(ubicacion = "${eq.cliente} - ${eq.ubicacion}")
@@ -106,7 +106,7 @@ class PruebaViewModel(
         _uiState.value = _uiState.value.copy(ordenTrabajo = ot)
     }
 
-    
+
     fun onTipoPruebaChanged(tipo: String) {
         val instrumentoRecomendado = when {
             tipo.contains("Megger", ignoreCase = true) -> "Megger MIT525 (Cal. Vigente 2026)"
@@ -132,7 +132,7 @@ class PruebaViewModel(
         _uiState.value = _uiState.value.copy(mediciones = plantilla)
     }
 
-    
+
     private fun obtenerPlantillaPorTipo(tipo: String): List<Medicion> {
         return when {
             tipo.contains("Megger", ignoreCase = true) -> listOf(
@@ -241,9 +241,9 @@ class PruebaViewModel(
         }
     }
 
-    
+
     fun guardarProtocolo(onSuccess: () -> Unit) {
-        viewModelScope.launch {
+        launchCatching(onError = { _remoteError.value = it }) {
             val state = _uiState.value
             val timestamp = System.currentTimeMillis()
             val idPrueba = "PRU-$timestamp"

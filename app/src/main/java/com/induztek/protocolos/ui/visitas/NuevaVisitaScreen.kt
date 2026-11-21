@@ -8,6 +8,16 @@
 
 package com.induztek.protocolos.ui.visitas
 
+import android.Manifest
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.Icon
+import androidx.compose.ui.platform.LocalContext
+import com.induztek.protocolos.util.LocationHelper
+import com.induztek.protocolos.util.NotificationHelper
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -49,12 +59,34 @@ import com.induztek.protocolos.viewmodel.VisitaViewModel
 @Composable
 fun NuevaVisitaScreen(
     visitaViewModel: VisitaViewModel,
-    usuarioActual: com.induztek.protocolos.data.local.UsuarioEntity? = null,
+    usuarioActual: com.induztek.protocolos.model.UserProfile? = null,
     onNavigateBack: () -> Unit,
     onVisitaCreada: (String) -> Unit
 ) {
     val viewModel = visitaViewModel
     val state by viewModel.nuevaVisitaState.collectAsState()
+    val context = LocalContext.current
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val concedido = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (concedido) {
+            LocationHelper.obtenerCoordenadasActuales(
+                context = context,
+                onExito = { _, _, formatted ->
+                    viewModel.onGpsCaptured(formatted)
+                    Toast.makeText(context, "GPS capturado: $formatted", Toast.LENGTH_SHORT).show()
+                },
+                onError = { error ->
+                    Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+                }
+            )
+        } else {
+            Toast.makeText(context, "Permiso de GPS requerido para geolocalizar la visita", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -116,6 +148,44 @@ fun NuevaVisitaScreen(
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Button(
+                        onClick = {
+                            permissionLauncher.launch(
+                                arrayOf(
+                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                    Manifest.permission.ACCESS_COARSE_LOCATION
+                                )
+                            )
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = AzulPetroleo),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = "GPS",
+                            tint = Color.White
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (state.coordenadasGps != null) "Actualizar Coordenadas GPS" else "Capturar Coordenadas GPS de Planta",
+                            color = Color.White,
+                            fontSize = 13.sp
+                        )
+                    }
+
+                    if (state.coordenadasGps != null) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "📍 Coordenadas fijadas: ${state.coordenadasGps}",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = AzulPetroleo
+                        )
+                    }
                 }
             }
 
@@ -223,7 +293,14 @@ fun NuevaVisitaScreen(
 
             Button(
                 onClick = {
+                    val ot = state.ordenTrabajo
+                    val lugar = state.instalacion
                     viewModel.crearVisita { visitaId ->
+                        NotificationHelper.mostrarNotificacionVisitaCreada(
+                            context = context,
+                            ordenTrabajo = ot,
+                            lugar = lugar
+                        )
                         onVisitaCreada(visitaId)
                     }
                 },

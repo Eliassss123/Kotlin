@@ -24,13 +24,13 @@ import com.induztek.protocolos.model.MomentoMedicion
 import com.induztek.protocolos.model.Protocolo
 import com.induztek.protocolos.model.Prueba
 import com.induztek.protocolos.model.ResultadoPrueba
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 
 data class EdicionPruebaState(
@@ -72,20 +72,32 @@ class ProtocoloViewModel(
 
     private val _edicionPruebaState = MutableStateFlow<EdicionPruebaState?>(null)
     val edicionPruebaState: StateFlow<EdicionPruebaState?> = _edicionPruebaState.asStateFlow()
+    private val _remoteError = MutableStateFlow<String?>(null)
+    val remoteError: StateFlow<String?> = _remoteError.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            protocoloRepository.seedInitialDataIfEmpty()
-            pruebaRepository.seedInitialDataIfEmpty()
-            instrumentoRepository.seedInitialDataIfEmpty()
-
+        launchCatching(onError = { _remoteError.value = it }) {
             instrumentoRepository.instrumentosActivos.collect { list ->
                 _instrumentosDisponibles.value = list
             }
         }
     }
 
-    
+    fun refresh() {
+        launchCatching(onError = { _remoteError.value = it }) {
+            try {
+                protocoloRepository.refresh()
+                pruebaRepository.refresh()
+                instrumentoRepository.refresh()
+                _remoteError.value = null
+            } catch (exception: Exception) {
+                if (exception is CancellationException) throw exception
+                _remoteError.value = exception.localizedMessage ?: "No fue posible cargar los protocolos"
+            }
+        }
+    }
+
+
     val protocolos: StateFlow<List<Protocolo>> = combine(
         protocoloRepository.allProtocolos,
         _empresaClienteFiltro
@@ -108,9 +120,9 @@ class ProtocoloViewModel(
         _empresaClienteFiltro.value = empresa
     }
 
-    
+
     fun cargarProtocolo(id: String) {
-        viewModelScope.launch {
+        launchCatching(onError = { _remoteError.value = it }) {
             val prot = protocoloRepository.getProtocoloById(id)
             _selectedProtocolo.value = prot
             if (prot != null) {
@@ -121,9 +133,9 @@ class ProtocoloViewModel(
         }
     }
 
-    
+
     fun iniciarEdicionPrueba(pruebaId: String) {
-        viewModelScope.launch {
+        launchCatching(onError = { _remoteError.value = it }) {
             val p = pruebaRepository.getPruebaById(pruebaId)
             if (p != null) {
                 iniciarEdicionPrueba(p)
@@ -131,9 +143,9 @@ class ProtocoloViewModel(
         }
     }
 
-    
+
     fun iniciarEdicionPrueba(prueba: Prueba) {
-        viewModelScope.launch {
+        launchCatching(onError = { _remoteError.value = it }) {
             val esManual = ReglasNegocio.esPruebaConAsignacionManual(prueba.tipoPrueba)
             val inst = _instrumentosDisponibles.value.find { it.modelo.contains(prueba.instrumento) || prueba.instrumento.contains(it.modelo) }
                 ?: _instrumentosDisponibles.value.firstOrNull()
@@ -195,7 +207,7 @@ class ProtocoloViewModel(
         _edicionPruebaState.value = _edicionPruebaState.value?.copy(resultadoManual = res)
     }
 
-    
+
     fun actualizarMedicion(index: Int, nuevoValorNum: Double?, nuevaUnidad: String, momento: MomentoMedicion) {
         val current = _edicionPruebaState.value ?: return
         val lista = current.mediciones.toMutableList()
@@ -225,7 +237,7 @@ class ProtocoloViewModel(
         }
     }
 
-    
+
     private fun recalcularResultadoPrueba() {
         val state = _edicionPruebaState.value ?: return
         if (state.estadoPrueba == EstadoPrueba.NO_REALIZADA) {
@@ -287,7 +299,7 @@ class ProtocoloViewModel(
         _edicionPruebaState.value = state.copy(resultadoCalculado = nuevoResultado)
     }
 
-    
+
     fun guardarEdicionPrueba(onSuccess: () -> Unit, onError: (String) -> Unit) {
         val state = _edicionPruebaState.value ?: return
         val prot = _selectedProtocolo.value ?: return
@@ -297,7 +309,7 @@ class ProtocoloViewModel(
             return
         }
 
-        viewModelScope.launch {
+        launchCatching(onError = { _remoteError.value = it }) {
             val inst = state.instrumentoSeleccionado
             val pruebaActualizada = Prueba(
                 id = state.pruebaId,
@@ -344,10 +356,10 @@ class ProtocoloViewModel(
         }
     }
 
-    
+
     fun formalizarProtocolo(usuarioFormalizador: String, esAprobacion: Boolean, onSuccess: () -> Unit) {
         val prot = _selectedProtocolo.value ?: return
-        viewModelScope.launch {
+        launchCatching(onError = { _remoteError.value = it }) {
             val nuevoEstado = if (esAprobacion) EstadoProtocolo.FORMALIZADO else EstadoProtocolo.OBSERVADO
             protocoloRepository.formalizarProtocolo(prot.id, usuarioFormalizador, nuevoEstado)
             cargarProtocolo(prot.id)
@@ -355,7 +367,7 @@ class ProtocoloViewModel(
         }
     }
 
-    
+
     fun agregarFotoAProtocolo(path: String) {
         val prot = _selectedProtocolo.value ?: return
         if (path.isBlank()) return
@@ -363,12 +375,12 @@ class ProtocoloViewModel(
         lista.add(path)
         val actualizado = prot.copy(fotos = lista)
         _selectedProtocolo.value = actualizado
-        viewModelScope.launch {
+        launchCatching(onError = { _remoteError.value = it }) {
             protocoloRepository.insertProtocolo(actualizado)
         }
     }
 
-    
+
     fun eliminarFotoDeProtocolo(index: Int) {
         val prot = _selectedProtocolo.value ?: return
         val lista = prot.fotos.toMutableList()
@@ -377,7 +389,7 @@ class ProtocoloViewModel(
             com.induztek.protocolos.util.ImageStorageHelper.eliminarArchivo(path)
             val actualizado = prot.copy(fotos = lista)
             _selectedProtocolo.value = actualizado
-            viewModelScope.launch {
+            launchCatching(onError = { _remoteError.value = it }) {
                 protocoloRepository.insertProtocolo(actualizado)
             }
         }

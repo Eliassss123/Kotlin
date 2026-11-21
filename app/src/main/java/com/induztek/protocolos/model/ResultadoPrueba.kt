@@ -36,7 +36,7 @@ enum class ResultadoPrueba(val label: String, val severidad: Int) {
             } ?: APROBADO
         }
 
-        
+
         fun peorResultado(resultados: List<ResultadoPrueba>): ResultadoPrueba {
             val validos = resultados.filter { it != NO_REALIZADA }
             if (validos.isEmpty()) return NO_REALIZADA

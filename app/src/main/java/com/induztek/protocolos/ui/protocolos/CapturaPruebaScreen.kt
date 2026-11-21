@@ -68,7 +68,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.induztek.protocolos.data.local.UsuarioEntity
+import com.induztek.protocolos.model.UserProfile
 import com.induztek.protocolos.model.EstadoPrueba
 import com.induztek.protocolos.model.Medicion
 import com.induztek.protocolos.model.MomentoMedicion
@@ -86,7 +86,7 @@ import com.induztek.protocolos.viewmodel.ProtocoloViewModel
 fun CapturaPruebaScreen(
     pruebaId: String = "",
     protocoloViewModel: ProtocoloViewModel,
-    usuarioActual: UsuarioEntity? = null,
+    usuarioActual: UserProfile? = null,
     onNavigateBack: () -> Unit
 ) {
     val viewModel = protocoloViewModel
@@ -97,6 +97,7 @@ fun CapturaPruebaScreen(
     }
     val state by viewModel.edicionPruebaState.collectAsState()
     val instrumentosDisponibles by viewModel.instrumentosDisponibles.collectAsState()
+    val remoteError by viewModel.remoteError.collectAsState()
 
     var dropdownInstrumentoExpanded by remember { mutableStateOf(false) }
     var mensajeErrorLocal by remember { mutableStateOf<String?>(null) }
@@ -135,8 +136,12 @@ fun CapturaPruebaScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
+            remoteError?.let { message ->
+                Text(text = message, color = Color.Red, fontWeight = FontWeight.SemiBold)
+            }
+
             state?.let { s ->
-                
+
                 Card(
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -172,7 +177,7 @@ fun CapturaPruebaScreen(
                             }
                         }
 
-                        
+
                         if (s.estadoPrueba == EstadoPrueba.NO_REALIZADA) {
                             Spacer(modifier = Modifier.height(8.dp))
                             OutlinedTextField(
@@ -191,7 +196,7 @@ fun CapturaPruebaScreen(
                 }
 
                 if (s.estadoPrueba == EstadoPrueba.REALIZADA) {
-                    
+
                     Card(
                         shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -252,7 +257,7 @@ fun CapturaPruebaScreen(
 
                             Spacer(modifier = Modifier.height(6.dp))
 
-                            
+
                             if (s.advertenciaCalibracionVencida) {
                                 Row(
                                     modifier = Modifier
@@ -284,7 +289,7 @@ fun CapturaPruebaScreen(
                         }
                     }
 
-                    
+
                     Card(
                         shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -333,7 +338,7 @@ fun CapturaPruebaScreen(
                                             fontWeight = FontWeight.Bold,
                                             color = AzulPetroleo
                                         )
-                                        
+
                                         Text(
                                             text = if (momentoActual == MomentoMedicion.POSTERIOR_MANTENIMIENTO) "Posterior Mantenimiento" else "Previa",
                                             fontSize = 11.sp,
@@ -359,7 +364,7 @@ fun CapturaPruebaScreen(
                                         modifier = Modifier.fillMaxWidth(),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        
+
                                         OutlinedTextField(
                                             value = valorTexto,
                                             onValueChange = { nuevo ->
@@ -376,7 +381,7 @@ fun CapturaPruebaScreen(
 
                                         Spacer(modifier = Modifier.width(8.dp))
 
-                                        
+
                                         ExposedDropdownMenuBox(
                                             expanded = dropdownUnidadExpanded,
                                             onExpandedChange = { dropdownUnidadExpanded = !dropdownUnidadExpanded },
@@ -417,7 +422,7 @@ fun CapturaPruebaScreen(
                         }
                     }
 
-                    
+
                     if (s.esAsignacionManual) {
                         Card(
                             shape = RoundedCornerShape(12.dp),
@@ -458,7 +463,7 @@ fun CapturaPruebaScreen(
                         }
                     }
 
-                    
+
                     Card(
                         shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -512,7 +517,7 @@ fun CapturaPruebaScreen(
                         }
                     }
 
-                    
+
                     OutlinedTextField(
                         value = s.observaciones,
                         onValueChange = { viewModel.onObservacionesPruebaChanged(it) },

@@ -20,7 +20,7 @@ data class Visita(
     val cliente: String,
     val instalacion: String,
     val modalidad: ModalidadVisita = ModalidadVisita.SOLO_PRUEBAS,
-    val ingenieroACargo: String, 
+    val ingenieroACargo: String,
     val tecnicos: String,
     val temperaturaAmbiente: String = "20°C",
     val humedad: String = "45%",

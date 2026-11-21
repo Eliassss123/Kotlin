@@ -14,13 +14,13 @@ import org.junit.Test
 
 class LoginValidationTest {
 
-    
+
     private val viewModel = LoginViewModel()
 
-    
+
     @Test
     fun emailValidation_validEmails_returnsTrue() {
-        
+
         assertTrue(viewModel.validarCorreo("usuario@dominio.com"))
         assertTrue(viewModel.validarCorreo("usuario.apellido@empresa.cl"))
         assertTrue(viewModel.validarCorreo("soporte+tag@induztek.org"))
@@ -29,7 +29,7 @@ class LoginValidationTest {
 
     @Test
     fun emailValidation_invalidEmails_returnsFalse() {
-        
+
         assertFalse(viewModel.validarCorreo(""))
         assertFalse(viewModel.validarCorreo("correo"))
         assertFalse(viewModel.validarCorreo("correo@"))
@@ -38,10 +38,10 @@ class LoginValidationTest {
     }
 
     @Test
-    
+
     fun passwordValidation_tooShort_returnsFalse() {
         assertFalse(viewModel.validarContrasena("Ab1"))
-        assertFalse(viewModel.validarContrasena("Ab12345")) 
+        assertFalse(viewModel.validarContrasena("Ab12345"))
     }
 
     @Test
@@ -66,10 +66,10 @@ class LoginValidationTest {
     }
 
     @Test
-    
+
     fun passwordValidation_validPasswords_returnsTrue() {
-        assertTrue(viewModel.validarContrasena("Admin2026!"))
-        assertTrue(viewModel.validarContrasena("Tecnico2026!"))
-        assertTrue(viewModel.validarContrasena("MiClave1@"))
+        assertTrue(viewModel.validarContrasena("Admin2026!A"))
+        assertTrue(viewModel.validarContrasena("Tecnico2026!A"))
+        assertTrue(viewModel.validarContrasena("MiClave2026@"))
     }
 }

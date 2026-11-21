@@ -35,7 +35,7 @@ data class Prueba(
     val variacionHistoricaPorcentaje: Double? = null,
     val superaVariacion25: Boolean = false
 ) {
-    
+
     val estado: EstadoProtocolo
         get() = when (resultado) {
             ResultadoPrueba.APROBADO -> EstadoProtocolo.FORMALIZADO

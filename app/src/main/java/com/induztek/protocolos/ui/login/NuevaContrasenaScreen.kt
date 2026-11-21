@@ -69,19 +69,19 @@ fun NuevaContrasenaScreen(
     val confirmarContrasena by viewModel.confirmarContrasena.collectAsState()
     val recuperacionState by viewModel.recuperacionState.collectAsState()
 
-    
+
     var isPassVisible by remember { mutableStateOf(false) }
     var isConfirmPassVisible by remember { mutableStateOf(false) }
 
-    
+
     val isNuevaValid = nuevaContrasena.isEmpty() || viewModel.validarContrasena(nuevaContrasena)
     val areMatching = confirmarContrasena.isEmpty() || nuevaContrasena == confirmarContrasena
-    
+
     val canSubmit = viewModel.validarContrasena(nuevaContrasena) &&
             viewModel.validarContrasena(confirmarContrasena) &&
             nuevaContrasena == confirmarContrasena
 
-    
+
     LaunchedEffect(recuperacionState) {
         if (recuperacionState is RecuperacionUiState.Success) {
             onContrasenaActualizada()
@@ -142,8 +142,8 @@ fun NuevaContrasenaScreen(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
-                    
-                    
+
+
                     text = "Crea tu nueva contraseña de al menos 6 caracteres.",
                     fontSize = 13.sp,
                     color = Color.Gray,
@@ -152,8 +152,8 @@ fun NuevaContrasenaScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                
-                
+
+
                 OutlinedTextField(
                     value = nuevaContrasena,
                     onValueChange = { viewModel.onNuevaContrasenaChanged(it) },
@@ -173,7 +173,7 @@ fun NuevaContrasenaScreen(
                     supportingText = {
                         if (!isNuevaValid) {
                             Text(
-                                
+
                                 text = "La contraseña debe tener al menos 6 caracteres",
                                 color = MaterialTheme.colorScheme.error,
                                 fontSize = 12.sp
@@ -203,8 +203,8 @@ fun NuevaContrasenaScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                
-                
+
+
                 OutlinedTextField(
                     value = confirmarContrasena,
                     onValueChange = { viewModel.onConfirmarContrasenaChanged(it) },
@@ -264,7 +264,7 @@ fun NuevaContrasenaScreen(
                 }
 
                 Button(
-                    
+
                     onClick = { viewModel.actualizarContrasena(nuevaContrasena) },
                     enabled = canSubmit && recuperacionState !is RecuperacionUiState.Loading,
                     modifier = Modifier

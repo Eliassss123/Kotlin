@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -56,6 +57,7 @@ fun ListaProtocolosScreen(
 ) {
     val protocolos by viewModel.protocolos.collectAsState()
     val usuarioActivo by loginViewModel.usuarioActivo.collectAsState()
+    val remoteError by viewModel.remoteError.collectAsState()
 
     val perfil = usuarioActivo?.getPerfil() ?: PerfilUsuario.TECNICO_TERRENO
     val esCliente = perfil == PerfilUsuario.CLIENTE
@@ -84,6 +86,13 @@ fun ListaProtocolosScreen(
                 .background(FondoApp)
                 .padding(16.dp)
         ) {
+            remoteError?.let { message ->
+                Text(
+                    text = message,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
             if (esCliente) {
                 Card(
                     modifier = Modifier

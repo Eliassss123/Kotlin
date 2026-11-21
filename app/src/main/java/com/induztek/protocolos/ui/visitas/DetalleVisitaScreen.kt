@@ -120,7 +120,7 @@ fun DetalleVisitaScreen(
                 .padding(16.dp)
         ) {
             visita?.let { vis ->
-                
+
                 if (mensajeError != null) {
                     Card(
                         modifier = Modifier
@@ -146,7 +146,7 @@ fun DetalleVisitaScreen(
                     }
                 }
 
-                
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
@@ -201,7 +201,7 @@ fun DetalleVisitaScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                
+
                 if (!vis.cerrada) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -282,7 +282,7 @@ fun DetalleVisitaScreen(
         }
     }
 
-    
+
     if (showAddEquipoDialog) {
         AlertDialog(
             onDismissRequest = { showAddEquipoDialog = false },
@@ -356,7 +356,7 @@ fun DetalleVisitaScreen(
         )
     }
 
-    
+
     if (showCerrarVisitaDialog) {
         AlertDialog(
             onDismissRequest = { showCerrarVisitaDialog = false },

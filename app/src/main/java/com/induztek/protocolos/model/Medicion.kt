@@ -17,7 +17,7 @@ data class Medicion(
     val momento: MomentoMedicion = MomentoMedicion.PREVIA,
     val instrumentoInfo: String = ""
 ) {
-    
+
     val valorFormateado: String
         get() = if (valorNumerico != null) {
             val valorTxt = if (valorNumerico % 1.0 == 0.0) {
@@ -30,7 +30,7 @@ data class Medicion(
             "-"
         }
 
-    
+
     constructor(campo: String, valorTexto: String) : this(
         campo = campo,
         valorNumerico = parseValorNumerico(valorTexto),

@@ -22,7 +22,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Pin
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -64,14 +63,12 @@ fun VerificarCodigoScreen(
     val codigoIngresado by viewModel.codigoIngresado.collectAsState()
     val correo by viewModel.correoRecuperacion.collectAsState()
     val recuperacionState by viewModel.recuperacionState.collectAsState()
-    val mostrarDialog by viewModel.mostrarDialogCodigo.collectAsState()
-    val codigoGenerado by viewModel.codigoGenerado.collectAsState()
 
-    
+
     val canSubmit = codigoIngresado.length == 6
 
-    
-    
+
+
     LaunchedEffect(recuperacionState) {
         if (recuperacionState is RecuperacionUiState.CodigoVerificado) {
             onCodigoVerificado()
@@ -142,7 +139,7 @@ fun VerificarCodigoScreen(
 
                 OutlinedTextField(
                     value = codigoIngresado,
-                    
+
                     onValueChange = {
                         if (it.length <= 6) {
                             viewModel.onCodigoIngresadoChanged(it)
@@ -166,7 +163,7 @@ fun VerificarCodigoScreen(
                         unfocusedLabelColor = Color.Gray
                     ),
                     keyboardOptions = KeyboardOptions(
-                        
+
                         keyboardType = KeyboardType.Number,
                         imeAction = ImeAction.Done
                     )
@@ -185,7 +182,7 @@ fun VerificarCodigoScreen(
                 }
 
                 Button(
-                    
+
                     onClick = { viewModel.verificarCodigo(codigoIngresado) },
                     enabled = canSubmit && recuperacionState !is RecuperacionUiState.Loading,
                     modifier = Modifier
@@ -214,7 +211,7 @@ fun VerificarCodigoScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                
+
                 TextButton(
                     onClick = { viewModel.solicitarCodigo(correo) }
                 ) {
@@ -229,36 +226,4 @@ fun VerificarCodigoScreen(
         }
     }
 
-    
-    
-    if (mostrarDialog && codigoGenerado != null) {
-        AlertDialog(
-            onDismissRequest = { viewModel.cerrarDialogCodigo() },
-            title = {
-                Text(
-                    text = "Nuevo Código Generado",
-                    fontWeight = FontWeight.Bold,
-                    color = AzulPetroleo
-                )
-            },
-            text = {
-                Column {
-                    Text(
-                        text = "Simulación: no se envía correo real. Tu nuevo código es: $codigoGenerado",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = { viewModel.cerrarDialogCodigo() },
-                    colors = ButtonDefaults.buttonColors(containerColor = AzulPetroleo)
-                ) {
-                    Text("ENTENDIDO", color = Color.White)
-                }
-            }
-        )
-    }
 }

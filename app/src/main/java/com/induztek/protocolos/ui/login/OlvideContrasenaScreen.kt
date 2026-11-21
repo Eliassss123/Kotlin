@@ -25,7 +25,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.LockReset
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -33,12 +32,19 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import com.induztek.protocolos.util.NotificationHelper
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -64,17 +70,33 @@ fun OlvideContrasenaScreen(
     onCodigoEnviado: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
-    
+
+    val context = LocalContext.current
     val correo by viewModel.correoRecuperacion.collectAsState()
     val recuperacionState by viewModel.recuperacionState.collectAsState()
-    val mostrarDialog by viewModel.mostrarDialogCodigo.collectAsState()
-    val codigoGenerado by viewModel.codigoGenerado.collectAsState()
+
+    val notifPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { }
+
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            notifPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
+    LaunchedEffect(recuperacionState) {
+        if (recuperacionState is RecuperacionUiState.CodigoEnviado) {
+            NotificationHelper.mostrarNotificacionCodigoRecuperacion(context, "124578")
+            onCodigoEnviado()
+        }
+    }
 
     val isEmailValid = correo.isEmpty() || viewModel.validarCorreo(correo)
-    
+
     val canSubmit = correo.isNotEmpty() && viewModel.validarCorreo(correo)
 
-    
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -96,12 +118,12 @@ fun OlvideContrasenaScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    
+
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -139,7 +161,7 @@ fun OlvideContrasenaScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                
+
                 OutlinedTextField(
                     value = correo,
                     onValueChange = { viewModel.onCorreoRecuperacionChanged(it) },
@@ -179,7 +201,7 @@ fun OlvideContrasenaScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                
+
                 if (recuperacionState is RecuperacionUiState.Error) {
                     Text(
                         text = (recuperacionState as RecuperacionUiState.Error).message,
@@ -191,8 +213,11 @@ fun OlvideContrasenaScreen(
                 }
 
                 Button(
-                    
-                    onClick = { viewModel.solicitarCodigo(correo) },
+                    onClick = {
+                        NotificationHelper.mostrarNotificacionCodigoRecuperacion(context, "124578")
+                        viewModel.solicitarCodigo(correo)
+                        onCodigoEnviado()
+                    },
                     enabled = canSubmit && recuperacionState !is RecuperacionUiState.Loading,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -221,52 +246,4 @@ fun OlvideContrasenaScreen(
         }
     }
 
-    
-    
-    if (mostrarDialog && codigoGenerado != null) {
-        
-        
-        AlertDialog(
-            
-            onDismissRequest = {
-                viewModel.cerrarDialogCodigo()
-                onCodigoEnviado()
-            },
-            title = {
-                Text(
-                    text = "Código de Recuperación",
-                    fontWeight = FontWeight.Bold,
-                    color = AzulPetroleo
-                )
-            },
-            text = {
-                Column {
-                    Text(
-                        
-                        text = "Simulación: no se envía correo real. Tu código es: $codigoGenerado",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.Black
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Usa este código en la siguiente pantalla para restablecer tu contraseña.",
-                        fontSize = 12.sp,
-                        color = Color.Gray
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        viewModel.cerrarDialogCodigo()
-                        onCodigoEnviado()
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = AzulPetroleo)
-                ) {
-                    Text("CONTINUAR", color = Color.White)
-                }
-            }
-        )
-    }
 }

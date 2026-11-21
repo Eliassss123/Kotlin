@@ -28,12 +28,12 @@ import com.induztek.protocolos.model.Prueba
 import com.induztek.protocolos.model.ResultadoPrueba
 import com.induztek.protocolos.model.SyncStatus
 import com.induztek.protocolos.model.Visita
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -44,6 +44,7 @@ data class NuevaVisitaState(
     val ordenTrabajo: String = "OT-2026-085",
     val cliente: String = "Planta Lampa",
     val instalacion: String = "Subestación Principal Norte",
+    val coordenadasGps: String? = null,
     val modalidad: ModalidadVisita = ModalidadVisita.SOLO_PRUEBAS,
     val ingenieroACargo: String = "Carlos Mendoza (Ingeniero de Pruebas)",
     val tecnicos: String = "Juan Pérez (Técnico de Terreno)",
@@ -76,16 +77,20 @@ class VisitaViewModel(
     private val _mensajeError = MutableStateFlow<String?>(null)
     val mensajeError: StateFlow<String?> = _mensajeError.asStateFlow()
 
-    init {
-        viewModelScope.launch {
-            visitaRepository.seedInitialDataIfEmpty()
-            actaRepository.seedInitialDataIfEmpty()
-            protocoloRepository.seedInitialDataIfEmpty()
-            pruebaRepository.seedInitialDataIfEmpty()
+    fun refresh() {
+        launchCatching(onError = { _mensajeError.value = it }) {
+            try {
+                visitaRepository.refresh()
+                actaRepository.refresh()
+                _mensajeError.value = null
+            } catch (exception: Exception) {
+                if (exception is CancellationException) throw exception
+                _mensajeError.value = exception.localizedMessage ?: "No fue posible cargar las visitas"
+            }
         }
     }
 
-    
+
     val todasLasVisitas: StateFlow<List<Visita>> = visitaRepository.allVisitas
         .stateIn(
             scope = viewModelScope,
@@ -103,6 +108,17 @@ class VisitaViewModel(
 
     fun onInstalacionChanged(inst: String) {
         _nuevaVisitaState.value = _nuevaVisitaState.value.copy(instalacion = inst, errorValidacion = null)
+    }
+
+    fun onGpsCaptured(coords: String) {
+        val current = _nuevaVisitaState.value
+        val baseInstalacion = current.instalacion.replace(Regex("\\s*\\[GPS:.*?\\]"), "").trim()
+        val nuevaInstalacion = "$baseInstalacion [GPS: $coords]"
+        _nuevaVisitaState.value = current.copy(
+            coordenadasGps = coords,
+            instalacion = nuevaInstalacion,
+            errorValidacion = null
+        )
     }
 
     fun onModalidadChanged(mod: ModalidadVisita) {
@@ -129,7 +145,7 @@ class VisitaViewModel(
         _mensajeError.value = null
     }
 
-    
+
     fun crearVisita(onSuccess: (String) -> Unit) {
         val state = _nuevaVisitaState.value
         if (state.ordenTrabajo.isBlank()) {
@@ -145,7 +161,7 @@ class VisitaViewModel(
             return
         }
 
-        viewModelScope.launch {
+        launchCatching(onError = { _mensajeError.value = it }) {
             val sdfFecha = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             val sdfHora = SimpleDateFormat("HH:mm", Locale.getDefault())
             val hoy = Date()
@@ -172,9 +188,9 @@ class VisitaViewModel(
         }
     }
 
-    
+
     fun cargarDetalleVisita(visitaId: String) {
-        viewModelScope.launch {
+        launchCatching(onError = { _mensajeError.value = it }) {
             val v = visitaRepository.getVisitaById(visitaId)
             _visitaSeleccionada.value = v
             if (v != null) {
@@ -185,9 +201,9 @@ class VisitaViewModel(
         }
     }
 
-    
+
     fun cargarActa(actaId: String) {
-        viewModelScope.launch {
+        launchCatching(onError = { _mensajeError.value = it }) {
             val acta = actaRepository.getActaById(actaId)
             _actaGenerada.value = acta
             if (acta != null) {
@@ -196,15 +212,15 @@ class VisitaViewModel(
         }
     }
 
-    
+
     fun agregarEquipoAVisita(equipo: Equipo, tecnicoUsuario: String, onProtocoloCreado: (String) -> Unit) {
         val visita = _visitaSeleccionada.value ?: return
 
-        viewModelScope.launch {
+        launchCatching(onError = { _mensajeError.value = it }) {
             val yaExiste = protocoloRepository.existeProtocoloParaEquipoEnVisita(visita.id, equipo.codigo)
             if (yaExiste) {
                 _mensajeError.value = "Ya existe un protocolo registrado para el equipo ${equipo.codigo} en esta visita (RN-02)."
-                return@launch
+                return@launchCatching
             }
 
             val timestamp = System.currentTimeMillis()
@@ -270,7 +286,7 @@ class VisitaViewModel(
         }
     }
 
-    
+
     fun cerrarVisitaYGenerarActa(
         recibidoPor: String,
         onSuccess: (Acta) -> Unit,
@@ -286,11 +302,11 @@ class VisitaViewModel(
             return
         }
 
-        viewModelScope.launch {
+        launchCatching(onError = { _mensajeError.value = it }) {
             val protocolos = _protocolosVisita.value
             if (protocolos.isEmpty()) {
                 onError("No se puede cerrar la visita sin al menos un protocolo registrado.")
-                return@launch
+                return@launchCatching
             }
 
             for (prot in protocolos) {
@@ -298,7 +314,7 @@ class VisitaViewModel(
                     val errorPrueba = ReglasNegocio.validarPruebaCompleta(prueba)
                     if (errorPrueba != null) {
                         onError("Error en protocolo ${prot.codigoProtocolo}: $errorPrueba")
-                        return@launch
+                        return@launchCatching
                     }
                 }
             }
