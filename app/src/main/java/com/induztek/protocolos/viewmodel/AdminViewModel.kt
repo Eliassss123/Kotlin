@@ -1,11 +1,3 @@
-
-
-
-
-
-
-
-
 package com.induztek.protocolos.viewmodel
 
 import androidx.lifecycle.ViewModel
@@ -23,7 +15,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-
 data class NuevoInstrumentoState(
     val tipo: String = "Medidor de Resistencia de Aislamiento",
     val marca: String = "",
@@ -33,12 +24,10 @@ data class NuevoInstrumentoState(
     val errorValidacion: String? = null
 )
 
-
 class AdminViewModel(
     private val instrumentoRepository: InstrumentoRepository,
     private val usuarioRepository: UsuarioRepository
 ) : ViewModel() {
-
 
     val instrumentos: StateFlow<List<Instrumento>> = instrumentoRepository.allInstrumentos
         .stateIn(
@@ -46,7 +35,6 @@ class AdminViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
-
 
     val personal: StateFlow<List<UserProfile>> = usuarioRepository.allUsuarios
         .stateIn(
@@ -73,31 +61,25 @@ class AdminViewModel(
         }
     }
 
-
     fun onTipoChanged(tipo: String) {
         _nuevoInstrumentoState.value = _nuevoInstrumentoState.value.copy(tipo = tipo)
     }
-
 
     fun onMarcaChanged(marca: String) {
         _nuevoInstrumentoState.value = _nuevoInstrumentoState.value.copy(marca = marca, errorValidacion = null)
     }
 
-
     fun onModeloChanged(modelo: String) {
         _nuevoInstrumentoState.value = _nuevoInstrumentoState.value.copy(modelo = modelo, errorValidacion = null)
     }
-
 
     fun onNumeroSerieChanged(serie: String) {
         _nuevoInstrumentoState.value = _nuevoInstrumentoState.value.copy(numeroSerie = serie, errorValidacion = null)
     }
 
-
     fun onVencimientoCalibracionChanged(venc: String) {
         _nuevoInstrumentoState.value = _nuevoInstrumentoState.value.copy(vencimientoCalibracion = venc)
     }
-
 
     fun crearInstrumento(onSuccess: () -> Unit) {
         val state = _nuevoInstrumentoState.value
@@ -128,7 +110,6 @@ class AdminViewModel(
         }
     }
 
-
     fun renovarCalibracion(instrumentoId: String, nuevoVencimiento: String) {
         viewModelScope.launch {
             try {
@@ -141,7 +122,6 @@ class AdminViewModel(
         }
     }
 
-
     fun toggleActivoPersonal(usuario: UserProfile) {
         viewModelScope.launch {
             try {
@@ -150,6 +130,50 @@ class AdminViewModel(
             } catch (exception: Exception) {
                 if (exception is CancellationException) throw exception
                 _error.value = exception.localizedMessage ?: "No fue posible actualizar el usuario"
+            }
+        }
+    }
+
+    fun crearUsuario(
+        nombre: String,
+        correo: String,
+        password: String,
+        empresaPlanta: String,
+        roleCode: String,
+        onSuccess: () -> Unit
+    ) {
+        if (nombre.isBlank() || correo.isBlank() || password.length < 10) {
+            _error.value = "Todos los campos son obligatorios y la contraseña debe tener al menos 10 caracteres."
+            return
+        }
+        viewModelScope.launch {
+            try {
+                usuarioRepository.registerWithRoleAndCompany(
+                    name = nombre.trim(),
+                    email = correo.trim(),
+                    password = password,
+                    company = empresaPlanta.trim().ifBlank { null },
+                    roleCode = roleCode,
+                    termsAccepted = true
+                )
+                usuarioRepository.refresh()
+                _error.value = null
+                onSuccess()
+            } catch (exception: Exception) {
+                if (exception is CancellationException) throw exception
+                _error.value = exception.localizedMessage ?: "No fue posible crear la cuenta de usuario"
+            }
+        }
+    }
+
+    fun eliminarUsuario(usuarioId: String) {
+        viewModelScope.launch {
+            try {
+                usuarioRepository.eliminarUsuario(usuarioId)
+                _error.value = null
+            } catch (exception: Exception) {
+                if (exception is CancellationException) throw exception
+                _error.value = exception.localizedMessage ?: "No fue posible eliminar la cuenta"
             }
         }
     }

@@ -19,8 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.induztek.protocolos.model.UserProfile
 import com.induztek.protocolos.ui.components.InduztekTopBar
-import com.induztek.protocolos.ui.theme.AzulPetroleo
-import com.induztek.protocolos.ui.theme.FondoApp
+import com.induztek.protocolos.ui.theme.*
 import com.induztek.protocolos.viewmodel.VisitaViewModel
 
 @Composable
@@ -38,6 +37,7 @@ fun DetalleActaScreen(
     }
 
     Scaffold(
+        containerColor = FondoApp,
         topBar = {
             InduztekTopBar(
                 titulo = "Acta Oficial de Entrega (RT-08)",
@@ -54,7 +54,7 @@ fun DetalleActaScreen(
                     .padding(padding),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(color = AzulPetroleo)
+                CircularProgressIndicator(color = InduztekBlue)
             }
         } else {
             Column(
@@ -69,8 +69,8 @@ fun DetalleActaScreen(
 
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = TarjetaFondo),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -78,56 +78,56 @@ fun DetalleActaScreen(
                             Icon(
                                 Icons.AutoMirrored.Filled.Assignment,
                                 contentDescription = null,
-                                tint = AzulPetroleo
+                                tint = InduztekBlue
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(
                                 text = "N° Acta: ${acta.id}",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = AzulPetroleo
+                                color = Color.White
                             )
                         }
                         Spacer(Modifier.height(8.dp))
                         Text(
                             text = "Fecha / Hora: ${acta.fechaEmision}",
                             fontSize = 13.sp,
-                            color = Color.DarkGray
+                            color = TextoSecundario
                         )
                         Text(
                             text = "Orden de Trabajo: ${acta.ordenTrabajo}",
                             fontSize = 13.sp,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.SemiBold,
+                            color = TextoPrincipal
                         )
                         Text(
                             text = "Instalación: ${acta.cliente} - ${acta.instalacion}",
                             fontSize = 13.sp,
-                            color = Color.DarkGray
+                            color = TextoSecundario
                         )
 
                         if (acta.marcaPendienteFormalizacion) {
                             Spacer(Modifier.height(10.dp))
                             Surface(
-                                shape = RoundedCornerShape(6.dp),
-                                color = Color(0xFFFFF3E0)
+                                shape = RoundedCornerShape(8.dp),
+                                color = Color(0xFFFFB300).copy(alpha = 0.16f)
                             ) {
                                 Text(
-                                    text = "★ PENDIENTE DE FORMALIZACIÓN (Validez técnica preliminar según RN-19)",
+                                    text = "PENDIENTE DE FORMALIZACIÓN (Validez técnica preliminar según RN-19)",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = Color(0xFFE65100),
+                                    color = Color(0xFFFFB300),
                                     fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
                                 )
                             }
                         }
                     }
                 }
 
-
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = TarjetaFondo),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -135,32 +135,32 @@ fun DetalleActaScreen(
                             "Recepción en Terreno (RT-08)",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = AzulPetroleo
+                            color = AzulPetroleoLight
                         )
                         Spacer(Modifier.height(8.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Person, contentDescription = null, tint = Color.Gray)
+                            Icon(Icons.Default.Person, contentDescription = null, tint = TextoSecundario)
                             Spacer(Modifier.width(8.dp))
                             Text(
                                 text = "Recibido por (Cliente): ${acta.recibidoPor}",
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 14.sp
+                                fontSize = 14.sp,
+                                color = TextoPrincipal
                             )
                         }
                         Spacer(Modifier.height(4.dp))
                         Text(
                             text = "Entregado por (Técnicos): ${acta.tecnicoEntrega}",
                             fontSize = 13.sp,
-                            color = Color.DarkGray
+                            color = TextoSecundario
                         )
                     }
                 }
 
-
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = TarjetaFondo),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -168,38 +168,55 @@ fun DetalleActaScreen(
                             "Protocolos Incluidos en esta Visita (${protocolos.size})",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = AzulPetroleo
+                            color = AzulPetroleoLight
                         )
                         Spacer(Modifier.height(8.dp))
                         protocolos.forEach { proto ->
-                            ListItem(
-                                headlineContent = {
-                                    Text(
-                                        "Protocolo: ${proto.codigoProtocolo}",
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                },
-                                supportingContent = {
-                                    Text("Equipo: ${proto.equipoCodigo} (${proto.tipoEquipo}) | Resultado: ${proto.resultadoGlobal.label}")
-                                },
-                                leadingContent = {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
                                         Icons.Default.CheckCircle,
                                         contentDescription = null,
-                                        tint = Color(0xFF2E7D32)
+                                        tint = Color(0xFF0F9D6B),
+                                        modifier = Modifier.size(18.dp)
                                     )
+                                    Spacer(Modifier.width(8.dp))
+                                    Column {
+                                        Text(
+                                            "Protocolo: ${proto.codigoProtocolo}",
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 14.sp,
+                                            color = Color.White
+                                        )
+                                        Text(
+                                            "Equipo: ${proto.equipoCodigo} (${proto.tipoEquipo})",
+                                            fontSize = 12.sp,
+                                            color = TextoSecundario
+                                        )
+                                    }
                                 }
-                            )
-                            HorizontalDivider()
+                                Text(
+                                    proto.resultadoGlobal.label,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF0F9D6B)
+                                )
+                            }
+                            HorizontalDivider(color = BordeFondo)
                         }
                     }
                 }
 
-
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = TarjetaFondo),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -207,13 +224,13 @@ fun DetalleActaScreen(
                             "Resumen y Justificación Técnica",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = AzulPetroleo
+                            color = AzulPetroleoLight
                         )
                         Spacer(Modifier.height(8.dp))
                         Text(
                             text = if (acta.resumenProtocolos.isNotBlank()) acta.resumenProtocolos else "Todas las pruebas se realizaron conforme a la norma técnica.",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color.DarkGray
+                            color = TextoSecundario
                         )
                     }
                 }

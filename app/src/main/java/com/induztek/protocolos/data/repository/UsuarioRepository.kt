@@ -46,6 +46,26 @@ class UsuarioRepository(
                 email = email,
                 password = password,
                 name = name,
+                roleCode = "CLIENT",
+                termsAccepted = termsAccepted
+            )
+        ).requireBody().toProfile()
+
+    suspend fun registerWithRoleAndCompany(
+        name: String,
+        email: String,
+        password: String,
+        company: String?,
+        roleCode: String?,
+        termsAccepted: Boolean
+    ): UserProfile =
+        api.register(
+            RegisterRequest(
+                email = email,
+                password = password,
+                name = name,
+                company = company,
+                roleCode = roleCode,
                 termsAccepted = termsAccepted
             )
         ).requireBody().toProfile()
@@ -75,6 +95,20 @@ class UsuarioRepository(
         updateProfile(photoUrl = current.fotoPerfil, biography = biografia)
     }
 
+    suspend fun actualizarPerfilCompleto(nombre: String, correo: String, empresa: String?, biografia: String?) {
+        val current = getCurrentUser()
+        val response = api.updateProfile(
+            UserProfileUpdateRequest(
+                name = nombre.trim(),
+                email = correo.trim(),
+                company = empresa?.trim()?.ifBlank { null },
+                photoUrl = current.fotoPerfil,
+                biography = biografia?.trim()
+            )
+        ).requireBody().toProfile()
+        _allUsuarios.value = _allUsuarios.value.map { if (it.id == response.id) response else it }
+    }
+
     private suspend fun updateProfile(photoUrl: String?, biography: String?) {
         val response = api.updateProfile(
             UserProfileUpdateRequest(photoUrl = photoUrl, biography = biography)
@@ -85,6 +119,11 @@ class UsuarioRepository(
     suspend fun setActivo(id: String, activo: Boolean) {
         val updated = api.setUserActive(id, ActiveRequest(active = activo)).requireBody().toProfile()
         _allUsuarios.value = _allUsuarios.value.map { if (it.id == updated.id) updated else it }
+    }
+
+    suspend fun eliminarUsuario(id: String) {
+        api.deleteUser(id).requireSuccess()
+        _allUsuarios.value = _allUsuarios.value.filter { it.id != id }
     }
 
     suspend fun solicitarRecuperacion(email: String) {

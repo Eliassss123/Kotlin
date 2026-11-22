@@ -1,12 +1,3 @@
-
-
-
-
-
-
-
-
-
 package com.induztek.protocolos.ui.perfil
 
 import android.graphics.Bitmap
@@ -17,17 +8,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -42,29 +23,9 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.PhotoLibrary
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -77,13 +38,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.induztek.protocolos.model.PerfilUsuario
 import com.induztek.protocolos.model.UserProfile
-import com.induztek.protocolos.ui.theme.AzulPetroleo
-import com.induztek.protocolos.ui.theme.AzulPetroleoLight
-import com.induztek.protocolos.ui.theme.FondoApp
-import com.induztek.protocolos.ui.theme.NaranjaSeguridad
-import com.induztek.protocolos.ui.theme.TarjetaFondo
-import androidx.compose.material3.MaterialTheme
+import com.induztek.protocolos.ui.components.InduztekBottomBar
+import com.induztek.protocolos.ui.navigation.Routes
+import com.induztek.protocolos.ui.theme.*
 import com.induztek.protocolos.util.ImageStorageHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -94,12 +53,15 @@ fun PerfilScreen(
     onVolver: () -> Unit,
     onActualizarFoto: (String?) -> Unit = {},
     onActualizarBiografia: (String?) -> Unit = {},
-    onCerrarSesion: () -> Unit = {}
+    onActualizarPerfilCompleto: (String, String, String?, String?) -> Unit = { _, _, _, _ -> },
+    onCerrarSesion: () -> Unit = {},
+    onTabSelected: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
     val perfil = usuario?.getPerfil()
     val esTrabajador = perfil?.esTrabajadorInduztek ?: true
-
+    val esCliente = perfil == PerfilUsuario.CLIENTE
+    val esAdminOJefe = perfil == PerfilUsuario.JEFE_TECNICO || perfil == PerfilUsuario.INGENIERO_PRUEBAS
 
     var bitmapFoto by remember(usuario?.fotoPerfil) {
         mutableStateOf(
@@ -108,13 +70,17 @@ fun PerfilScreen(
         )
     }
 
-
     var mostrarDialogOpcionesFoto by remember { mutableStateOf(false) }
     var mostrarDialogEditarBio by remember { mutableStateOf(false) }
+    var mostrarDialogEditarPerfil by remember { mutableStateOf(false) }
+
     var biografiaTexto by remember(usuario?.biografia) {
         mutableStateOf(usuario?.biografia ?: "")
     }
 
+    var nombreEdit by remember(usuario?.nombre) { mutableStateOf(usuario?.nombre ?: "") }
+    var correoEdit by remember(usuario?.correo) { mutableStateOf(usuario?.correo ?: "") }
+    var empresaEdit by remember(usuario?.empresaCliente) { mutableStateOf(usuario?.empresaCliente ?: "") }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview()
@@ -126,7 +92,6 @@ fun PerfilScreen(
             onActualizarFoto(path)
         }
     }
-
 
     val permissionCameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -141,7 +106,6 @@ fun PerfilScreen(
             android.widget.Toast.makeText(context, "Se necesita permiso de cámara para tomar fotos", android.widget.Toast.LENGTH_LONG).show()
         }
     }
-
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -180,14 +144,24 @@ fun PerfilScreen(
                     containerColor = AzulPetroleo
                 )
             )
+        },
+        bottomBar = {
+            InduztekBottomBar(
+                currentRoute = Routes.Perfil.route,
+                esCliente = esCliente,
+                esAdminOJefe = esAdminOJefe,
+                onTabSelected = onTabSelected
+            )
         }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             profileError?.let { message ->
                 Text(
@@ -197,18 +171,19 @@ fun PerfilScreen(
                 )
             }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(AzulPetroleo)
-                    .padding(vertical = 28.dp),
-                contentAlignment = Alignment.Center
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = TarjetaFondo),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-
                     Box(
                         modifier = Modifier
                             .size(105.dp)
@@ -242,33 +217,30 @@ fun PerfilScreen(
                                 modifier = Modifier
                                     .size(95.dp)
                                     .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.2f))
-                                    .border(2.dp, Color.White.copy(alpha = 0.4f), CircleShape),
+                                    .background(InduztekBlue),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.AccountCircle,
-                                    contentDescription = "Avatar por defecto",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(76.dp)
+                                Text(
+                                    text = usuario?.nombre?.take(1)?.uppercase() ?: "U",
+                                    color = Color.White,
+                                    fontSize = 36.sp,
+                                    fontWeight = FontWeight.Bold
                                 )
                             }
                         }
 
-
                         Box(
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
-                                .size(32.dp)
+                                .size(30.dp)
                                 .clip(CircleShape)
-                                .background(NaranjaSeguridad)
-                                .border(2.dp, Color.White, CircleShape),
+                                .background(NaranjaSeguridad),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.CameraAlt,
                                 contentDescription = "Cambiar foto",
-                                tint = Color.White,
+                                tint = Color.Black,
                                 modifier = Modifier.size(17.dp)
                             )
                         }
@@ -288,22 +260,16 @@ fun PerfilScreen(
                         fontWeight = FontWeight.SemiBold
                     )
 
-
                     Box(
                         modifier = Modifier
                             .background(
-                                color = if (esTrabajador) Color(0xFF0277BD).copy(alpha = 0.35f) else Color(0xFFFF9800).copy(alpha = 0.35f),
-                                shape = RoundedCornerShape(16.dp)
+                                color = if (esTrabajador) InduztekBlue.copy(alpha = 0.25f) else Color(0xFFFFB300).copy(alpha = 0.25f),
+                                shape = RoundedCornerShape(999.dp)
                             )
-                            .border(
-                                width = 1.dp,
-                                color = if (esTrabajador) Color(0xFF81D4FA) else Color(0xFFFFCC80),
-                                shape = RoundedCornerShape(16.dp)
-                            )
-                            .padding(horizontal = 12.dp, vertical = 4.dp)
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Text(
-                            text = if (esTrabajador) "🛠️ Personal / Trabajador Induztek" else "🏢 Cliente Externo · ${usuario?.empresaCliente ?: "Empresa"}",
+                            text = if (esTrabajador) "Personal / Trabajador Induztek" else "Cliente Externo · ${usuario?.empresaCliente ?: "Empresa"}",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
@@ -312,15 +278,75 @@ fun PerfilScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-
+            // Información de cuenta editable (excepto cargo)
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = TarjetaFondo),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Información de cuenta",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            color = Color.White
+                        )
+                        IconButton(onClick = {
+                            nombreEdit = usuario?.nombre ?: ""
+                            correoEdit = usuario?.correo ?: ""
+                            empresaEdit = usuario?.empresaCliente ?: ""
+                            mostrarDialogEditarPerfil = true
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Editar datos",
+                                tint = InduztekBlue
+                            )
+                        }
+                    }
+
+                    FilaInfoPerfil(
+                        icono = Icons.Default.Email,
+                        etiqueta = "Nombre y Correo",
+                        valor = "${usuario?.nombre ?: "—"} (${usuario?.correo ?: "—"})",
+                        textColor = Color.White
+                    )
+
+                    HorizontalDivider(color = BordeFondo)
+
+                    FilaInfoPerfil(
+                        icono = Icons.Default.Badge,
+                        etiqueta = "Cargo / Rol (No modificable)",
+                        valor = if (perfil != null) "${perfil.codigo} · ${perfil.label}" else "—",
+                        textColor = TextoSecundario
+                    )
+
+                    if (!usuario?.empresaCliente.isNullOrBlank()) {
+                        HorizontalDivider(color = BordeFondo)
+                        FilaInfoPerfil(
+                            icono = Icons.Default.Business,
+                            etiqueta = "Empresa / Planta Asignada",
+                            valor = usuario?.empresaCliente ?: "—",
+                            textColor = Color.White
+                        )
+                    }
+                }
+            }
+
+            // Biografía
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = TarjetaFondo),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(
@@ -336,7 +362,7 @@ fun PerfilScreen(
                             text = "Biografía y Rol",
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp,
-                            color = AzulPetroleo
+                            color = Color.White
                         )
                         IconButton(onClick = {
                             biografiaTexto = usuario?.biografia ?: ""
@@ -345,7 +371,7 @@ fun PerfilScreen(
                             Icon(
                                 imageVector = Icons.Default.Edit,
                                 contentDescription = "Editar biografía",
-                                tint = AzulPetroleo
+                                tint = InduztekBlue
                             )
                         }
                     }
@@ -354,167 +380,44 @@ fun PerfilScreen(
                         text = if (!usuario?.biografia.isNullOrBlank()) {
                             usuario!!.biografia!!
                         } else {
-                            "Sin biografía registrada. Pulsa el lápiz para añadir una descripción de tus funciones o vinculación laboral."
+                            "Sin biografía registrada. Pulsa el lápiz para añadir una descripción de tus funciones."
                         },
                         fontSize = 14.sp,
-                        color = if (!usuario?.biografia.isNullOrBlank()) Color.White else Color.Gray,
+                        color = if (!usuario?.biografia.isNullOrBlank()) Color.White else TextoSecundario,
                         lineHeight = 20.sp
                     )
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                color = if (esTrabajador) Color(0xFFE8F5E9) else Color(0xFFFFF3E0),
-                                shape = RoundedCornerShape(6.dp)
-                            )
-                            .padding(horizontal = 10.dp, vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = if (esTrabajador) {
-                                "✓ Cuenta habilitada para operaciones técnicas en terreno e inspección."
-                            } else {
-                                "✓ Cuenta cliente con acceso exclusivo a actas y protocolos de su empresa."
-                            },
-                            fontSize = 11.sp,
-                            color = if (esTrabajador) Color(0xFF2E7D32) else Color(0xFFE65100),
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-
-
-
-
-
-
-
-
-
-
-
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-
-                    Text(
-                        text = "Información de cuenta",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = AzulPetroleo
-                    )
-
-                    FilaInfoPerfil(
-                        icono = Icons.Default.Email,
-                        etiqueta = "Correo",
-                        valor = usuario?.correo ?: "—",
-                        textColor = AzulPetroleoLight
-                    )
-
-                    HorizontalDivider()
-
-                    FilaInfoPerfil(
-                        icono = Icons.Default.Badge,
-                        etiqueta = "Rol",
-                        valor = if (perfil != null) "${perfil.codigo} · ${perfil.label}" else "—"
-                    )
-
-                    if (!usuario?.empresaCliente.isNullOrBlank()) {
-                        HorizontalDivider()
-                        FilaInfoPerfil(
-                            icono = Icons.Default.Business,
-                            etiqueta = "Empresa",
-                            valor = usuario?.empresaCliente ?: "—"
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-
-            if (perfil != null) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = "Permisos del rol",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp,
-                            color = AzulPetroleo
-                        )
-                        Text(
-                            text = perfil.descripcion,
-                            fontSize = 13.sp,
-                            color = Color.Gray
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        FilaPermiso("Registrar equipos", perfil.puedeRegistrarEquipos)
-                        FilaPermiso("Registrar protocolos", perfil.puedeRegistrarProtocolos)
-                        FilaPermiso("Cerrar visitas", perfil.puedeCerrarVisita)
-                        FilaPermiso("Formalizar protocolos", perfil.puedeFormalizar)
-                        FilaPermiso("Gestionar instrumentos", perfil.puedeGestionarInstrumentos)
-                        FilaPermiso("Gestionar personal", perfil.puedeGestionarPersonal)
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-
+            // Cerrar Sesión
             Button(
                 onClick = onCerrarSesion,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .height(48.dp),
-                shape = RoundedCornerShape(8.dp)
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF5350)),
+                shape = RoundedCornerShape(10.dp)
             ) {
-                Icon(imageVector = Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null, tint = Color.White)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Cerrar Sesión", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                Text(
+                    text = "CERRAR SESIÓN",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp
+                )
             }
-
-            Spacer(modifier = Modifier.height(32.dp))
         }
     }
-
 
     if (mostrarDialogOpcionesFoto) {
         AlertDialog(
             onDismissRequest = { mostrarDialogOpcionesFoto = false },
-            title = {
-                Text(text = "Foto de Perfil", fontWeight = FontWeight.Bold, color = AzulPetroleo)
-            },
+            containerColor = TarjetaFondo,
+            titleContentColor = Color.White,
+            textContentColor = TextoPrincipal,
+            title = { Text("Fotografía de Perfil", fontWeight = FontWeight.Bold) },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(text = "Elige cómo deseas actualizar tu fotografía de perfil:")
-
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Elige cómo deseas actualizar tu fotografía de perfil:", fontSize = 13.sp, color = TextoSecundario)
                     Button(
                         onClick = {
                             mostrarDialogOpcionesFoto = false
@@ -522,85 +425,53 @@ fun PerfilScreen(
                                 context,
                                 android.Manifest.permission.CAMERA
                             ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-
                             if (tienePermiso) {
-                                try {
-                                    cameraLauncher.launch(null)
-                                } catch (e: Exception) {
-                                    android.widget.Toast.makeText(context, "No se pudo iniciar la cámara: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
-                                }
+                                try { cameraLauncher.launch(null) } catch (_: Exception) {}
                             } else {
                                 permissionCameraLauncher.launch(android.Manifest.permission.CAMERA)
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = AzulPetroleo),
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = InduztekBlue),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
-                        Icon(imageVector = Icons.Default.CameraAlt, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Abrir Cámara")
+                        Icon(Icons.Default.CameraAlt, contentDescription = null, tint = Color.White)
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Abrir Cámara", color = Color.White)
                     }
-
                     OutlinedButton(
                         onClick = {
                             mostrarDialogOpcionesFoto = false
-                            try {
-                                galleryLauncher.launch("image/*")
-                            } catch (e: Exception) {
-                                android.widget.Toast.makeText(context, "No se pudo abrir la galería", android.widget.Toast.LENGTH_SHORT).show()
-                            }
+                            try { galleryLauncher.launch("image/*") } catch (_: Exception) {}
                         },
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
-                        Icon(imageVector = Icons.Default.PhotoLibrary, contentDescription = null, tint = AzulPetroleo)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Elegir de Galería", color = AzulPetroleo)
-                    }
-
-                    if (bitmapFoto != null || !usuario?.fotoPerfil.isNullOrBlank()) {
-                        Button(
-                            onClick = {
-                                ImageStorageHelper.eliminarArchivo(usuario?.fotoPerfil)
-                                bitmapFoto = null
-                                onActualizarFoto(null)
-                                mostrarDialogOpcionesFoto = false
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFEBEE)),
-                            shape = RoundedCornerShape(8.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Icon(imageVector = Icons.Default.Delete, contentDescription = null, tint = Color(0xFFC62828))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(text = "Quitar Foto Actual", color = Color(0xFFC62828), fontWeight = FontWeight.Bold)
-                        }
+                        Icon(Icons.Default.PhotoLibrary, contentDescription = null, tint = Color.White)
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Elegir de Galería", color = Color.White)
                     }
                 }
             },
             confirmButton = {},
             dismissButton = {
                 TextButton(onClick = { mostrarDialogOpcionesFoto = false }) {
-                    Text("Cancelar")
+                    Text("Cancelar", color = Color.White)
                 }
             }
         )
     }
 
-
     if (mostrarDialogEditarBio) {
         AlertDialog(
             onDismissRequest = { mostrarDialogEditarBio = false },
-            title = {
-                Text(text = "Editar Biografía Profesional", fontWeight = FontWeight.Bold, color = AzulPetroleo)
-            },
+            containerColor = TarjetaFondo,
+            titleContentColor = Color.White,
+            textContentColor = TextoPrincipal,
+            title = { Text("Editar Biografía Profesional", fontWeight = FontWeight.Bold) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        text = "Escribe una breve descripción de tu rol, experiencia laboral o relación con Induztek:",
-                        fontSize = 13.sp,
-                        color = Color.White
-                    )
+                    Text("Escribe una breve descripción de tu rol y experiencia:", fontSize = 13.sp, color = TextoSecundario)
                     OutlinedTextField(
                         value = biografiaTexto,
                         onValueChange = { biografiaTexto = it },
@@ -617,14 +488,68 @@ fun PerfilScreen(
                         onActualizarBiografia(biografiaTexto.trim())
                         mostrarDialogEditarBio = false
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = AzulPetroleo)
+                    colors = ButtonDefaults.buttonColors(containerColor = InduztekBlue),
+                    shape = RoundedCornerShape(10.dp)
                 ) {
                     Text("Guardar", color = Color.White)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { mostrarDialogEditarBio = false }) {
-                    Text("Cancelar")
+                    Text("Cancelar", color = Color.White)
+                }
+            }
+        )
+    }
+
+    if (mostrarDialogEditarPerfil) {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogEditarPerfil = false },
+            containerColor = TarjetaFondo,
+            titleContentColor = Color.White,
+            textContentColor = TextoPrincipal,
+            title = { Text("Editar Datos de Cuenta", fontWeight = FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = nombreEdit,
+                        onValueChange = { nombreEdit = it },
+                        label = { Text("Nombre Completo") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = correoEdit,
+                        onValueChange = { correoEdit = it },
+                        label = { Text("Correo Electrónico") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = empresaEdit,
+                        onValueChange = { empresaEdit = it },
+                        label = { Text("Empresa / Planta") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    Text("Nota: El cargo/rol técnico no es modificable desde este panel.", fontSize = 11.sp, color = TextoSecundario)
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onActualizarPerfilCompleto(nombreEdit, correoEdit, empresaEdit, usuario?.biografia)
+                        mostrarDialogEditarPerfil = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = InduztekBlue),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Text("Guardar", color = Color.White)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarDialogEditarPerfil = false }) {
+                    Text("Cancelar", color = Color.White)
                 }
             }
         )
@@ -636,7 +561,7 @@ private fun FilaInfoPerfil(
     icono: ImageVector,
     etiqueta: String,
     valor: String,
-    textColor: Color = MaterialTheme.colorScheme.onSurface
+    textColor: Color = Color.White
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -645,14 +570,14 @@ private fun FilaInfoPerfil(
         Icon(
             imageVector = icono,
             contentDescription = null,
-            tint = AzulPetroleoLight,
+            tint = InduztekBlue,
             modifier = Modifier.size(22.dp)
         )
         Column {
             Text(
                 text = etiqueta,
                 fontSize = 11.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = TextoSecundario
             )
             Text(
                 text = valor,
@@ -661,29 +586,5 @@ private fun FilaInfoPerfil(
                 color = textColor
             )
         }
-    }
-}
-
-@Composable
-private fun FilaPermiso(
-    nombre: String,
-    tiene: Boolean
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Box(
-            modifier = Modifier
-                .size(8.dp)
-                .clip(CircleShape)
-                .background(if (tiene) Color(0xFF4CAF50) else Color(0xFFBDBDBD))
-        )
-        Text(
-            text = nombre,
-            fontSize = 13.sp,
-            color = if (tiene) Color.DarkGray else Color.LightGray
-        )
     }
 }

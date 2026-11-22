@@ -1,28 +1,12 @@
-
-
-
-
-
-
-
-
 package com.induztek.protocolos.ui.equipos
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.TrendingDown
 import androidx.compose.material.icons.filled.Warning
@@ -46,10 +30,7 @@ import com.induztek.protocolos.model.Prueba
 import com.induztek.protocolos.ui.components.EstadoChip
 import com.induztek.protocolos.ui.components.InduztekTopBar
 import com.induztek.protocolos.ui.components.ResultadoChip
-import com.induztek.protocolos.ui.theme.AzulPetroleo
-import com.induztek.protocolos.ui.theme.FondoApp
-import com.induztek.protocolos.ui.theme.NaranjaSeguridad
-import com.induztek.protocolos.ui.theme.TextoSecundario
+import com.induztek.protocolos.ui.theme.*
 import com.induztek.protocolos.viewmodel.EquipoViewModel
 
 @Composable
@@ -71,6 +52,7 @@ fun DetalleEquipoScreen(
     }
 
     Scaffold(
+        containerColor = FondoApp,
         topBar = {
             InduztekTopBar(
                 titulo = "Ficha Técnica & Placa (FT-03)",
@@ -84,15 +66,17 @@ fun DetalleEquipoScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(FondoApp)
-                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             equipo?.let { eq ->
 
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = TarjetaFondo),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(
@@ -105,7 +89,7 @@ fun DetalleEquipoScreen(
                                     text = eq.codigo,
                                     fontSize = 19.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = AzulPetroleo
+                                    color = Color.White
                                 )
                                 if (eq.tagCliente.isNotBlank()) {
                                     Text(
@@ -119,63 +103,64 @@ fun DetalleEquipoScreen(
                             EstadoChip(estado = eq.ultimoEstado, esCliente = esCliente)
                         }
 
-                        Spacer(modifier = Modifier.height(8.dp))
-                        HorizontalDivider(color = Color(0xFFEEEEEE))
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
+                        HorizontalDivider(color = BordeFondo)
+                        Spacer(modifier = Modifier.height(10.dp))
 
                         Text(
                             text = "Tipo: ${eq.tipo} (${eq.clasificacion.label})",
                             fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.SemiBold,
+                            color = TextoPrincipal
                         )
+
+                        Spacer(modifier = Modifier.height(2.dp))
 
                         Text(
                             text = "Cliente: ${eq.cliente} | Ubicación: ${eq.ubicacion}",
-                            fontSize = 12.sp,
+                            fontSize = 13.sp,
                             color = TextoSecundario
                         )
 
-
                         if (eq.empeorando) {
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(10.dp))
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(Color(0xFFFFEBEE), RoundedCornerShape(8.dp))
-                                    .padding(8.dp),
+                                    .background(Color(0xFFEF5350).copy(alpha = 0.16f), RoundedCornerShape(8.dp))
+                                    .padding(10.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(Icons.Default.TrendingDown, contentDescription = null, tint = Color(0xFFD32F2F))
-                                Spacer(modifier = Modifier.width(6.dp))
+                                Icon(Icons.Default.TrendingDown, contentDescription = null, tint = Color(0xFFEF5350), modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = "Tendencia Histórica: Este equipo presenta degradación o variación superior al 25% respecto a mediciones previas (RT-07).",
                                     fontSize = 12.sp,
-                                    color = Color(0xFFD32F2F),
+                                    color = Color(0xFFEF5350),
                                     fontWeight = FontWeight.SemiBold
                                 )
                             }
                         }
 
-
+                        Spacer(modifier = Modifier.height(14.dp))
+                        HorizontalDivider(color = BordeFondo)
                         Spacer(modifier = Modifier.height(10.dp))
-                        HorizontalDivider(color = Color(0xFFEEEEEE))
-                        Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
                             text = "Datos de Placa de Características",
-                            fontSize = 13.sp,
+                            fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
-                            color = AzulPetroleo
+                            color = AzulPetroleoLight
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(Color(0xFFF8F9FA), RoundedCornerShape(8.dp))
-                                .padding(10.dp),
-                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                                .background(Color(0xFF14213F), RoundedCornerShape(10.dp))
+                                .padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             DatoPlacaItem(etiqueta = "Marca / Modelo", valor = "${eq.marca} ${eq.modelo}".trim().ifBlank { "—" })
                             DatoPlacaItem(etiqueta = "N° de Serie", valor = eq.numeroSerie.ifBlank { "—" })
@@ -200,39 +185,38 @@ fun DetalleEquipoScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
                     text = "Historial de Pruebas Técnicas (RT-06, RT-07)",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = AzulPetroleo
+                    color = Color.White
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
-
                 if (historialPruebas.isEmpty()) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = CardDefaults.cardColors(containerColor = TarjetaFondo)
                     ) {
-                        Text(
-                            text = "No se registran pruebas previas para este equipo",
-                            color = TextoSecundario
-                        )
+                        Column(modifier = Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "No se registran pruebas previas para este equipo",
+                                color = TextoSecundario,
+                                fontSize = 13.sp
+                            )
+                        }
                     }
                 } else {
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        items(historialPruebas) { prueba ->
-                            PruebaHistorialItem(prueba = prueba)
-                        }
+                    historialPruebas.forEach { prueba ->
+                        PruebaHistorialItem(prueba = prueba)
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
                 }
             } ?: run {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "Cargando datos del equipo...")
+                Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
+                    Text(text = "Cargando datos del equipo...", color = TextoSecundario)
                 }
             }
         }
@@ -243,11 +227,11 @@ fun DetalleEquipoScreen(
 fun PruebaHistorialItem(prueba: Prueba) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = TarjetaFondo),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(14.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -255,62 +239,65 @@ fun PruebaHistorialItem(prueba: Prueba) {
             ) {
                 Text(
                     text = prueba.tipoPrueba,
-                    fontSize = 14.sp,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
-                    color = AzulPetroleo
+                    color = Color.White
                 )
                 ResultadoChip(resultado = prueba.resultado)
             }
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Text(
-                text = "OT: ${prueba.ordenTrabajo} | 📅 ${prueba.fechaHora} | Estado: ${prueba.estadoPrueba.label}",
-                fontSize = 11.sp,
-                color = TextoSecundario
-            )
-
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.CalendarToday, contentDescription = null, tint = TextoSecundario, modifier = Modifier.size(13.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "OT: ${prueba.ordenTrabajo} | ${prueba.fechaHora} | Estado: ${prueba.estadoPrueba.label}",
+                    fontSize = 12.sp,
+                    color = TextoSecundario
+                )
+            }
 
             if (prueba.variacionHistoricaPorcentaje != null && prueba.variacionHistoricaPorcentaje != 0.0) {
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (prueba.superaVariacion25) {
-                        Icon(Icons.Default.Warning, contentDescription = null, tint = Color(0xFFD32F2F), modifier = Modifier.height(14.dp))
+                        Icon(Icons.Default.Warning, contentDescription = null, tint = Color(0xFFEF5350), modifier = Modifier.size(14.dp))
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "Variación histórica alta: ${if (prueba.variacionHistoricaPorcentaje > 0) "+" else ""}${prueba.variacionHistoricaPorcentaje}% (> 25%)",
-                            fontSize = 11.sp,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFFD32F2F)
+                            color = Color(0xFFEF5350)
                         )
                     } else {
                         Text(
                             text = "Variación histórica: ${if (prueba.variacionHistoricaPorcentaje > 0) "+" else ""}${prueba.variacionHistoricaPorcentaje}%",
-                            fontSize = 11.sp,
-                            color = Color.Gray
+                            fontSize = 12.sp,
+                            color = TextoSecundario
                         )
                     }
                 }
             }
 
             if (prueba.observaciones.isNotBlank()) {
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(text = "Obs: ${prueba.observaciones}", fontSize = 12.sp, color = Color.DarkGray)
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(text = "Obs: ${prueba.observaciones}", fontSize = 12.sp, color = TextoSecundario)
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
-            HorizontalDivider(color = Color(0xFFF5F5F5))
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            HorizontalDivider(color = BordeFondo)
+            Spacer(modifier = Modifier.height(8.dp))
 
             prueba.mediciones.forEach { med ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 1.dp),
+                        .padding(vertical = 2.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = med.campo, fontSize = 12.sp, color = Color.Gray)
-                    Text(text = med.valorFormateado, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text(text = med.campo, fontSize = 13.sp, color = TextoSecundario)
+                    Text(text = med.valorFormateado, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextoPrincipal)
                 }
             }
         }
@@ -329,7 +316,7 @@ private fun DatoPlacaItem(etiqueta: String, valor: String) {
             text = valor,
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
-            color = Color(0xFF263238)
+            color = Color.White
         )
     }
 }

@@ -27,9 +27,7 @@ if (correo.isNotEmpty()) {
 -----------------------------------------------------------------------------
 * Dónde pegarlo: En 'LoginScreen.kt', dentro de 'LaunchedEffect(uiState)' cuando el estado sea Success, antes de 'onLoginSuccess()'.
 
------------------------------------------------------------------------------
-android.widget.Toast.makeText(context, "¡Bienvenido $email!", android.widget.Toast.LENGTH_LONG).show()
------------------------------------------------------------------------------
+-------------------------------------------------------------------------
 
 
 3. SALUDO DINÁMICO SEGÚN LA HORA DEL DÍA (LoginScreen.kt)

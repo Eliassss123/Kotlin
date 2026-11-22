@@ -1,12 +1,3 @@
-
-
-
-
-
-
-
-
-
 package com.induztek.protocolos.ui.components
 
 import androidx.compose.foundation.background
@@ -30,12 +21,10 @@ fun EstadoChip(
 ) {
     val texto = estado.getLabelCliente(esCliente)
     val (backgroundColor, textColor) = when (estado) {
-        EstadoProtocolo.FORMALIZADO -> Color(0xFF2E7D32) to Color.White
-        EstadoProtocolo.REGISTRADO_TERRENO -> {
-            if (esCliente) Color(0xFF455A64) to Color.White else Color(0xFFFFA000) to Color.Black
-        }
-        EstadoProtocolo.OBSERVADO -> Color(0xFFD32F2F) to Color.White
-        EstadoProtocolo.BORRADOR -> Color(0xFF78909C) to Color.White
+        EstadoProtocolo.FORMALIZADO -> Color(0xFF0F9D6B).copy(alpha = 0.2f) to Color(0xFF34D399)
+        EstadoProtocolo.REGISTRADO_TERRENO -> Color(0xFFFFB300).copy(alpha = 0.2f) to Color(0xFFFBBF24)
+        EstadoProtocolo.OBSERVADO -> Color(0xFFEF5350).copy(alpha = 0.2f) to Color(0xFFF87171)
+        EstadoProtocolo.BORRADOR -> Color(0xFF64748B).copy(alpha = 0.2f) to Color(0xFF94A3B8)
     }
 
     Text(
@@ -46,7 +35,7 @@ fun EstadoChip(
         maxLines = 1,
         softWrap = false,
         modifier = modifier
-            .background(color = backgroundColor, shape = RoundedCornerShape(12.dp))
+            .background(color = backgroundColor, shape = RoundedCornerShape(999.dp))
             .padding(horizontal = 10.dp, vertical = 4.dp)
     )
 }
@@ -57,10 +46,10 @@ fun ResultadoChip(
     modifier: Modifier = Modifier
 ) {
     val (backgroundColor, textColor) = when (resultado) {
-        ResultadoPrueba.APROBADO -> Color(0xFF2E7D32) to Color.White
-        ResultadoPrueba.OBSERVADO -> Color(0xFFFFA000) to Color.Black
-        ResultadoPrueba.RECHAZADO -> Color(0xFFD32F2F) to Color.White
-        ResultadoPrueba.NO_REALIZADA -> Color(0xFF757575) to Color.White
+        ResultadoPrueba.APROBADO -> Color(0xFF0F9D6B).copy(alpha = 0.2f) to Color(0xFF34D399)
+        ResultadoPrueba.OBSERVADO -> Color(0xFFFFB300).copy(alpha = 0.2f) to Color(0xFFFBBF24)
+        ResultadoPrueba.RECHAZADO -> Color(0xFFEF5350).copy(alpha = 0.2f) to Color(0xFFF87171)
+        ResultadoPrueba.NO_REALIZADA -> Color(0xFF64748B).copy(alpha = 0.2f) to Color(0xFF94A3B8)
     }
 
     Text(
@@ -71,7 +60,7 @@ fun ResultadoChip(
         maxLines = 1,
         softWrap = false,
         modifier = modifier
-            .background(color = backgroundColor, shape = RoundedCornerShape(8.dp))
-            .padding(horizontal = 8.dp, vertical = 3.dp)
+            .background(color = backgroundColor, shape = RoundedCornerShape(999.dp))
+            .padding(horizontal = 10.dp, vertical = 4.dp)
     )
 }

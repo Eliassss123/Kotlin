@@ -1,10 +1,3 @@
-
-
-
-
-
-
-
 package com.induztek.protocolos.ui.theme
 
 import android.app.Activity
@@ -18,30 +11,30 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-
-private val DarkColorScheme = darkColorScheme(
-    primary = AzulPetroleo,
+private val InduztekColorScheme = darkColorScheme(
+    primary = InduztekBlue,
     onPrimary = Color.White,
-    primaryContainer = AzulSuaveFondo,
-    onPrimaryContainer = Color.White,
+    primaryContainer = ChipFondo,
+    onPrimaryContainer = TextoPrincipal,
     secondary = NaranjaSeguridad,
     onSecondary = Color.Black,
     background = FondoApp,
     onBackground = TextoPrincipal,
     surface = TarjetaFondo,
     onSurface = TextoPrincipal,
-    surfaceVariant = Color(0xFF334155),
+    surfaceVariant = ChipFondo,
     onSurfaceVariant = TextoSecundario,
-    outline = BordeFondo
+    outline = BordeFondo,
+    error = EstadoFueraDeRangoRojo,
+    onError = Color.White
 )
 
 @Composable
 fun InduztekTheme(
-
     darkTheme: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = DarkColorScheme
+    val colorScheme = InduztekColorScheme
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {

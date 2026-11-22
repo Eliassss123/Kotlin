@@ -1,24 +1,8 @@
-
-
-
-
-
-
-
 package com.induztek.protocolos.ui.protocolos
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,10 +11,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,11 +21,11 @@ import androidx.compose.ui.unit.sp
 import com.induztek.protocolos.model.PerfilUsuario
 import com.induztek.protocolos.model.Protocolo
 import com.induztek.protocolos.ui.components.EstadoChip
+import com.induztek.protocolos.ui.components.InduztekBottomBar
 import com.induztek.protocolos.ui.components.InduztekTopBar
 import com.induztek.protocolos.ui.components.ResultadoChip
-import com.induztek.protocolos.ui.theme.AzulPetroleo
-import com.induztek.protocolos.ui.theme.FondoApp
-import com.induztek.protocolos.ui.theme.TextoSecundario
+import com.induztek.protocolos.ui.navigation.Routes
+import com.induztek.protocolos.ui.theme.*
 import com.induztek.protocolos.viewmodel.LoginViewModel
 import com.induztek.protocolos.viewmodel.ProtocoloViewModel
 
@@ -53,7 +34,8 @@ fun ListaProtocolosScreen(
     viewModel: ProtocoloViewModel,
     loginViewModel: LoginViewModel,
     onNavigateBack: () -> Unit,
-    onProtocoloSelected: (String) -> Unit
+    onProtocoloSelected: (String) -> Unit,
+    onTabSelected: (String) -> Unit = {}
 ) {
     val protocolos by viewModel.protocolos.collectAsState()
     val usuarioActivo by loginViewModel.usuarioActivo.collectAsState()
@@ -61,6 +43,7 @@ fun ListaProtocolosScreen(
 
     val perfil = usuarioActivo?.getPerfil() ?: PerfilUsuario.TECNICO_TERRENO
     val esCliente = perfil == PerfilUsuario.CLIENTE
+    val esAdminOJefe = perfil == PerfilUsuario.JEFE_TECNICO || perfil == PerfilUsuario.INGENIERO_PRUEBAS
 
     LaunchedEffect(usuarioActivo) {
         if (esCliente && !usuarioActivo?.empresaCliente.isNullOrBlank()) {
@@ -71,19 +54,28 @@ fun ListaProtocolosScreen(
     }
 
     Scaffold(
+        containerColor = FondoApp,
         topBar = {
             InduztekTopBar(
                 titulo = if (esCliente) "Protocolos de ${usuarioActivo?.empresaCliente ?: "Empresa"}" else "Historial de Protocolos",
                 canNavigateBack = true,
                 onNavigateBack = onNavigateBack
             )
+        },
+        bottomBar = {
+            InduztekBottomBar(
+                currentRoute = Routes.ListaProtocolos.route,
+                esCliente = esCliente,
+                esAdminOJefe = esAdminOJefe,
+                onTabSelected = onTabSelected
+            )
         }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
                 .background(FondoApp)
+                .padding(innerPadding)
                 .padding(16.dp)
         ) {
             remoteError?.let { message ->
@@ -93,29 +85,17 @@ fun ListaProtocolosScreen(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
-            if (esCliente) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 12.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFECEFF1))
-                ) {
-                    Text(
-                        text = "Vista de Cliente (P-04): Los protocolos no formalizados se muestran como 'Pendiente de formalización' hasta su aprobación final por ingeniería (RN-19).",
-                        fontSize = 12.sp,
-                        color = Color(0xFF37474F),
-                        modifier = Modifier.padding(10.dp)
-                    )
-                }
-            }
 
             if (protocolos.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "No se registran protocolos guardados", color = TextoSecundario)
+                    Text(
+                        text = "No se registran protocolos guardados",
+                        color = TextoSecundario,
+                        fontSize = 15.sp
+                    )
                 }
             } else {
                 LazyColumn(
@@ -144,44 +124,52 @@ fun ProtocoloCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = TarjetaFondo),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(14.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = protocolo.codigoProtocolo,
+                    text = "${protocolo.codigoProtocolo} · ${protocolo.equipoCodigo}",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = AzulPetroleo
+                    color = Color.White
                 )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    ResultadoChip(resultado = protocolo.resultadoGlobal)
-                    Spacer(modifier = Modifier.width(6.dp))
-                    EstadoChip(estado = protocolo.estado, esCliente = esCliente)
-                }
+                EstadoChip(estado = protocolo.estado, esCliente = esCliente)
             }
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Equipo: ${protocolo.equipoCodigo} (${protocolo.tipoEquipo})",
+                text = protocolo.tipoEquipo,
                 fontSize = 13.sp,
-                fontWeight = FontWeight.Medium
-            )
-
-            Spacer(modifier = Modifier.height(2.dp))
-
-            Text(
-                text = "OT: ${protocolo.ordenTrabajo} | 📅 ${protocolo.fechaHora} | 👤 ${protocolo.tecnicoCreador}",
-                fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold,
                 color = TextoSecundario
             )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "OT: ${protocolo.ordenTrabajo} | ${protocolo.fechaHora}",
+                    fontSize = 12.sp,
+                    color = TextoSecundario
+                )
+                ResultadoChip(resultado = protocolo.resultadoGlobal)
+            }
         }
     }
 }

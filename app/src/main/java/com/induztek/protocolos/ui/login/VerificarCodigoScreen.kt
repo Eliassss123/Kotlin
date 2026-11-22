@@ -1,43 +1,14 @@
-
-
-
-
-
-
 package com.induztek.protocolos.ui.login
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Pin
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,11 +19,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.induztek.protocolos.ui.theme.AzulPetroleo
-import com.induztek.protocolos.ui.theme.NaranjaSeguridad
+import com.induztek.protocolos.ui.theme.*
 import com.induztek.protocolos.viewmodel.LoginViewModel
 import com.induztek.protocolos.viewmodel.RecuperacionUiState
-
 
 @Composable
 fun VerificarCodigoScreen(
@@ -64,10 +33,7 @@ fun VerificarCodigoScreen(
     val correo by viewModel.correoRecuperacion.collectAsState()
     val recuperacionState by viewModel.recuperacionState.collectAsState()
 
-
     val canSubmit = codigoIngresado.length == 6
-
-
 
     LaunchedEffect(recuperacionState) {
         if (recuperacionState is RecuperacionUiState.CodigoVerificado) {
@@ -78,7 +44,7 @@ fun VerificarCodigoScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0D47A1)),
+            .background(FondoApp),
         contentAlignment = Alignment.Center
     ) {
         Card(
@@ -86,7 +52,7 @@ fun VerificarCodigoScreen(
                 .fillMaxWidth(0.92f)
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = TarjetaFondo),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Column(
@@ -104,7 +70,7 @@ fun VerificarCodigoScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver",
-                            tint = AzulPetroleo
+                            tint = Color.White
                         )
                     }
                 }
@@ -122,7 +88,7 @@ fun VerificarCodigoScreen(
                     text = "Verificar Código",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = AzulPetroleo,
+                    color = Color.White,
                     textAlign = TextAlign.Center
                 )
 
@@ -131,7 +97,7 @@ fun VerificarCodigoScreen(
                 Text(
                     text = "Ingresa el código de 6 dígitos que fue generado para $correo",
                     fontSize = 13.sp,
-                    color = Color.Gray,
+                    color = TextoSecundario,
                     textAlign = TextAlign.Center
                 )
 
@@ -139,31 +105,29 @@ fun VerificarCodigoScreen(
 
                 OutlinedTextField(
                     value = codigoIngresado,
-
                     onValueChange = {
                         if (it.length <= 6) {
                             viewModel.onCodigoIngresadoChanged(it)
                         }
                     },
                     label = { Text("Código de 6 dígitos") },
-                    textStyle = TextStyle(color = Color.Black),
+                    textStyle = TextStyle(color = Color.White, fontSize = 20.sp, letterSpacing = 4.sp, textAlign = TextAlign.Center),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
-                        errorTextColor = Color.Black,
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
-                        errorContainerColor = Color.White,
-                        cursorColor = Color.Black,
-                        focusedBorderColor = AzulPetroleo,
-                        unfocusedBorderColor = Color.LightGray,
-                        focusedLabelColor = AzulPetroleo,
-                        unfocusedLabelColor = Color.Gray
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        errorTextColor = Color.White,
+                        focusedContainerColor = Color(0xFF14213F),
+                        unfocusedContainerColor = Color(0xFF14213F),
+                        errorContainerColor = Color(0xFF14213F),
+                        cursorColor = InduztekBlue,
+                        focusedBorderColor = InduztekBlue,
+                        unfocusedBorderColor = BordeFondo,
+                        focusedLabelColor = InduztekBlue,
+                        unfocusedLabelColor = TextoSecundario
                     ),
                     keyboardOptions = KeyboardOptions(
-
                         keyboardType = KeyboardType.Number,
                         imeAction = ImeAction.Done
                     )
@@ -174,7 +138,7 @@ fun VerificarCodigoScreen(
                 if (recuperacionState is RecuperacionUiState.Error) {
                     Text(
                         text = (recuperacionState as RecuperacionUiState.Error).message,
-                        color = MaterialTheme.colorScheme.error,
+                        color = Color(0xFFEF5350),
                         fontSize = 13.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(bottom = 12.dp)
@@ -182,17 +146,16 @@ fun VerificarCodigoScreen(
                 }
 
                 Button(
-
                     onClick = { viewModel.verificarCodigo(codigoIngresado) },
                     enabled = canSubmit && recuperacionState !is RecuperacionUiState.Loading,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = AzulPetroleo,
-                        disabledContainerColor = Color.LightGray
+                        containerColor = InduztekBlue,
+                        disabledContainerColor = Color(0xFF14213F)
                     ),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(10.dp)
                 ) {
                     if (recuperacionState is RecuperacionUiState.Loading) {
                         CircularProgressIndicator(
@@ -211,13 +174,12 @@ fun VerificarCodigoScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-
                 TextButton(
                     onClick = { viewModel.solicitarCodigo(correo) }
                 ) {
                     Text(
                         text = "¿No recibiste el código? Reenviar",
-                        color = AzulPetroleo,
+                        color = InduztekBlue,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -225,5 +187,4 @@ fun VerificarCodigoScreen(
             }
         }
     }
-
 }

@@ -2,6 +2,7 @@ package com.induztek.protocolos.data.remote
 
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
@@ -34,4 +35,7 @@ interface AuthApi {
 
     @PATCH("api/usuarios/{id}/estado")
     suspend fun setUserActive(@Path("id") id: String, @Body request: ActiveRequest): Response<UserResponseDto>
+
+    @DELETE("api/usuarios/{id}")
+    suspend fun deleteUser(@Path("id") id: String): Response<Unit>
 }

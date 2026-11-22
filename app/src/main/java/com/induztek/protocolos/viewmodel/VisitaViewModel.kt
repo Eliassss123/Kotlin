@@ -205,6 +205,12 @@ class VisitaViewModel(
         val visita = _visitaSeleccionada.value ?: return
 
         launchCatching(onError = { _mensajeError.value = it }) {
+            try {
+                equipoRepository.insertEquipo(equipo)
+            } catch (e: Exception) {
+                // Ignore if offline or already exists
+            }
+
             val yaExiste = protocoloRepository.existeProtocoloParaEquipoEnVisita(visita.id, equipo.codigo)
             if (yaExiste) {
                 _mensajeError.value = "Ya existe un protocolo registrado para el equipo ${equipo.codigo} en esta visita (RN-02)."

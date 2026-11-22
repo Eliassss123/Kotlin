@@ -58,6 +58,13 @@ fun AppNavegacion(
 
     val navController = rememberNavController()
 
+    val onTabSelected: (String) -> Unit = { route ->
+        navController.navigate(route) {
+            popUpTo(Routes.ListaEquipos.route) { saveState = true }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
 
     val usuarioActual by loginViewModel.usuarioActivo.collectAsState()
     val profileError by loginViewModel.profileError.collectAsState()
@@ -210,7 +217,8 @@ fun AppNavegacion(
                 },
                 onVisitaClick = { visitaId ->
                     navController.navigate(Routes.DetalleVisita.createRoute(visitaId))
-                }
+                },
+                onTabSelected = onTabSelected
             )
         }
 
@@ -225,7 +233,8 @@ fun AppNavegacion(
                     navController.navigate(Routes.DetalleVisita.createRoute(visitaId)) {
                         popUpTo(Routes.ListaVisitas.route)
                     }
-                }
+                },
+                onTabSelected = onTabSelected
             )
         }
 
@@ -260,7 +269,8 @@ fun AppNavegacion(
                 onNavigateBack = { navController.popBackStack() },
                 onProtocoloSelected = { id ->
                     navController.navigate(Routes.DetalleProtocolo.createRoute(id))
-                }
+                },
+                onTabSelected = onTabSelected
             )
         }
 
@@ -318,7 +328,8 @@ fun AppNavegacion(
             AdminScreen(
                 adminViewModel = adminViewModel,
                 usuarioActual = usuarioActual,
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onTabSelected = onTabSelected
             )
         }
 
@@ -335,12 +346,16 @@ fun AppNavegacion(
                 onActualizarBiografia = { bio ->
                     loginViewModel.actualizarBiografia(bio)
                 },
+                onActualizarPerfilCompleto = { nombre, correo, empresa, bio ->
+                    loginViewModel.actualizarPerfilCompleto(nombre, correo, empresa, bio)
+                },
                 onCerrarSesion = {
                     loginViewModel.cerrarSesion()
                     navController.navigate(Routes.Login.route) {
                         popUpTo(0) { inclusive = true }
                     }
-                }
+                },
+                onTabSelected = onTabSelected
             )
         }
     }

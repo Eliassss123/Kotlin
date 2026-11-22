@@ -133,6 +133,25 @@ class LoginViewModel(
         }
     }
 
+    fun actualizarPerfilCompleto(nombre: String, correo: String, empresa: String?, biografia: String?) {
+        val actual = _usuarioActivo.value ?: return
+        viewModelScope.launch {
+            try {
+                usuarioRepository?.actualizarPerfilCompleto(nombre, correo, empresa, biografia)
+                _usuarioActivo.value = actual.copy(
+                    nombre = nombre.trim(),
+                    correo = correo.trim(),
+                    empresaCliente = empresa?.trim()?.ifBlank { null },
+                    biografia = biografia?.trim()
+                )
+                _profileError.value = null
+            } catch (exception: Exception) {
+                if (exception is CancellationException) throw exception
+                _profileError.value = errorMessage(exception)
+            }
+        }
+    }
+
     fun onEmailChanged(newEmail: String) {
         _email.value = newEmail
         _uiState.value = LoginUiState.Idle
@@ -295,9 +314,10 @@ class LoginViewModel(
         _uiState.value = LoginUiState.Idle
     }
 
-    fun registrar(nombre: String, correo: String, contrasena: String, aceptaTerminos: Boolean) {
+    fun registrar(nombre: String, correo: String, contrasena: String, empresaPlanta: String, aceptaTerminos: Boolean) {
         val name = nombre.trim()
         val emailValue = correo.trim()
+        val companyValue = empresaPlanta.trim()
         if (name.isBlank()) {
             _registroState.value = RegistroUiState.Error("Ingresa tu nombre")
             return
@@ -324,9 +344,17 @@ class LoginViewModel(
         viewModelScope.launch {
             _registroState.value = RegistroUiState.Loading
             try {
-                val profile = repository.register(name, emailValue, contrasena, termsAccepted = true)
+                // Public self-registrations ALWAYS register as Client (P-04 / CLIENT)
+                val profile = repository.registerWithRoleAndCompany(
+                    name = name,
+                    email = emailValue,
+                    password = contrasena,
+                    company = companyValue,
+                    roleCode = "CLIENT",
+                    termsAccepted = true
+                )
                 val message = if (profile.activo) {
-                    "Cuenta creada. Ya puedes iniciar sesión."
+                    "Cuenta Cliente creada. Ya puedes iniciar sesión."
                 } else {
                     "Solicitud recibida. Un administrador debe aprobar la cuenta antes de iniciar sesión."
                 }

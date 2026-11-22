@@ -1,22 +1,7 @@
-
-
-
-
-
-
 package com.induztek.protocolos.ui.login
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -24,24 +9,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -54,8 +23,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.induztek.protocolos.ui.theme.AzulPetroleo
-import com.induztek.protocolos.ui.theme.NaranjaSeguridad
+import com.induztek.protocolos.ui.theme.*
 import com.induztek.protocolos.viewmodel.LoginViewModel
 import com.induztek.protocolos.viewmodel.RecuperacionUiState
 
@@ -69,10 +37,8 @@ fun NuevaContrasenaScreen(
     val confirmarContrasena by viewModel.confirmarContrasena.collectAsState()
     val recuperacionState by viewModel.recuperacionState.collectAsState()
 
-
     var isPassVisible by remember { mutableStateOf(false) }
     var isConfirmPassVisible by remember { mutableStateOf(false) }
-
 
     val isNuevaValid = nuevaContrasena.isEmpty() || viewModel.validarContrasena(nuevaContrasena)
     val areMatching = confirmarContrasena.isEmpty() || nuevaContrasena == confirmarContrasena
@@ -80,7 +46,6 @@ fun NuevaContrasenaScreen(
     val canSubmit = viewModel.validarContrasena(nuevaContrasena) &&
             viewModel.validarContrasena(confirmarContrasena) &&
             nuevaContrasena == confirmarContrasena
-
 
     LaunchedEffect(recuperacionState) {
         if (recuperacionState is RecuperacionUiState.Success) {
@@ -91,7 +56,7 @@ fun NuevaContrasenaScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0D47A1)),
+            .background(FondoApp),
         contentAlignment = Alignment.Center
     ) {
         Card(
@@ -99,7 +64,7 @@ fun NuevaContrasenaScreen(
                 .fillMaxWidth(0.92f)
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = TarjetaFondo),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Column(
@@ -117,7 +82,7 @@ fun NuevaContrasenaScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver",
-                            tint = AzulPetroleo
+                            tint = Color.White
                         )
                     }
                 }
@@ -135,36 +100,33 @@ fun NuevaContrasenaScreen(
                     text = "Nueva Contraseña",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = AzulPetroleo,
+                    color = Color.White,
                     textAlign = TextAlign.Center
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
-
-
-                    text = "Crea tu nueva contraseña de al menos 6 caracteres.",
+                    text = "Crea tu nueva contraseña de al menos 10 caracteres, incluyendo mayúsculas, minúsculas, números y símbolos.",
                     fontSize = 13.sp,
-                    color = Color.Gray,
+                    color = TextoSecundario,
                     textAlign = TextAlign.Center
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-
-
                 OutlinedTextField(
                     value = nuevaContrasena,
                     onValueChange = { viewModel.onNuevaContrasenaChanged(it) },
                     label = { Text("Nueva Contraseña") },
-                    textStyle = TextStyle(color = Color.Black),
-                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                    textStyle = TextStyle(color = Color.White),
+                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = TextoSecundario) },
                     trailingIcon = {
                         IconButton(onClick = { isPassVisible = !isPassVisible }) {
                             Icon(
                                 imageVector = if (isPassVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                contentDescription = if (isPassVisible) "Ocultar contraseña" else "Mostrar contraseña"
+                                contentDescription = if (isPassVisible) "Ocultar contraseña" else "Mostrar contraseña",
+                                tint = TextoSecundario
                             )
                         }
                     },
@@ -173,9 +135,8 @@ fun NuevaContrasenaScreen(
                     supportingText = {
                         if (!isNuevaValid) {
                             Text(
-
-                                text = "La contraseña debe tener al menos 6 caracteres",
-                                color = MaterialTheme.colorScheme.error,
+                                text = "Debe tener al menos 10 caracteres, mayúscula, minúscula, número y símbolo",
+                                color = Color(0xFFEF5350),
                                 fontSize = 12.sp
                             )
                         }
@@ -183,17 +144,17 @@ fun NuevaContrasenaScreen(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
-                        errorTextColor = Color.Black,
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
-                        errorContainerColor = Color.White,
-                        cursorColor = Color.Black,
-                        focusedBorderColor = AzulPetroleo,
-                        unfocusedBorderColor = Color.LightGray,
-                        focusedLabelColor = AzulPetroleo,
-                        unfocusedLabelColor = Color.Gray
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        errorTextColor = Color.White,
+                        focusedContainerColor = Color(0xFF14213F),
+                        unfocusedContainerColor = Color(0xFF14213F),
+                        errorContainerColor = Color(0xFF14213F),
+                        cursorColor = InduztekBlue,
+                        focusedBorderColor = InduztekBlue,
+                        unfocusedBorderColor = BordeFondo,
+                        focusedLabelColor = InduztekBlue,
+                        unfocusedLabelColor = TextoSecundario
                     ),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
@@ -203,19 +164,18 @@ fun NuevaContrasenaScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-
-
                 OutlinedTextField(
                     value = confirmarContrasena,
                     onValueChange = { viewModel.onConfirmarContrasenaChanged(it) },
                     label = { Text("Confirmar Contraseña") },
-                    textStyle = TextStyle(color = Color.Black),
-                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                    textStyle = TextStyle(color = Color.White),
+                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = TextoSecundario) },
                     trailingIcon = {
                         IconButton(onClick = { isConfirmPassVisible = !isConfirmPassVisible }) {
                             Icon(
                                 imageVector = if (isConfirmPassVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                contentDescription = if (isConfirmPassVisible) "Ocultar contraseña" else "Mostrar contraseña"
+                                contentDescription = if (isConfirmPassVisible) "Ocultar contraseña" else "Mostrar contraseña",
+                                tint = TextoSecundario
                             )
                         }
                     },
@@ -225,7 +185,7 @@ fun NuevaContrasenaScreen(
                         if (!areMatching) {
                             Text(
                                 text = "Las contraseñas no coinciden",
-                                color = MaterialTheme.colorScheme.error,
+                                color = Color(0xFFEF5350),
                                 fontSize = 12.sp
                             )
                         }
@@ -233,17 +193,17 @@ fun NuevaContrasenaScreen(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
-                        errorTextColor = Color.Black,
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
-                        errorContainerColor = Color.White,
-                        cursorColor = Color.Black,
-                        focusedBorderColor = AzulPetroleo,
-                        unfocusedBorderColor = Color.LightGray,
-                        focusedLabelColor = AzulPetroleo,
-                        unfocusedLabelColor = Color.Gray
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        errorTextColor = Color.White,
+                        focusedContainerColor = Color(0xFF14213F),
+                        unfocusedContainerColor = Color(0xFF14213F),
+                        errorContainerColor = Color(0xFF14213F),
+                        cursorColor = InduztekBlue,
+                        focusedBorderColor = InduztekBlue,
+                        unfocusedBorderColor = BordeFondo,
+                        focusedLabelColor = InduztekBlue,
+                        unfocusedLabelColor = TextoSecundario
                     ),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
@@ -256,7 +216,7 @@ fun NuevaContrasenaScreen(
                 if (recuperacionState is RecuperacionUiState.Error) {
                     Text(
                         text = (recuperacionState as RecuperacionUiState.Error).message,
-                        color = MaterialTheme.colorScheme.error,
+                        color = Color(0xFFEF5350),
                         fontSize = 13.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(bottom = 12.dp)
@@ -264,17 +224,16 @@ fun NuevaContrasenaScreen(
                 }
 
                 Button(
-
                     onClick = { viewModel.actualizarContrasena(nuevaContrasena) },
                     enabled = canSubmit && recuperacionState !is RecuperacionUiState.Loading,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = AzulPetroleo,
-                        disabledContainerColor = Color.LightGray
+                        containerColor = InduztekBlue,
+                        disabledContainerColor = Color(0xFF14213F)
                     ),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(10.dp)
                 ) {
                     if (recuperacionState is RecuperacionUiState.Loading) {
                         CircularProgressIndicator(

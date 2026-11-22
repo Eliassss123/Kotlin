@@ -23,6 +23,7 @@ data class RegisterRequest(
     val password: String,
     val name: String,
     val company: String? = null,
+    val roleCode: String? = null,
     val termsAccepted: Boolean
 )
 
@@ -48,7 +49,13 @@ data class UserResponseDto(
     val biography: String?
 )
 
-data class UserProfileUpdateRequest(val photoUrl: String?, val biography: String?)
+data class UserProfileUpdateRequest(
+    val name: String? = null,
+    val email: String? = null,
+    val company: String? = null,
+    val photoUrl: String? = null,
+    val biography: String? = null
+)
 
 data class ActiveRequest(val active: Boolean)
 

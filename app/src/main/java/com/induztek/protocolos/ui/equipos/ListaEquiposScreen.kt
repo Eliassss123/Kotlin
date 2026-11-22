@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -40,6 +41,8 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.TrendingDown
+import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -80,7 +83,15 @@ import com.induztek.protocolos.model.ClasificacionEquipo
 import com.induztek.protocolos.model.Equipo
 import com.induztek.protocolos.model.PerfilUsuario
 import com.induztek.protocolos.ui.components.EstadoChip
+import com.induztek.protocolos.ui.components.InduztekHeader
+import com.induztek.protocolos.ui.components.InduztekBottomBar
+import com.induztek.protocolos.ui.navigation.Routes
 import com.induztek.protocolos.ui.theme.AzulPetroleo
+import com.induztek.protocolos.ui.theme.InduztekBlue
+import com.induztek.protocolos.ui.theme.TarjetaFondo
+import com.induztek.protocolos.ui.theme.ChipFondo
+import androidx.compose.material.icons.filled.Bolt
+import com.induztek.protocolos.ui.theme.InduztekBlue
 import com.induztek.protocolos.ui.theme.BordeFondo
 import com.induztek.protocolos.ui.theme.FondoApp
 import com.induztek.protocolos.ui.theme.NaranjaSeguridad
@@ -130,7 +141,8 @@ fun ListaEquiposScreen(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
-                drawerContainerColor = Color.White
+                drawerContainerColor = FondoApp,
+                drawerContentColor = TextoPrincipal
             ) {
 
                 Box(
@@ -267,58 +279,39 @@ fun ListaEquiposScreen(
     ) {
         Scaffold(
             containerColor = FondoApp,
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = "Equipos & Diagnóstico Induztek",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp,
-                            lineHeight = 19.sp,
-                            maxLines = 2,
-                            color = Color.White
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(
-                                imageVector = Icons.Default.Menu,
-                                contentDescription = "Menú",
-                                tint = Color.White
-                            )
+            bottomBar = {
+                InduztekBottomBar(
+                    currentRoute = Routes.ListaEquipos.route,
+                    esCliente = esCliente,
+                    esAdminOJefe = esJefeTecnico,
+                    onTabSelected = { route ->
+                        when (route) {
+                            Routes.ListaEquipos.route -> {}
+                            Routes.ListaVisitas.route -> onVerVisitasClick()
+                            Routes.ListaProtocolos.route -> onVerProtocolosClick()
+                            Routes.Admin.route -> onAdminClick()
+                            Routes.Perfil.route -> onVerPerfilClick()
                         }
-                    },
-                    actions = {
-                        if (esJefeTecnico) {
-                            IconButton(onClick = onAdminClick) {
-                                Icon(
-                                    imageVector = Icons.Default.AdminPanelSettings,
-                                    contentDescription = "Administración",
-                                    tint = NaranjaSeguridad
-                                )
-                            }
-                        }
-                        IconButton(onClick = onCerrarSesion) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                                contentDescription = "Cerrar Sesión",
-                                tint = Color.White
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = AzulPetroleo
-                    )
+                    }
                 )
             },
             floatingActionButton = {
                 if (perfil.puedeRegistrarEquipos) {
                     FloatingActionButton(
                         onClick = onCrearEquipoClick,
-                        containerColor = NaranjaSeguridad,
-                        contentColor = Color.Black
+                        containerColor = InduztekBlue,
+                        contentColor = Color.White,
+                        shape = RoundedCornerShape(999.dp),
+                        modifier = Modifier.padding(bottom = 8.dp)
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = "Nuevo Equipo en Terreno")
+                        Row(
+                            modifier = Modifier.padding(horizontal = 20.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(20.dp))
+                            Text("Nuevo Equipo en Terreno", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                        }
                     }
                 }
             }
@@ -327,54 +320,39 @@ fun ListaEquiposScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(16.dp)
+                    .padding(horizontal = 20.dp)
             ) {
+                InduztekHeader(
+                    usuario = usuarioActivo,
+                    onPerfilClick = onVerPerfilClick,
+                    onMenuClick = { scope.launch { drawerState.open() } }
+                )
+
+                Text(
+                    text = "Equipos & Diagnóstico Induztek",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    lineHeight = 32.sp
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "Sesión: ${usuarioActivo?.nombre ?: "Usuario Induztek"}\n${perfil.codigo} · ${perfil.label}${if (!usuarioActivo?.empresaCliente.isNullOrBlank()) " · ${usuarioActivo?.empresaCliente}" else ""}",
+                    fontSize = 13.sp,
+                    color = TextoSecundario,
+                    lineHeight = 17.sp
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
                 remoteError?.let { message ->
                     Text(
                         text = message,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
-                }
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = CardDefaults.cardColors(containerColor = AzulPetroleo)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 14.dp, vertical = 10.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
-                            Text(
-                                text = "Sesión: ${usuarioActivo?.nombre ?: "Usuario Induztek"}",
-                                color = Color.White,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            val empresaDesc = if (!usuarioActivo?.empresaCliente.isNullOrBlank()) " · ${usuarioActivo?.empresaCliente}" else ""
-                            Text(
-                                text = "${perfil.codigo} · ${perfil.label}$empresaDesc",
-                                color = NaranjaSeguridad,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                        if (esCliente) {
-                            Text(
-                                text = "Solo Consulta",
-                                color = Color.White,
-                                fontSize = 11.sp,
-                                modifier = Modifier
-                                    .background(Color(0xFF37474F), RoundedCornerShape(4.dp))
-                                    .padding(horizontal = 6.dp, vertical = 2.dp)
-                            )
-                        }
-                    }
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -520,85 +498,186 @@ fun EquipoCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = TarjetaFondo),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.padding(14.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .fillMaxHeight()
+                    .background(if (equipo.empeorando) Color(0xFFE5484D) else Color.Transparent)
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
             ) {
-                Column {
-                    Text(
-                        text = equipo.codigo,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = AzulPetroleo
-                    )
-                    if (equipo.tagCliente.isNotBlank()) {
-                        Text(
-                            text = "TAG: ${equipo.tagCliente}",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = NaranjaSeguridad
-                        )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(InduztekBlue.copy(alpha = 0.15f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Bolt,
+                                contentDescription = null,
+                                tint = InduztekBlue,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                        Column {
+                            Text(
+                                text = equipo.codigo,
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextoPrincipal
+                            )
+                            if (equipo.tagCliente.isNotBlank()) {
+                                Text(
+                                    text = "TAG: ${equipo.tagCliente}",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = TextoSecundario
+                                )
+                            }
+                        }
                     }
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
 
                     if (equipo.empeorando) {
                         Row(
                             modifier = Modifier
-                                .background(Color(0xFFFFEBEE), RoundedCornerShape(6.dp))
-                                .padding(horizontal = 6.dp, vertical = 2.dp),
+                                .background(Color(0xFFE5484D).copy(alpha = 0.16f), RoundedCornerShape(999.dp))
+                                .padding(horizontal = 10.dp, vertical = 4.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
                                 Icons.Default.TrendingDown,
-                                contentDescription = "Empeorando",
-                                tint = Color(0xFFD32F2F),
-                                modifier = Modifier.height(14.dp)
+                                contentDescription = null,
+                                tint = Color(0xFFE5484D),
+                                modifier = Modifier.size(14.dp)
                             )
-                            Spacer(modifier = Modifier.width(2.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = "En Alerta",
-                                fontSize = 11.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFFD32F2F)
+                                color = Color(0xFFE5484D)
                             )
                         }
-                        Spacer(modifier = Modifier.width(6.dp))
                     }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .background(ChipFondo, RoundedCornerShape(999.dp))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = equipo.tipo,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = TextoPrincipal
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .background(ChipFondo, RoundedCornerShape(999.dp))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "Clasificación: ${equipo.clasificacion.label}",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = TextoPrincipal
+                        )
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
                     EstadoChip(estado = equipo.ultimoEstado, esCliente = esCliente)
                 }
-            }
 
-            Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
-            Text(
-                text = "${equipo.tipo} · Clasificación: ${equipo.clasificacion.label}",
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.DarkGray
-            )
+                if (equipo.cliente.isNotBlank()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Business,
+                            contentDescription = null,
+                            tint = TextoSecundario,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Text(
+                            text = equipo.cliente,
+                            fontSize = 14.sp,
+                            color = TextoSecundario
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(2.dp))
+                }
+                if (equipo.ubicacion.isNotBlank()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = null,
+                            tint = TextoSecundario,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Text(
+                            text = equipo.ubicacion,
+                            fontSize = 14.sp,
+                            color = TextoSecundario
+                        )
+                    }
+                }
 
-            if (equipo.cliente.isNotBlank()) {
-                Text(
-                    text = "🏢 ${equipo.cliente} | 📍 ${equipo.ubicacion}",
-                    fontSize = 12.sp,
-                    color = TextoSecundario
-                )
-            }
+                Spacer(modifier = Modifier.height(12.dp))
+                HorizontalDivider(color = BordeFondo)
+                Spacer(modifier = Modifier.height(10.dp))
 
-            if (equipo.marca.isNotBlank() || equipo.potenciaTension.isNotBlank()) {
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "⚡ ${equipo.potenciaTension} · ${equipo.marca} (${equipo.anio})",
-                    fontSize = 11.sp,
-                    color = Color.Gray
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Bolt,
+                        contentDescription = null,
+                        tint = TextoSecundario,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Text(
+                        text = "${equipo.potenciaTension} · ${equipo.marca} (${equipo.anio})",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = TextoSecundario
+                    )
+                }
             }
         }
     }
