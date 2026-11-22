@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.*
@@ -77,6 +78,11 @@ fun AdminScreen(
     var showDeleteUserDialog by remember { mutableStateOf(false) }
     var usuarioAEliminar by remember { mutableStateOf<UserProfile?>(null) }
 
+    var showEditRoleDialog by remember { mutableStateOf(false) }
+    var usuarioAEditarRol by remember { mutableStateOf<UserProfile?>(null) }
+    var nuevoRolSeleccionado by remember { mutableStateOf("Técnico de Terreno (P-01)") }
+    var dropdownEditarRolExpanded by remember { mutableStateOf(false) }
+
     var nuevoNombreUsuario by remember { mutableStateOf("") }
     var nuevoCorreoUsuario by remember { mutableStateOf("") }
     var nuevaPasswordUsuario by remember { mutableStateOf("") }
@@ -88,7 +94,7 @@ fun AdminScreen(
 
     val tiposInstrumento = listOf("Megóhmetro", "Microohmímetro", "Multímetro", "Pinza Amperimétrica", "Probador de Rigidez Dieléctrica")
     val marcasInstrumento = listOf("Fluke", "Megger", "AEMC", "Vanguard", "Omicron", "Hioki", "Kyoritsu")
-    val cargosDisponibles = listOf("Técnico de Terreno (P-01)", "Ingeniero de Pruebas (P-02)", "Jefe Técnico (P-03)", "Cliente (P-04)")
+    val cargosDisponibles = listOf("Técnico de Terreno (P-01)", "Administrador (P-03)", "Cliente (P-04)")
     val empresasDisponibles = listOf("Planta Lampa", "Minera Andes", "Minera Escondida", "Codelco Ventanas", "Minera Los Pelambres", "Induztek Central")
 
     val textFieldColors = OutlinedTextFieldDefaults.colors(
@@ -341,6 +347,23 @@ fun AdminScreen(
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
                                         IconButton(onClick = {
+                                            usuarioAEditarRol = user
+                                            nuevoRolSeleccionado = when (user.perfilCodigo) {
+                                                "P-03" -> "Administrador (P-03)"
+                                                "P-04" -> "Cliente (P-04)"
+                                                else -> "Técnico de Terreno (P-01)"
+                                            }
+                                            showEditRoleDialog = true
+                                        }) {
+                                            Icon(
+                                                imageVector = Icons.Default.Edit,
+                                                contentDescription = "Cambiar cargo",
+                                                tint = InduztekBlue,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.width(2.dp))
+                                        IconButton(onClick = {
                                             usuarioAEliminar = user
                                             showDeleteUserDialog = true
                                         }) {
@@ -584,7 +607,6 @@ fun AdminScreen(
                     onClick = {
                         val targetRoleCode = when {
                             cargoSeleccionado.contains("P-01") -> "FIELD_TECHNICIAN"
-                            cargoSeleccionado.contains("P-02") -> "TEST_ENGINEER"
                             cargoSeleccionado.contains("P-03") -> "ADMIN"
                             cargoSeleccionado.contains("P-04") -> "CLIENT"
                             else -> "FIELD_TECHNICIAN"
@@ -617,36 +639,68 @@ fun AdminScreen(
         )
     }
 
-    if (showDeleteUserDialog && usuarioAEliminar != null) {
+    if (showEditRoleDialog && usuarioAEditarRol != null) {
         AlertDialog(
-            onDismissRequest = { showDeleteUserDialog = false },
+            onDismissRequest = { showEditRoleDialog = false },
             containerColor = TarjetaFondo,
             titleContentColor = Color.White,
             textContentColor = TextoPrincipal,
-            title = { Text("Eliminar Cuenta", fontWeight = FontWeight.Bold) },
+            title = { Text("Cambiar Cargo / Rol", fontWeight = FontWeight.Bold) },
             text = {
-                Text(
-                    "¿Estás seguro de que deseas eliminar permanentemente la cuenta de ${usuarioAEliminar?.nombre} (${usuarioAEliminar?.correo})? Esta acción no se puede deshacer.",
-                    fontSize = 13.sp,
-                    color = TextoSecundario
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Selecciona el nuevo cargo para ${usuarioAEditarRol?.nombre}:", fontSize = 13.sp, color = TextoSecundario)
+                    ExposedDropdownMenuBox(
+                        expanded = dropdownEditarRolExpanded,
+                        onExpandedChange = { dropdownEditarRolExpanded = !dropdownEditarRolExpanded }
+                    ) {
+                        OutlinedTextField(
+                            value = nuevoRolSeleccionado,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Cargo / Rol *") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownEditarRolExpanded) },
+                            modifier = Modifier.menuAnchor().fillMaxWidth(),
+                            colors = textFieldColors
+                        )
+                        ExposedDropdownMenu(
+                            expanded = dropdownEditarRolExpanded,
+                            onDismissRequest = { dropdownEditarRolExpanded = false }
+                        ) {
+                            cargosDisponibles.forEach { cargo ->
+                                DropdownMenuItem(
+                                    text = { Text(cargo) },
+                                    onClick = {
+                                        nuevoRolSeleccionado = cargo
+                                        dropdownEditarRolExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
             },
             confirmButton = {
                 Button(
                     onClick = {
-                        usuarioAEliminar?.let { u ->
-                            adminViewModel.eliminarUsuario(u.id)
+                        usuarioAEditarRol?.let { u ->
+                            val targetRoleCode = when {
+                                nuevoRolSeleccionado.contains("P-01") -> "FIELD_TECHNICIAN"
+                                nuevoRolSeleccionado.contains("P-03") -> "ADMIN"
+                                nuevoRolSeleccionado.contains("P-04") -> "CLIENT"
+                                else -> "FIELD_TECHNICIAN"
+                            }
+                            adminViewModel.cambiarRolPersonal(u, targetRoleCode)
                         }
-                        showDeleteUserDialog = false
+                        showEditRoleDialog = false
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF5350)),
+                    colors = ButtonDefaults.buttonColors(containerColor = InduztekBlue),
                     shape = RoundedCornerShape(10.dp)
                 ) {
-                    Text("Eliminar", color = Color.White)
+                    Text("Actualizar Rol", color = Color.White)
                 }
             },
             dismissButton = {
-                OutlinedButton(onClick = { showDeleteUserDialog = false }) {
+                OutlinedButton(onClick = { showEditRoleDialog = false }) {
                     Text("Cancelar", color = Color.White)
                 }
             }

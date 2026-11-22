@@ -177,4 +177,16 @@ class AdminViewModel(
             }
         }
     }
+
+    fun cambiarRolPersonal(usuario: UserProfile, nuevoRolCodigo: String) {
+        viewModelScope.launch {
+            try {
+                usuarioRepository.actualizarRol(usuario.id, nuevoRolCodigo)
+                _error.value = null
+            } catch (exception: Exception) {
+                if (exception is CancellationException) throw exception
+                _error.value = exception.localizedMessage ?: "No fue posible actualizar el rol del usuario"
+            }
+        }
+    }
 }

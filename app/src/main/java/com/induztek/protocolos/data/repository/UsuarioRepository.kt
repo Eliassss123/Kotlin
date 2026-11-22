@@ -2,6 +2,7 @@ package com.induztek.protocolos.data.repository
 
 import com.induztek.protocolos.data.remote.ActiveRequest
 import com.induztek.protocolos.data.remote.AuthApi
+import com.induztek.protocolos.data.remote.RoleRequest
 import com.induztek.protocolos.data.remote.LoginRequest
 import com.induztek.protocolos.data.remote.RecoveryRequest
 import com.induztek.protocolos.data.remote.RegisterRequest
@@ -118,6 +119,11 @@ class UsuarioRepository(
 
     suspend fun setActivo(id: String, activo: Boolean) {
         val updated = api.setUserActive(id, ActiveRequest(active = activo)).requireBody().toProfile()
+        _allUsuarios.value = _allUsuarios.value.map { if (it.id == updated.id) updated else it }
+    }
+
+    suspend fun actualizarRol(id: String, roleCode: String) {
+        val updated = api.setUserRole(id, RoleRequest(roleCode)).requireBody().toProfile()
         _allUsuarios.value = _allUsuarios.value.map { if (it.id == updated.id) updated else it }
     }
 

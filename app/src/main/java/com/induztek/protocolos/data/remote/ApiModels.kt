@@ -35,6 +35,8 @@ data class ResetPasswordRequest(val email: String, val code: String, val newPass
 
 data class MessageDto(val message: String)
 
+data class RoleRequest(val roleCode: String)
+
 data class UserResponseDto(
     val id: String,
     val email: String,

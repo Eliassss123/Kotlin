@@ -36,6 +36,9 @@ interface AuthApi {
     @PATCH("api/usuarios/{id}/estado")
     suspend fun setUserActive(@Path("id") id: String, @Body request: ActiveRequest): Response<UserResponseDto>
 
+    @PATCH("api/usuarios/{id}/rol")
+    suspend fun setUserRole(@Path("id") id: String, @Body request: RoleRequest): Response<UserResponseDto>
+
     @DELETE("api/usuarios/{id}")
     suspend fun deleteUser(@Path("id") id: String): Response<Unit>
 }
