@@ -16,14 +16,12 @@ object RetrofitClient {
             .addInterceptor(Interceptor { chain ->
                 val request = chain.request()
                 val token = accessTokenProvider()
-                val authenticatedRequest = if (token.isNullOrBlank()) {
-                    request
-                } else {
-                    request.newBuilder()
-                        .header("Authorization", "Bearer $token")
-                        .build()
+                val requestBuilder = request.newBuilder()
+                    .header("X-Tunnel-Skip-Anti-Phishing-Page", "true")
+                if (!token.isNullOrBlank()) {
+                    requestBuilder.header("Authorization", "Bearer $token")
                 }
-                chain.proceed(authenticatedRequest)
+                chain.proceed(requestBuilder.build())
             })
             .build()
     }

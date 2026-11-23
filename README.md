@@ -1,5 +1,10 @@
 # Induztek Protocolos de Prueba en Terreno
 
+## Repositorios
+
+- Aplicación Android (Kotlin): [Eliassss123/Kotlin](https://github.com/Eliassss123/Kotlin/tree/kotlin)
+- Backend de microservicios: [Benjamin-Negrete/Kotlin-Microservicios](https://github.com/Benjamin-Negrete/Kotlin-Microservicios)
+
 Sistema integral de gestión, ejecución y control de protocolos de prueba y mantenimiento para sistemas eléctricos de alta y media tensión en terreno, compuesto por una aplicación móvil **Android (Jetpack Compose / Kotlin)** y una arquitectura backend basada en **Microservicios Spring Boot (Cloud & Netflix Eureka)**.
 
 ---

@@ -1,12 +1,11 @@
-
-
-
-
-
-
-
-
-
+/**
+ * =====================================================================================
+ * INDUZTEK PROTOCOLOS - NAVEGACIÓN PRINCIPAL (AppNavegacion.kt)
+ * =====================================================================================
+ * Este archivo define el grafo de navegación de Jetpack Compose (NavHost).
+ * Conecta todas las pantallas de la aplicación móvil y gestiona el traspaso de ViewModels
+ * y argumentos entre rutas (Login, Equipos, Visitas, Protocolos, Administración y Perfil).
+ */
 package com.induztek.protocolos.navigation
 
 import androidx.compose.runtime.Composable
@@ -42,10 +41,10 @@ import com.induztek.protocolos.viewmodel.ProtocoloViewModel
 import com.induztek.protocolos.viewmodel.PruebaViewModel
 import com.induztek.protocolos.viewmodel.VisitaViewModel
 
-
-
-
-
+/**
+ * Composable principal que inicializa el controlador de navegación (NavController)
+ * y declara cada una de las rutas accesibles en la aplicación.
+ */
 @Composable
 fun AppNavegacion(
     loginViewModel: LoginViewModel,
@@ -55,9 +54,10 @@ fun AppNavegacion(
     visitaViewModel: VisitaViewModel,
     adminViewModel: AdminViewModel
 ) {
-
+    // Controlador que maneja el historial de pantallas y transiciones
     val navController = rememberNavController()
 
+    // Callback para manejar la selección de pestañas en la barra de navegación inferior (InduztekBottomBar)
     val onTabSelected: (String) -> Unit = { route ->
         navController.navigate(route) {
             popUpTo(Routes.ListaEquipos.route) { saveState = true }
@@ -66,22 +66,25 @@ fun AppNavegacion(
         }
     }
 
+    // Estados globales del usuario autenticado actual
     val usuarioActual by loginViewModel.usuarioActivo.collectAsState()
     val profileError by loginViewModel.profileError.collectAsState()
 
-
-
+    // Contenedor de navegación que define la pantalla inicial y el mapa de rutas
     NavHost(
         navController = navController,
         startDestination = Routes.Login.route
     ) {
+        // ==========================================
+        // 1. FLUJO DE AUTENTICACIÓN Y RECUPERACIÓN
+        // ==========================================
 
-
-
+        // Pantalla de Inicio de Sesión
         composable(route = Routes.Login.route) {
             LoginScreen(
                 viewModel = loginViewModel,
                 onLoginSuccess = {
+                    // Refrescar repositorios locales al iniciar sesión y navegar a equipos
                     equipoViewModel.refresh()
                     protocoloViewModel.refresh()
                     visitaViewModel.refresh()
@@ -98,6 +101,7 @@ fun AppNavegacion(
             )
         }
 
+        // Pantalla de Registro de Nueva Cuenta de Cliente
         composable(route = Routes.Registro.route) {
             RegistroScreen(
                 viewModel = loginViewModel,
@@ -106,8 +110,7 @@ fun AppNavegacion(
             )
         }
 
-
-
+        // Pantalla de Recuperación de Contraseña (Paso 1: Ingreso de correo)
         composable(route = Routes.OlvideContrasena.route) {
             OlvideContrasenaScreen(
                 viewModel = loginViewModel,
@@ -118,8 +121,7 @@ fun AppNavegacion(
             )
         }
 
-
-
+        // Pantalla de Verificación de Código de 6 dígitos (Paso 2)
         composable(route = Routes.VerificarCodigo.route) {
             VerificarCodigoScreen(
                 viewModel = loginViewModel,
@@ -130,8 +132,7 @@ fun AppNavegacion(
             )
         }
 
-
-
+        // Pantalla de Ingreso de Nueva Contraseña (Paso 3)
         composable(route = Routes.NuevaContrasena.route) {
             NuevaContrasenaScreen(
                 viewModel = loginViewModel,
@@ -144,8 +145,11 @@ fun AppNavegacion(
             )
         }
 
+        // ==========================================
+        // 2. MÓDULO DE EQUIPOS (FT-03 / RT-02)
+        // ==========================================
 
-
+        // Pantalla Principal: Listado de Equipos Eléctricos en Terreno
         composable(route = Routes.ListaEquipos.route) {
             ListaEquiposScreen(
                 viewModel = equipoViewModel,
@@ -177,8 +181,7 @@ fun AppNavegacion(
             )
         }
 
-
-
+        // Pantalla de Registro de Nuevo Equipo en Terreno (RT-02)
         composable(route = Routes.CrearEquipo.route) {
             CrearEquipoScreen(
                 viewModel = equipoViewModel,
@@ -187,8 +190,7 @@ fun AppNavegacion(
             )
         }
 
-
-
+        // Pantalla de Ficha Técnica e Historial del Equipo (FT-03)
         composable(
             route = Routes.DetalleEquipo.route,
             arguments = listOf(navArgument("codigo") { type = NavType.StringType })
@@ -205,8 +207,11 @@ fun AppNavegacion(
             )
         }
 
+        // ==========================================
+        // 3. MÓDULO DE VISITAS TÉCNICAS (RT-01)
+        // ==========================================
 
-
+        // Pantalla Principal: Listado de Visitas Técnicas
         composable(route = Routes.ListaVisitas.route) {
             ListaVisitasScreen(
                 visitaViewModel = visitaViewModel,
@@ -222,8 +227,7 @@ fun AppNavegacion(
             )
         }
 
-
-
+        // Pantalla de Creación de Nueva Visita Técnica (RT-01)
         composable(route = Routes.NuevaVisita.route) {
             NuevaVisitaScreen(
                 visitaViewModel = visitaViewModel,
@@ -238,8 +242,7 @@ fun AppNavegacion(
             )
         }
 
-
-
+        // Pantalla de Detalle de Visita, Protocolos Asociados y Cierre de Acta (RT-08)
         composable(
             route = Routes.DetalleVisita.route,
             arguments = listOf(navArgument("visitaId") { type = NavType.StringType })
@@ -260,8 +263,11 @@ fun AppNavegacion(
             )
         }
 
+        // ==========================================
+        // 4. MÓDULO DE PROTOCOLOS Y PRUEBAS (RT-03)
+        // ==========================================
 
-
+        // Pantalla Principal: Historial General de Protocolos de Prueba
         composable(route = Routes.ListaProtocolos.route) {
             ListaProtocolosScreen(
                 viewModel = protocoloViewModel,
@@ -274,8 +280,7 @@ fun AppNavegacion(
             )
         }
 
-
-
+        // Pantalla de Detalle de Protocolo, Evidencia Fotográfica y Formalización (RN-16)
         composable(
             route = Routes.DetalleProtocolo.route,
             arguments = listOf(navArgument("id") { type = NavType.StringType })
@@ -292,8 +297,7 @@ fun AppNavegacion(
             )
         }
 
-
-
+        // Pantalla de Captura y Edición de Mediciones por Prueba (RT-04)
         composable(
             route = Routes.CapturaPrueba.route,
             arguments = listOf(navArgument("pruebaId") { type = NavType.StringType })
@@ -307,8 +311,7 @@ fun AppNavegacion(
             )
         }
 
-
-
+        // Pantalla de Visualización de Acta Oficial de Entrega (RT-08)
         composable(
             route = Routes.DetalleActa.route,
             arguments = listOf(navArgument("actaId") { type = NavType.StringType })
@@ -322,8 +325,11 @@ fun AppNavegacion(
             )
         }
 
+        // ==========================================
+        // 5. ADMINISTRACIÓN Y PERFIL DE USUARIO
+        // ==========================================
 
-
+        // Panel de Administración Técnica (Gestión de Personal e Instrumentos)
         composable(route = Routes.Admin.route) {
             AdminScreen(
                 adminViewModel = adminViewModel,
@@ -333,8 +339,7 @@ fun AppNavegacion(
             )
         }
 
-
-
+        // Pantalla de Perfil de Usuario, Fotografía y Edición de Datos
         composable(route = Routes.Perfil.route) {
             PerfilScreen(
                 usuario = usuarioActual,

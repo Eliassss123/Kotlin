@@ -1,0 +1,61 @@
+=============================================================================
+MANUAL Y GUÍA PASO A PASO DE PRUEBAS UNITARIAS E INTERACTIVAS - INDUZTEK PROTOCOLOS
+=============================================================================
+Este documento detalla la guía paso a paso y la estructura recomendada para implementar
+pruebas unitarias y de integración para absolutamente todos los componentes interactivos
+de la aplicación Android en Kotlin (ViewModels, Repositorios, Navegación y Vistas).
+
+-----------------------------------------------------------------------------
+1. PRUEBAS UNITARIAS PARA LoginViewModel (Autenticación y Validación)
+-----------------------------------------------------------------------------
+* Objetivo: Probar la validación de correos electrónicos, contraseñas seguras y el flujo de inicio de sesión exitoso o erróneo.
+* Paso a paso para implementarlo:
+  1. Crear un archivo `LoginViewModelTest.kt` en `app/src/test/java/com/induztek/protocolos/viewmodel/`.
+  2. Configurar JUnit 5 o JUnit 4 junto con Mockito y Coroutines Test Dispatcher.
+  3. Escribir los casos de prueba:
+     - `validarCorreo_retornaTrueParaCorreosValidos()`
+     - `validarContrasena_verificaRequisitosDeSeguridad()`
+     - `login_emiteEstadoExitosoAlAutenticarCredencialesCorrectas()`
+
+Ejemplo de código de prueba:
+```kotlin
+@Test
+fun validarCorreo_retornaTrueParaCorreosValidos() {
+    val viewModel = LoginViewModel()
+    assertTrue(viewModel.validarCorreo("admin@induztek.cl"))
+    assertFalse(viewModel.validarCorreo("correo-invalido"))
+}
+```
+
+-----------------------------------------------------------------------------
+2. PRUEBAS UNITARIAS PARA AdminViewModel (Gestión de Personal y Roles)
+-----------------------------------------------------------------------------
+* Objetivo: Verificar la creación de nuevas cuentas de usuario, asignación de planta/empresa y cambios de roles (P-01, P-03, P-04).
+* Paso a paso para implementarlo:
+  1. Crear `AdminViewModelTest.kt` en `app/src/test/java/com/induztek/protocolos/viewmodel/`.
+  2. Mockear `UsuarioRepository` e `InstrumentoRepository`.
+  3. Verificar que al invocar `crearUsuario(...)` o `cambiarRolPersonal(...)`, los repositorios reciban los parámetros correctos.
+
+-----------------------------------------------------------------------------
+3. PRUEBAS UNITARIAS PARA VisitaViewModel Y EquipoViewModel
+-----------------------------------------------------------------------------
+* Objetivo: Validar la creación de visitas técnicas (RT-01), registro de equipos en terreno (RT-02) y la generación automática de protocolos de prueba (RT-03).
+* Paso a paso para implementarlo:
+  1. Crear `VisitaViewModelTest.kt`.
+  2. Comprobar que `agregarEquipoAVisita` valide duplicados (RN-02) antes de insertar el protocolo en la base de datos local Room.
+
+-----------------------------------------------------------------------------
+4. PRUEBAS DE INTEGRACIÓN PARA UsuarioRepository (Conectividad API REST)
+-----------------------------------------------------------------------------
+* Objetivo: Probar las peticiones HTTP de Retrofit utilizando MockWebServer para simular respuestas JSON del backend de Spring Boot.
+* Paso a paso para implementarlo:
+  1. Configurar MockWebServer en la clase de test.
+  2. Simular respuestas HTTP 200, 403 y 404 para los endpoints de login, registro, actualización de perfil y eliminación de usuarios (`DELETE /api/usuarios/{id}`).
+
+-----------------------------------------------------------------------------
+5. PRUEBAS UI / COMPOSE (Jetpack Compose UI Testing)
+-----------------------------------------------------------------------------
+* Objetivo: Validar la interacción de los componentes visuales (Clicks en botones, escritura en OutlinedTextFields, selección en ComboBoxes).
+* Paso a paso para implementarlo:
+  1. Utilizar `ComposeTestRule` (`createComposeRule()`).
+  2. Probar que `LoginScreen` muestre errores al dejar campos vacíos y que `DetalleVisitaScreen` despliegue correctamente la lista de equipos disponibles.
