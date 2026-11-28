@@ -2,16 +2,15 @@ package com.induztek.protocolos.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.induztek.protocolos.data.remote.toUserMessage
 import com.induztek.protocolos.data.repository.UsuarioRepository
 import com.induztek.protocolos.model.UserProfile
 import com.induztek.protocolos.util.SessionManager
-import java.io.IOException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import retrofit2.HttpException
 
 sealed class LoginUiState {
     object Idle : LoginUiState()
@@ -410,16 +409,6 @@ class LoginViewModel(
         }
     }
 
-    private fun errorMessage(exception: Exception): String = when (exception) {
-        is HttpException -> when (exception.code()) {
-            400 -> "Los datos enviados no son válidos"
-            401 -> "Correo o contraseña incorrectos"
-            403 -> "La cuenta está pendiente de aprobación o fue desactivada"
-            404 -> "No se encontró el recurso solicitado"
-            409 -> "El registro ya existe"
-            else -> "Error del servidor (${exception.code()})"
-        }
-        is IOException -> "No fue posible conectar con el servidor. Verifica tu conexión."
-        else -> exception.localizedMessage ?: "Ocurrió un error inesperado"
-    }
+    /** Ver la tabla de códigos HTTP en [com.induztek.protocolos.data.remote.ApiErrors]. */
+    private fun errorMessage(exception: Exception): String = exception.toUserMessage()
 }

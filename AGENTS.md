@@ -11,6 +11,8 @@
 - Historical gotcha: putting the `.txt` test docs in `app/src/main/res/values/` breaks `:app:mergeDebugResources` ("The file name must end with .xml"). They now live in `docs/`; never move non-XML files into `res/values/`.
 - Unit-test stack is configured in `app/build.gradle.kts`: JUnit4, `kotlinx-coroutines-test`, MockK, MockWebServer, plus `unitTests.isReturnDefaultValues = true`. Compose UI test deps are `androidTestImplementation` only; there are no `androidTest` sources yet.
 - No lint/format/typecheck/CI configuration exists here; don't claim those checks run.
+- Test helpers live in `app/src/test/java/com/induztek/protocolos/testutil/` (`MainDispatcherRule` for ViewModel tests, `httpError(...)` for backend-shaped `HttpException`s). Coverage: `.\gradlew.bat :app:createDebugUnitTestCoverageReport` (debug has `enableUnitTestCoverage = true`).
+- HTTP error → user message mapping is centralized in `data/remote/ApiErrors.kt` (`Throwable.toUserMessage()`); documented in `docs/CodigosHTTP.md`. Don't add per-ViewModel `when (code())` tables.
 - Unit tests are JUnit4 in `app/src/test/java/com/induztek/protocolos`. `docs/*.txt` are written notes, compiled tests are only the `.kt` files under `app/src/test`.
 
 ## Runtime config quirks

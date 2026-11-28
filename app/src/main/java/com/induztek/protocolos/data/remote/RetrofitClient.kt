@@ -1,6 +1,7 @@
 package com.induztek.protocolos.data.remote
 
 import com.induztek.protocolos.BuildConfig
+import java.util.concurrent.TimeUnit
 import okhttp3.OkHttpClient
 import okhttp3.Interceptor
 import retrofit2.Retrofit
@@ -11,8 +12,19 @@ object RetrofitClient {
 
     private var accessTokenProvider: () -> String? = { null }
 
+    /**
+     * Segundos que la app espera la respuesta. Debe superar el timeout de identity-service hacia
+     * notifications-service (50 s): con el valor por defecto de OkHttp (10 s) la app cortaba la
+     * solicitud del código de recuperación antes de que el backend terminara de enviar el correo.
+     */
+    const val READ_TIMEOUT_SECONDS = 60L
+    const val CONNECT_TIMEOUT_SECONDS = 15L
+
     private val okHttpClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
+            .connectTimeout(CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .readTimeout(READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .writeTimeout(READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .addInterceptor(Interceptor { chain ->
                 val request = chain.request()
                 val token = accessTokenProvider()
