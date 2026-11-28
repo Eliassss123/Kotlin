@@ -1,4 +1,5 @@
 import java.util.Properties
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -50,6 +51,10 @@ android {
         }
         debug {
             manifestPlaceholders["usesCleartextTraffic"] = "true"
+            // Reporte de cobertura JaCoCo de los tests unitarios:
+            //   .\gradlew.bat :app:createDebugUnitTestCoverageReport
+            //   -> app/build/reports/coverage/test/debug/index.html
+            enableUnitTestCoverage = true
         }
     }
     compileOptions {
@@ -67,6 +72,15 @@ android {
     }
     testOptions {
         unitTests.isReturnDefaultValues = true
+        // Muestra en consola cada test y la traza completa cuando falla:
+        //   .\gradlew.bat :app:testDebugUnitTest
+        unitTests.all {
+            it.testLogging {
+                events("passed", "skipped", "failed")
+                exceptionFormat = TestExceptionFormat.FULL
+                showStandardStreams = false
+            }
+        }
     }
 }
 
