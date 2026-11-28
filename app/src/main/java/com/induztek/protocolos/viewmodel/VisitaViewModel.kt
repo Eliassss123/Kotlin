@@ -12,7 +12,9 @@ package com.induztek.protocolos.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.induztek.protocolos.data.remote.toUserMessage
 import com.induztek.protocolos.data.repository.ActaRepository
+import com.induztek.protocolos.domain.errores.CodigoError
 import com.induztek.protocolos.data.repository.EquipoRepository
 import com.induztek.protocolos.data.repository.ProtocoloRepository
 import com.induztek.protocolos.data.repository.PruebaRepository
@@ -84,7 +86,7 @@ class VisitaViewModel(
                 _mensajeError.value = null
             } catch (exception: Exception) {
                 if (exception is CancellationException) throw exception
-                _mensajeError.value = exception.localizedMessage ?: "No fue posible cargar las visitas"
+                _mensajeError.value = exception.toUserMessage()
             }
         }
     }
@@ -137,15 +139,15 @@ class VisitaViewModel(
     fun crearVisita(onSuccess: (String) -> Unit) {
         val state = _nuevaVisitaState.value
         if (state.ordenTrabajo.isBlank()) {
-            _nuevaVisitaState.value = state.copy(errorValidacion = "La Orden de Trabajo (OT) es obligatoria")
+            _nuevaVisitaState.value = state.copy(errorValidacion = CodigoError.VIS_001.formatear())
             return
         }
         if (state.cliente.isBlank()) {
-            _nuevaVisitaState.value = state.copy(errorValidacion = "El cliente es obligatorio")
+            _nuevaVisitaState.value = state.copy(errorValidacion = CodigoError.VIS_002.formatear())
             return
         }
         if (state.ingenieroACargo.isBlank()) {
-            _nuevaVisitaState.value = state.copy(errorValidacion = "El Ingeniero a cargo es OBLIGATORIO (Aclar. 4 y 7)")
+            _nuevaVisitaState.value = state.copy(errorValidacion = CodigoError.VIS_003.formatear())
             return
         }
 
@@ -181,7 +183,9 @@ class VisitaViewModel(
         launchCatching(onError = { _mensajeError.value = it }) {
             val v = visitaRepository.getVisitaById(visitaId)
             _visitaSeleccionada.value = v
-            if (v != null) {
+            if (v == null) {
+                _mensajeError.value = CodigoError.VIS_009.formatear(visitaId)
+            } else {
                 protocoloRepository.getProtocolosByVisita(v.id).collect { list ->
                     _protocolosVisita.value = list
                 }
@@ -194,7 +198,9 @@ class VisitaViewModel(
         launchCatching(onError = { _mensajeError.value = it }) {
             val acta = actaRepository.getActaById(actaId)
             _actaGenerada.value = acta
-            if (acta != null) {
+            if (acta == null) {
+                _mensajeError.value = CodigoError.VIS_010.formatear(actaId)
+            } else {
                 cargarDetalleVisita(acta.visitaId)
             }
         }
@@ -202,7 +208,7 @@ class VisitaViewModel(
 
 
     fun agregarEquipoAVisita(equipo: Equipo, tecnicoUsuario: String, onProtocoloCreado: (String) -> Unit) {
-        val visita = _visitaSeleccionada.value ?: return
+        val visita = _visitaSeleccionada.value ?: run { _mensajeError.value = CodigoError.VIS_005.formatear(); return }
 
         launchCatching(onError = { _mensajeError.value = it }) {
             try {
@@ -213,7 +219,7 @@ class VisitaViewModel(
 
             val yaExiste = protocoloRepository.existeProtocoloParaEquipoEnVisita(visita.id, equipo.codigo)
             if (yaExiste) {
-                _mensajeError.value = "Ya existe un protocolo registrado para el equipo ${equipo.codigo} en esta visita (RN-02)."
+                _mensajeError.value = CodigoError.VIS_004.formatear(equipo.codigo)
                 return@launchCatching
             }
 
@@ -287,19 +293,19 @@ class VisitaViewModel(
         onError: (String) -> Unit
     ) {
         val visita = _visitaSeleccionada.value ?: run {
-            onError("No hay una visita activa seleccionada")
+            onError(CodigoError.VIS_005.formatear())
             return
         }
 
         if (recibidoPor.isBlank()) {
-            onError("Es obligatorio ingresar el nombre de la persona que recibe el acta (RT-08)")
+            onError(CodigoError.VIS_006.formatear())
             return
         }
 
         launchCatching(onError = { _mensajeError.value = it }) {
             val protocolos = _protocolosVisita.value
             if (protocolos.isEmpty()) {
-                onError("No se puede cerrar la visita sin al menos un protocolo registrado.")
+                onError(CodigoError.VIS_007.formatear())
                 return@launchCatching
             }
 
@@ -307,7 +313,7 @@ class VisitaViewModel(
                 for (prueba in prot.pruebas) {
                     val errorPrueba = ReglasNegocio.validarPruebaCompleta(prueba)
                     if (errorPrueba != null) {
-                        onError("Error en protocolo ${prot.codigoProtocolo}: $errorPrueba")
+                        onError(CodigoError.VIS_008.formatear(prot.codigoProtocolo, errorPrueba))
                         return@launchCatching
                     }
                 }

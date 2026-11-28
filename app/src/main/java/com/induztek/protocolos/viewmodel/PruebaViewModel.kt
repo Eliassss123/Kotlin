@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModel
 import com.induztek.protocolos.data.repository.EquipoRepository
 import com.induztek.protocolos.data.repository.ProtocoloRepository
 import com.induztek.protocolos.data.repository.PruebaRepository
+import com.induztek.protocolos.domain.errores.CodigoError
 import com.induztek.protocolos.model.Equipo
 import com.induztek.protocolos.model.EstadoProtocolo
 import com.induztek.protocolos.model.Medicion
@@ -209,11 +210,14 @@ class PruebaViewModel(
     }
 
     fun agregarMedicion(campo: String, valor: String) {
-        if (campo.isNotBlank() && valor.isNotBlank()) {
-            val listaActual = _uiState.value.mediciones.toMutableList()
-            listaActual.add(Medicion(campo.trim(), valor.trim()))
-            _uiState.value = _uiState.value.copy(mediciones = listaActual)
+        if (campo.isBlank() || valor.isBlank()) {
+            _remoteError.value = CodigoError.PRU_004.formatear()
+            return
         }
+        val listaActual = _uiState.value.mediciones.toMutableList()
+        listaActual.add(Medicion(campo.trim(), valor.trim()))
+        _uiState.value = _uiState.value.copy(mediciones = listaActual)
+        _remoteError.value = null
     }
 
     fun eliminarMedicion(index: Int) {
@@ -242,7 +246,20 @@ class PruebaViewModel(
     }
 
 
+    /** Valida la prueba antes de guardar: PRU-001 (sin equipo), PRU-002 (sin OT), PRU-003 (sin mediciones). */
+    fun validarPrueba(state: NuevaPruebaState = _uiState.value): String? = when {
+        state.equipoCodigo.isBlank() -> CodigoError.PRU_001.formatear()
+        state.ordenTrabajo.isBlank() -> CodigoError.PRU_002.formatear()
+        state.mediciones.isEmpty() -> CodigoError.PRU_003.formatear()
+        else -> null
+    }
+
     fun guardarProtocolo(onSuccess: () -> Unit) {
+        val errorValidacion = validarPrueba()
+        if (errorValidacion != null) {
+            _remoteError.value = errorValidacion
+            return
+        }
         launchCatching(onError = { _remoteError.value = it }) {
             val state = _uiState.value
             val timestamp = System.currentTimeMillis()

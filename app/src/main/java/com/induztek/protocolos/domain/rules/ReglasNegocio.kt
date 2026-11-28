@@ -7,6 +7,7 @@
 
 package com.induztek.protocolos.domain.rules
 
+import com.induztek.protocolos.domain.errores.CodigoError
 import com.induztek.protocolos.model.EstadoPrueba
 import com.induztek.protocolos.model.Medicion
 import com.induztek.protocolos.model.MomentoMedicion
@@ -127,14 +128,15 @@ object ReglasNegocio {
 
 
 
+    /** Valida que una prueba esté completa antes de cerrar la visita. Devuelve null si es válida, o el error REG-001 / REG-002. */
     fun validarPruebaCompleta(prueba: Prueba): String? {
         if (prueba.estadoPrueba == EstadoPrueba.NO_REALIZADA) {
             if (prueba.motivoNoRealizada.isBlank()) {
-                return "La prueba '${prueba.tipoPrueba}' está marcada como NO REALIZADA y requiere un motivo no vacío."
+                return CodigoError.REG_001.formatear(prueba.tipoPrueba)
             }
         } else {
             if (prueba.mediciones.isEmpty()) {
-                return "La prueba '${prueba.tipoPrueba}' debe tener al menos una medición registrada o marcarse como NO REALIZADA con su motivo."
+                return CodigoError.REG_002.formatear(prueba.tipoPrueba)
             }
         }
         return null

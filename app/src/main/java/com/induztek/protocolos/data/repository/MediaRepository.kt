@@ -3,11 +3,13 @@ package com.induztek.protocolos.data.repository
 import com.induztek.protocolos.data.remote.MediaApi
 import com.induztek.protocolos.data.remote.requireBody
 import java.io.File
-import java.io.IOException
+import com.induztek.protocolos.domain.errores.AppException
+import com.induztek.protocolos.domain.errores.CodigoError
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 
+/** Sube imágenes locales al backend. Errores: MED-001 (fuera de filesDir), MED-002 (> 10 MB), MED-003 (no se borró la copia). */
 class MediaRepository(
     private val api: MediaApi,
     private val appFilesDir: File
@@ -17,16 +19,16 @@ class MediaRepository(
         val file = File(path).canonicalFile
         val root = appFilesDir.canonicalFile
         if (!file.toPath().startsWith(root.toPath()) || !file.isFile) {
-            throw IOException("The selected image is not in the app's private storage")
+            throw AppException(CodigoError.MED_001)
         }
         if (file.length() > 10L * 1024 * 1024) {
-            throw IOException("Images cannot exceed 10 MB")
+            throw AppException(CodigoError.MED_002)
         }
         val mediaType = (java.net.URLConnection.guessContentTypeFromName(file.name) ?: "image/jpeg").toMediaType()
         val part = MultipartBody.Part.createFormData("file", file.name, file.asRequestBody(mediaType))
         val response = api.subirImagen(part).requireBody()
         if (!file.delete()) {
-            throw IOException("The image was uploaded, but the temporary local copy could not be removed")
+            throw AppException(CodigoError.MED_003)
         }
         return response.url
     }

@@ -5,7 +5,8 @@ La app recibe del backend (vía API Gateway) los códigos de esta tabla. Toda la
 
 - `ApiErrors.parse(HttpException)` lee el cuerpo JSON `ApiError` del backend (`status`, `code`, `message`, `path`, `details`).
 - `ApiErrors.messageForStatus(status, apiError)` devuelve el mensaje en español.
-- `Throwable.toUserMessage()` es lo que usan los ViewModels (`LoginViewModel.errorMessage` y `launchCatching` en `RemoteViewModelExtensions.kt`).
+- `Throwable.toUserMessage()` es lo que usan los ViewModels (`LoginViewModel.errorMessage` y `launchCatching` en `RemoteViewModelExtensions.kt`). Antepone el código: `[HTTP-502] No se pudo enviar el correo…`.
+- Los errores propios de la app (validaciones, imágenes, red) tienen su código en [CodigosError.md](CodigosError.md).
 
 > El cuerpo de error de OkHttp solo se puede leer **una vez**: llamar a `parse` / `toUserMessage` una sola vez por excepción.
 
@@ -47,8 +48,10 @@ Retrofit lanza `retrofit2.HttpException` (vía `requireBody()` / `requireSuccess
 
 | Excepción | Cuándo | Mensaje |
 |-----------|--------|---------|
-| `SocketTimeoutException` | El servidor no respondió en `RetrofitClient.READ_TIMEOUT_SECONDS` (60 s) | "El servidor tardó demasiado en responder…" |
-| `IOException` | Sin red, túnel caído, DNS | "No fue posible conectar con el servidor…" |
+| `SocketTimeoutException` | El servidor no respondió en `RetrofitClient.READ_TIMEOUT_SECONDS` (60 s) | `[RED-001]` "El servidor tardó demasiado en responder…" |
+| `IOException` | Sin red, túnel caído, DNS | `[RED-002]` "No fue posible conectar con el servidor…" |
+| `AppException(RED_003)` | Respuesta 2xx sin cuerpo en `requireBody()` | `[RED-003]` "El servidor respondió sin datos…" |
+| Cualquier otra | Error no previsto | `[APP-001]` "Ocurrió un error inesperado" (sin detalles internos) |
 
 ## Pruebas
 

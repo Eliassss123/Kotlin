@@ -9,7 +9,9 @@ package com.induztek.protocolos.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.induztek.protocolos.data.remote.toUserMessage
 import com.induztek.protocolos.data.repository.EquipoRepository
+import com.induztek.protocolos.domain.errores.CodigoError
 import com.induztek.protocolos.data.repository.PruebaRepository
 import com.induztek.protocolos.model.ClasificacionEquipo
 import com.induztek.protocolos.model.Equipo
@@ -72,7 +74,7 @@ class EquipoViewModel(
                 _remoteError.value = null
             } catch (exception: Exception) {
                 if (exception is CancellationException) throw exception
-                _remoteError.value = exception.localizedMessage ?: "No fue posible cargar los equipos"
+                _remoteError.value = exception.toUserMessage()
             }
         }
     }
@@ -137,7 +139,9 @@ class EquipoViewModel(
         launchCatching(onError = { _remoteError.value = it }) {
             val equipo = equipoRepository.getEquipoByCodigo(codigo)
             _selectedEquipo.value = equipo
-            if (equipo != null) {
+            if (equipo == null) {
+                _remoteError.value = CodigoError.EQ_006.formatear(codigo)
+            } else {
                 pruebaRepository.getPruebasByEquipo(equipo.codigo).collect { pruebas ->
                     _historialPruebas.value = pruebas
                 }
@@ -235,7 +239,7 @@ class EquipoViewModel(
                 )
                 if (duplicado != null) {
                     _nuevoEquipoState.value = _nuevoEquipoState.value.copy(
-                        advertenciaDuplicado = "Posible duplicado detectado: Ya existe el equipo '${duplicado.codigo}' [TAG: ${duplicado.tagCliente}] en esta instalación (RT-02)."
+                        advertenciaDuplicado = CodigoError.EQ_005.formatear(duplicado.codigo, duplicado.tagCliente)
                     )
                 } else {
                     _nuevoEquipoState.value = _nuevoEquipoState.value.copy(advertenciaDuplicado = null)
@@ -252,27 +256,23 @@ class EquipoViewModel(
         val tieneTag = codigoIngresado.isNotBlank()
         if (!tieneTag) {
             if (state.marca.isBlank() || state.numeroSerie.isBlank()) {
-                _nuevoEquipoState.value = state.copy(
-                    errorValidacion = "El código del TAG es obligatorio (ej: TR-500KVA-01, CAB-XLPE-05). Si el equipo no posee TAG, debe ingresar obligatoriamente Marca y N° de Serie para identificarlo."
-                )
+                _nuevoEquipoState.value = state.copy(errorValidacion = CodigoError.EQ_001.formatear())
                 return
             }
         }
 
         if (state.cliente.isBlank()) {
-            _nuevoEquipoState.value = state.copy(errorValidacion = "El cliente es obligatorio")
+            _nuevoEquipoState.value = state.copy(errorValidacion = CodigoError.EQ_002.formatear())
             return
         }
         if (state.ubicacion.isBlank()) {
-            _nuevoEquipoState.value = state.copy(errorValidacion = "La instalación/ubicación es obligatoria")
+            _nuevoEquipoState.value = state.copy(errorValidacion = CodigoError.EQ_003.formatear())
             return
         }
 
         val anioInt = state.anio.toIntOrNull()
         if (anioInt == null || anioInt !in 1900..2026) {
-            _nuevoEquipoState.value = state.copy(
-                errorValidacion = "El año ingresado '${state.anio}' no es válido. Debe ser un número de 4 dígitos entre 1900 y 2026."
-            )
+            _nuevoEquipoState.value = state.copy(errorValidacion = CodigoError.EQ_004.formatear(state.anio))
             return
         }
 

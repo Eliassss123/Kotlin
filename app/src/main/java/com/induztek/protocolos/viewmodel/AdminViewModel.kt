@@ -2,7 +2,9 @@ package com.induztek.protocolos.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.induztek.protocolos.data.remote.toUserMessage
 import com.induztek.protocolos.data.repository.InstrumentoRepository
+import com.induztek.protocolos.domain.errores.CodigoError
 import com.induztek.protocolos.data.repository.UsuarioRepository
 import com.induztek.protocolos.model.Instrumento
 import com.induztek.protocolos.model.UserProfile
@@ -56,7 +58,7 @@ class AdminViewModel(
                 _error.value = null
             } catch (exception: Exception) {
                 if (exception is CancellationException) throw exception
-                _error.value = exception.localizedMessage ?: "No fue posible cargar los datos de administración"
+                _error.value = exception.toUserMessage()
             }
         }
     }
@@ -84,7 +86,11 @@ class AdminViewModel(
     fun crearInstrumento(onSuccess: () -> Unit) {
         val state = _nuevoInstrumentoState.value
         if (state.marca.isBlank() || state.modelo.isBlank() || state.numeroSerie.isBlank()) {
-            _nuevoInstrumentoState.value = state.copy(errorValidacion = "Marca, modelo y número de serie son obligatorios.")
+            _nuevoInstrumentoState.value = state.copy(errorValidacion = CodigoError.ADM_001.formatear())
+            return
+        }
+        if (!esFechaValida(state.vencimientoCalibracion)) {
+            _nuevoInstrumentoState.value = state.copy(errorValidacion = CodigoError.ADM_002.formatear(state.vencimientoCalibracion))
             return
         }
 
@@ -105,7 +111,7 @@ class AdminViewModel(
                 onSuccess()
             } catch (exception: Exception) {
                 if (exception is CancellationException) throw exception
-                _error.value = exception.localizedMessage ?: "No fue posible guardar el instrumento"
+                _error.value = exception.toUserMessage()
             }
         }
     }
@@ -117,7 +123,7 @@ class AdminViewModel(
                 _error.value = null
             } catch (exception: Exception) {
                 if (exception is CancellationException) throw exception
-                _error.value = exception.localizedMessage ?: "No fue posible actualizar la calibración"
+                _error.value = exception.toUserMessage()
             }
         }
     }
@@ -129,7 +135,7 @@ class AdminViewModel(
                 _error.value = null
             } catch (exception: Exception) {
                 if (exception is CancellationException) throw exception
-                _error.value = exception.localizedMessage ?: "No fue posible actualizar el usuario"
+                _error.value = exception.toUserMessage()
             }
         }
     }
@@ -143,7 +149,11 @@ class AdminViewModel(
         onSuccess: () -> Unit
     ) {
         if (nombre.isBlank() || correo.isBlank() || password.length < 10) {
-            _error.value = "Todos los campos son obligatorios y la contraseña debe tener al menos 10 caracteres."
+            _error.value = CodigoError.ADM_003.formatear()
+            return
+        }
+        if (!correo.trim().matches(CORREO_REGEX)) {
+            _error.value = CodigoError.ADM_004.formatear(correo.trim())
             return
         }
         viewModelScope.launch {
@@ -161,7 +171,24 @@ class AdminViewModel(
                 onSuccess()
             } catch (exception: Exception) {
                 if (exception is CancellationException) throw exception
-                _error.value = exception.localizedMessage ?: "No fue posible crear la cuenta de usuario"
+                _error.value = exception.toUserMessage()
+            }
+        }
+    }
+
+    private companion object {
+        val CORREO_REGEX = Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+
+        /** true si la fecha tiene formato yyyy-MM-dd y existe en el calendario (rechaza 2027-02-30). */
+        fun esFechaValida(fecha: String): Boolean {
+            val texto = fecha.trim()
+            if (!texto.matches(Regex("\\d{4}-\\d{2}-\\d{2}"))) return false
+            // SimpleDateFormat estricto en vez de java.time: minSdk 24 no incluye java.time sin desugaring.
+            val formato = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.ROOT).apply { isLenient = false }
+            return try {
+                formato.parse(texto) != null
+            } catch (_: java.text.ParseException) {
+                false
             }
         }
     }
@@ -173,7 +200,7 @@ class AdminViewModel(
                 _error.value = null
             } catch (exception: Exception) {
                 if (exception is CancellationException) throw exception
-                _error.value = exception.localizedMessage ?: "No fue posible eliminar la cuenta"
+                _error.value = exception.toUserMessage()
             }
         }
     }
@@ -185,7 +212,7 @@ class AdminViewModel(
                 _error.value = null
             } catch (exception: Exception) {
                 if (exception is CancellationException) throw exception
-                _error.value = exception.localizedMessage ?: "No fue posible actualizar el rol del usuario"
+                _error.value = exception.toUserMessage()
             }
         }
     }

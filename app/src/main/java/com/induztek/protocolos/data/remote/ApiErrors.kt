@@ -2,6 +2,8 @@ package com.induztek.protocolos.data.remote
 
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
+import com.induztek.protocolos.domain.errores.AppException
+import com.induztek.protocolos.domain.errores.CodigoError
 import java.io.IOException
 import java.net.SocketTimeoutException
 import retrofit2.HttpException
@@ -115,10 +117,16 @@ object ApiErrors {
     }
 }
 
-/** Convierte cualquier error de red/HTTP en un mensaje para mostrar al usuario. */
+/**
+ * Convierte cualquier error en el mensaje que ve el usuario, siempre con su código entre corchetes:
+ * - [AppException] → su [CodigoError] (p. ej. `[MED-002] La imagen supera…`).
+ * - [HttpException] → `[HTTP-<status>]` + mensaje de [ApiErrors.messageForStatus].
+ * - [SocketTimeoutException] → `[RED-001]`; otra [IOException] → `[RED-002]`; cualquier otra → `[APP-001]`.
+ */
 fun Throwable.toUserMessage(): String = when (this) {
-    is HttpException -> ApiErrors.messageForStatus(code(), ApiErrors.parse(this))
-    is SocketTimeoutException -> "El servidor tardó demasiado en responder. Inténtalo de nuevo."
-    is IOException -> "No fue posible conectar con el servidor. Verifica tu conexión."
-    else -> localizedMessage ?: "Ocurrió un error inesperado"
+    is AppException -> message ?: error.formatear()
+    is HttpException -> "[HTTP-${code()}] " + ApiErrors.messageForStatus(code(), ApiErrors.parse(this))
+    is SocketTimeoutException -> CodigoError.RED_001.formatear()
+    is IOException -> CodigoError.RED_002.formatear()
+    else -> CodigoError.APP_001.formatear()
 }

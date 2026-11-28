@@ -13,6 +13,9 @@
 - No lint/format/typecheck/CI configuration exists here; don't claim those checks run.
 - Test helpers live in `app/src/test/java/com/induztek/protocolos/testutil/` (`MainDispatcherRule` for ViewModel tests, `httpError(...)` for backend-shaped `HttpException`s). Coverage: `.\gradlew.bat :app:createDebugUnitTestCoverageReport` (debug has `enableUnitTestCoverage = true`).
 - HTTP error → user message mapping is centralized in `data/remote/ApiErrors.kt` (`Throwable.toUserMessage()`); documented in `docs/CodigosHTTP.md`. Don't add per-ViewModel `when (code())` tables.
+- Every user-visible error comes from `domain/errores/CodigoError.kt` (`CodigoError.X.formatear(...)` → `"[X-NNN] ..."`, or `throw AppException(CodigoError.X)` from repositories). Never hardcode error strings; add a new entry with the next number (codes are never reused) and update `docs/CodigosError.md`. Tests assert codes with `testutil/assertCodigo` / `assertHttp`.
+- ViewModels that call `stateIn(viewModelScope)` or launch in `init` must be created inside the test (`by lazy` or a factory), after `MainDispatcherRule` sets `Dispatchers.Main`; creating them as eager properties makes coroutines silently not run.
+- Test classes start with a KDoc listing acceptance criteria (`CA-XXX-NN`) and each `@Test` has a one-line `// CA-XXX-NN [CODE]: ...` comment.
 - Unit tests are JUnit4 in `app/src/test/java/com/induztek/protocolos`. `docs/*.txt` are written notes, compiled tests are only the `.kt` files under `app/src/test`.
 
 ## Runtime config quirks

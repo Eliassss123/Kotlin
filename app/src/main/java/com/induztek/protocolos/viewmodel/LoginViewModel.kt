@@ -3,6 +3,7 @@ package com.induztek.protocolos.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.induztek.protocolos.data.remote.toUserMessage
+import com.induztek.protocolos.domain.errores.CodigoError
 import com.induztek.protocolos.data.repository.UsuarioRepository
 import com.induztek.protocolos.model.UserProfile
 import com.induztek.protocolos.util.SessionManager
@@ -102,7 +103,7 @@ class LoginViewModel(
     }
 
     fun actualizarFotoPerfil(fotoPath: String?) {
-        val actual = _usuarioActivo.value ?: return
+        val actual = _usuarioActivo.value ?: run { _profileError.value = CodigoError.PERF_001.formatear(); return }
         viewModelScope.launch {
             try {
                 val updated = actual.copy(fotoPerfil = fotoPath)
@@ -119,7 +120,7 @@ class LoginViewModel(
     }
 
     fun actualizarBiografia(biografia: String?) {
-        val actual = _usuarioActivo.value ?: return
+        val actual = _usuarioActivo.value ?: run { _profileError.value = CodigoError.PERF_001.formatear(); return }
         viewModelScope.launch {
             try {
                 usuarioRepository?.actualizarBiografia(actual.id, biografia)
@@ -133,7 +134,7 @@ class LoginViewModel(
     }
 
     fun actualizarPerfilCompleto(nombre: String, correo: String, empresa: String?, biografia: String?) {
-        val actual = _usuarioActivo.value ?: return
+        val actual = _usuarioActivo.value ?: run { _profileError.value = CodigoError.PERF_001.formatear(); return }
         viewModelScope.launch {
             try {
                 usuarioRepository?.actualizarPerfilCompleto(nombre, correo, empresa, biografia)
@@ -200,13 +201,14 @@ class LoginViewModel(
             value.any { !it.isLetterOrDigit() }
     }
 
+    /** Primer requisito de contraseña que no se cumple (AUTH-010 a AUTH-014), o null si es válida. */
     fun mensajeValidacionContrasena(pass: String): String? {
         val value = pass.trim()
-        if (value.length < 10) return "Debe tener al menos 10 caracteres"
-        if (!value.any(Char::isUpperCase)) return "Debe incluir al menos una letra mayúscula"
-        if (!value.any(Char::isLowerCase)) return "Debe incluir al menos una letra minúscula"
-        if (!value.any(Char::isDigit)) return "Debe incluir al menos un número"
-        if (!value.any { !it.isLetterOrDigit() }) return "Debe incluir al menos un carácter especial (!@#\$%^&*...)"
+        if (value.length < 10) return CodigoError.AUTH_010.formatear()
+        if (!value.any(Char::isUpperCase)) return CodigoError.AUTH_011.formatear()
+        if (!value.any(Char::isLowerCase)) return CodigoError.AUTH_012.formatear()
+        if (!value.any(Char::isDigit)) return CodigoError.AUTH_013.formatear()
+        if (!value.any { !it.isLetterOrDigit() }) return CodigoError.AUTH_014.formatear()
         return null
     }
 
@@ -222,12 +224,12 @@ class LoginViewModel(
     fun solicitarCodigo(correo: String? = null) {
         val targetEmail = (correo ?: _correoRecuperacion.value).trim()
         if (!validarCorreo(targetEmail)) {
-            _recuperacionState.value = RecuperacionUiState.Error("Ingresa un correo válido")
+            _recuperacionState.value = RecuperacionUiState.Error(CodigoError.AUTH_001.formatear())
             return
         }
         val repository = usuarioRepository
         if (repository == null) {
-            _recuperacionState.value = RecuperacionUiState.Error("El servicio de autenticación no está disponible")
+            _recuperacionState.value = RecuperacionUiState.Error(CodigoError.AUTH_003.formatear())
             return
         }
         viewModelScope.launch {
@@ -248,12 +250,12 @@ class LoginViewModel(
         val code = (codigoIngresado ?: _codigoIngresado.value).trim()
         val targetEmail = _correoRecuperacion.value.trim()
         if (!code.matches(Regex("\\d{6}"))) {
-            _recuperacionState.value = RecuperacionUiState.Error("Ingresa el código de 6 dígitos")
+            _recuperacionState.value = RecuperacionUiState.Error(CodigoError.AUTH_020.formatear())
             return
         }
         val repository = usuarioRepository
         if (repository == null) {
-            _recuperacionState.value = RecuperacionUiState.Error("El servicio de autenticación no está disponible")
+            _recuperacionState.value = RecuperacionUiState.Error(CodigoError.AUTH_003.formatear())
             return
         }
         viewModelScope.launch {
@@ -275,22 +277,22 @@ class LoginViewModel(
         val targetEmail = _correoRecuperacion.value.trim()
         val code = _codigoIngresado.value.trim()
         if (!recoveryCodeVerified) {
-            _recuperacionState.value = RecuperacionUiState.Error("Primero verifica el código recibido")
+            _recuperacionState.value = RecuperacionUiState.Error(CodigoError.AUTH_021.formatear())
             return
         }
         if (!validarContrasena(newPassword)) {
             _recuperacionState.value = RecuperacionUiState.Error(
-                mensajeValidacionContrasena(newPassword) ?: "Contraseña inválida"
+                mensajeValidacionContrasena(newPassword) ?: CodigoError.AUTH_010.formatear()
             )
             return
         }
         if (newPassword != confirmation) {
-            _recuperacionState.value = RecuperacionUiState.Error("Las contraseñas no coinciden")
+            _recuperacionState.value = RecuperacionUiState.Error(CodigoError.AUTH_022.formatear())
             return
         }
         val repository = usuarioRepository
         if (repository == null) {
-            _recuperacionState.value = RecuperacionUiState.Error("El servicio de autenticación no está disponible")
+            _recuperacionState.value = RecuperacionUiState.Error(CodigoError.AUTH_003.formatear())
             return
         }
         viewModelScope.launch {
@@ -318,26 +320,26 @@ class LoginViewModel(
         val emailValue = correo.trim()
         val companyValue = empresaPlanta.trim()
         if (name.isBlank()) {
-            _registroState.value = RegistroUiState.Error("Ingresa tu nombre")
+            _registroState.value = RegistroUiState.Error(CodigoError.AUTH_005.formatear())
             return
         }
         if (!validarCorreo(emailValue)) {
-            _registroState.value = RegistroUiState.Error("Ingresa un correo válido")
+            _registroState.value = RegistroUiState.Error(CodigoError.AUTH_001.formatear())
             return
         }
         if (!validarContrasena(contrasena)) {
             _registroState.value = RegistroUiState.Error(
-                mensajeValidacionContrasena(contrasena) ?: "Contraseña inválida"
+                mensajeValidacionContrasena(contrasena) ?: CodigoError.AUTH_010.formatear()
             )
             return
         }
         if (!aceptaTerminos) {
-            _registroState.value = RegistroUiState.Error("Debes aceptar los términos y condiciones")
+            _registroState.value = RegistroUiState.Error(CodigoError.AUTH_006.formatear())
             return
         }
         val repository = usuarioRepository
         if (repository == null) {
-            _registroState.value = RegistroUiState.Error("El servicio de autenticación no está disponible")
+            _registroState.value = RegistroUiState.Error(CodigoError.AUTH_003.formatear())
             return
         }
         viewModelScope.launch {
@@ -374,16 +376,16 @@ class LoginViewModel(
         val emailValue = _email.value.trim()
         val passwordValue = _password.value
         if (!validarCorreo(emailValue)) {
-            _uiState.value = LoginUiState.Error("Ingresa un correo válido")
+            _uiState.value = LoginUiState.Error(CodigoError.AUTH_001.formatear())
             return
         }
         if (passwordValue.isBlank()) {
-            _uiState.value = LoginUiState.Error("Ingresa tu contraseña")
+            _uiState.value = LoginUiState.Error(CodigoError.AUTH_002.formatear())
             return
         }
         val repository = usuarioRepository
         if (repository == null) {
-            _uiState.value = LoginUiState.Error("El servicio de autenticación no está disponible")
+            _uiState.value = LoginUiState.Error(CodigoError.AUTH_003.formatear())
             return
         }
         viewModelScope.launch {
@@ -391,7 +393,7 @@ class LoginViewModel(
             try {
                 val session = repository.login(emailValue, passwordValue)
                 if (!session.profile.activo) {
-                    _uiState.value = LoginUiState.Error("Cuenta desactivada. Contacte al Jefe Técnico de Induztek.")
+                    _uiState.value = LoginUiState.Error(CodigoError.AUTH_004.formatear())
                     return@launch
                 }
                 sessionManager?.guardarSesion(

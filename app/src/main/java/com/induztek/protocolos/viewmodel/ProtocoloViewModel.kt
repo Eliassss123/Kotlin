@@ -10,7 +10,9 @@ package com.induztek.protocolos.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.induztek.protocolos.data.remote.toUserMessage
 import com.induztek.protocolos.data.repository.EquipoRepository
+import com.induztek.protocolos.domain.errores.CodigoError
 import com.induztek.protocolos.data.repository.InstrumentoRepository
 import com.induztek.protocolos.data.repository.ProtocoloRepository
 import com.induztek.protocolos.data.repository.PruebaRepository
@@ -92,7 +94,7 @@ class ProtocoloViewModel(
                 _remoteError.value = null
             } catch (exception: Exception) {
                 if (exception is CancellationException) throw exception
-                _remoteError.value = exception.localizedMessage ?: "No fue posible cargar los protocolos"
+                _remoteError.value = exception.toUserMessage()
             }
         }
     }
@@ -125,7 +127,9 @@ class ProtocoloViewModel(
         launchCatching(onError = { _remoteError.value = it }) {
             val prot = protocoloRepository.getProtocoloById(id)
             _selectedProtocolo.value = prot
-            if (prot != null) {
+            if (prot == null) {
+                _remoteError.value = CodigoError.PRO_004.formatear(id)
+            } else {
                 pruebaRepository.getPruebasByProtocolo(prot.id).collect { list ->
                     _pruebasDelProtocolo.value = if (list.isNotEmpty()) list else prot.pruebas
                 }
@@ -139,6 +143,8 @@ class ProtocoloViewModel(
             val p = pruebaRepository.getPruebaById(pruebaId)
             if (p != null) {
                 iniciarEdicionPrueba(p)
+            } else {
+                _remoteError.value = CodigoError.PRO_005.formatear(pruebaId)
             }
         }
     }
@@ -301,11 +307,15 @@ class ProtocoloViewModel(
 
 
     fun guardarEdicionPrueba(onSuccess: () -> Unit, onError: (String) -> Unit) {
-        val state = _edicionPruebaState.value ?: return
-        val prot = _selectedProtocolo.value ?: return
+        val state = _edicionPruebaState.value ?: run { onError(CodigoError.PRO_002.formatear()); return }
+        val prot = _selectedProtocolo.value ?: run { onError(CodigoError.PRO_003.formatear()); return }
+        if (prot.esInmutable) {
+            onError(CodigoError.PRO_006.formatear())
+            return
+        }
 
         if (state.estadoPrueba == EstadoPrueba.NO_REALIZADA && state.motivoNoRealizada.isBlank()) {
-            onError("Si la prueba es NO REALIZADA, debe registrar obligatoriamente el motivo (Aclaración 2).")
+            onError(CodigoError.PRO_001.formatear())
             return
         }
 
@@ -358,7 +368,11 @@ class ProtocoloViewModel(
 
 
     fun formalizarProtocolo(usuarioFormalizador: String, esAprobacion: Boolean, onSuccess: () -> Unit) {
-        val prot = _selectedProtocolo.value ?: return
+        val prot = _selectedProtocolo.value ?: run { _remoteError.value = CodigoError.PRO_003.formatear(); return }
+        if (prot.esInmutable) {
+            _remoteError.value = CodigoError.PRO_006.formatear()
+            return
+        }
         launchCatching(onError = { _remoteError.value = it }) {
             val nuevoEstado = if (esAprobacion) EstadoProtocolo.FORMALIZADO else EstadoProtocolo.OBSERVADO
             protocoloRepository.formalizarProtocolo(prot.id, usuarioFormalizador, nuevoEstado)
@@ -369,7 +383,7 @@ class ProtocoloViewModel(
 
 
     fun agregarFotoAProtocolo(path: String) {
-        val prot = _selectedProtocolo.value ?: return
+        val prot = _selectedProtocolo.value ?: run { _remoteError.value = CodigoError.PRO_003.formatear(); return }
         if (path.isBlank()) return
         val lista = prot.fotos.toMutableList()
         lista.add(path)
@@ -382,7 +396,7 @@ class ProtocoloViewModel(
 
 
     fun eliminarFotoDeProtocolo(index: Int) {
-        val prot = _selectedProtocolo.value ?: return
+        val prot = _selectedProtocolo.value ?: run { _remoteError.value = CodigoError.PRO_003.formatear(); return }
         val lista = prot.fotos.toMutableList()
         if (index in lista.indices) {
             val path = lista.removeAt(index)
